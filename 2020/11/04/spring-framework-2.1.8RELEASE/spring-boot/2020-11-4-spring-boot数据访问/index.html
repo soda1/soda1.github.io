@@ -1,0 +1,282 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>spring boot数据访问 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="JDBC        &lt;dependency&gt;             &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;             &lt;artifactId&gt;spring-boot-starter-jdbc&lt;&#x2F;artifactId&gt;         &lt;&#x2F;dependency&gt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spring boot数据访问">
+<meta property="og:url" content="http://soda1.github.io/2020/11/04/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-boot%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="JDBC        &lt;dependency&gt;             &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;             &lt;artifactId&gt;spring-boot-starter-jdbc&lt;&#x2F;artifactId&gt;         &lt;&#x2F;dependency&gt;">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180305194443.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180306105412.png">
+<meta property="article:published_time" content="2020-11-04T17:53:40.000Z">
+<meta property="article:modified_time" content="2022-05-28T20:34:10.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180305194443.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">65</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">10</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#JDBC"><span class="toc-number">1.</span> <span class="toc-text">JDBC</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E5%90%88Druid%E6%95%B0%E6%8D%AE%E6%BA%90"><span class="toc-number">2.</span> <span class="toc-text">整合Druid数据源</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E5%90%88MyBatis"><span class="toc-number">3.</span> <span class="toc-text">整合MyBatis</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E8%A7%A3%E7%89%88"><span class="toc-number">3.1.</span> <span class="toc-text">注解版</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%89%88"><span class="toc-number">3.2.</span> <span class="toc-text">配置文件版</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E5%90%88SpringData-JPA"><span class="toc-number">4.</span> <span class="toc-text">整合SpringData JPA</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SpringData%E7%AE%80%E4%BB%8B"><span class="toc-number">4.1.</span> <span class="toc-text">SpringData简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E5%90%88SpringData-JPA-1"><span class="toc-number">4.2.</span> <span class="toc-text">整合SpringData JPA</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2020/11/04/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-boot%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">spring boot数据访问</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2020-11-04 17:53:40" itemprop="dateCreated datePublished" datetime="2020-11-04T17:53:40+00:00">2020-11-04</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2022-05-28 20:34:10" itemprop="dateModified" datetime="2022-05-28T20:34:10+00:00">2022-05-28</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">1.2k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">6m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/spring-boot/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">spring boot</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h2 id="JDBC"><a href="#JDBC" class="headerlink" title="JDBC"></a>JDBC</h2><pre><code class="xml">        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-jdbc&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;mysql&lt;/groupId&gt;
+            &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+            &lt;scope&gt;runtime&lt;/scope&gt;
+        &lt;/dependency&gt;</code></pre>
+<pre><code class="yaml">spring:
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://192.168.15.22:3306/database?serverTimezone=Asia/Shanghai #要加上时区,不然会报错
+    driver-class-name: com.mysql.jdbc.Driver</code></pre>
+<p>效果：</p>
+<p>​    默认是用org.apache.tomcat.jdbc.pool.DataSource作为数据源；</p>
+<p>​    数据源的相关配置都在DataSourceProperties里面；</p>
+<p>自动配置原理：</p>
+<p>org.springframework.boot.autoconfigure.jdbc：</p>
+<p>1、参考DataSourceConfiguration，根据配置创建数据源，默认使用Tomcat连接池；可以使用spring.datasource.type指定自定义的数据源类型；</p>
+<p>2、SpringBoot默认可以支持；</p>
+<pre><code>org.apache.tomcat.jdbc.pool.DataSource、HikariDataSource、BasicDataSource、</code></pre>
+<p>3、自定义数据源类型</p>
+<pre><code class="java">/**
+ * Generic DataSource configuration.
+ */
+@ConditionalOnMissingBean(DataSource.class)
+@ConditionalOnProperty(name = &quot;spring.datasource.type&quot;)
+static class Generic &#123;
+
+   @Bean
+   public DataSource dataSource(DataSourceProperties properties) &#123;
+       //使用DataSourceBuilder创建数据源，利用反射创建响应type的数据源，并且绑定相关属性
+      return properties.initializeDataSourceBuilder().build();
+   &#125;
+
+&#125;</code></pre>
+<p>4、<strong>DataSourceInitializer：ApplicationListener</strong>；</p>
+<p>​    作用：</p>
+<p>​        1）、runSchemaScripts();运行建表语句；</p>
+<p>​        2）、runDataScripts();运行插入数据的sql语句；</p>
+<p>默认只需要将文件命名为：</p>
+<pre><code class="properties">schema-*.sql、data-*.sql
+默认规则：schema.sql，schema-all.sql；
+可以使用   
+    schema:
+      - classpath:department.sql
+      指定位置</code></pre>
+<p>5、操作数据库：自动配置了JdbcTemplate操作数据库</p>
+<h2 id="整合Druid数据源"><a href="#整合Druid数据源" class="headerlink" title="整合Druid数据源"></a>整合Druid数据源</h2><pre><code class="java">导入druid数据源
+@Configuration
+public class DruidConfig &#123;
+
+    @ConfigurationProperties(prefix = &quot;spring.datasource&quot;)
+    @Bean
+    public DataSource druid()&#123;
+       return  new DruidDataSource();
+    &#125;
+
+    //配置Druid的监控
+    //1、配置一个管理后台的Servlet
+    @Bean
+    public ServletRegistrationBean statViewServlet()&#123;
+        ServletRegistrationBean bean = new ServletRegistrationBean(new StatViewServlet(), &quot;/druid/*&quot;);
+        Map&lt;String,String&gt; initParams = new HashMap&lt;&gt;();
+
+        initParams.put(&quot;loginUsername&quot;,&quot;admin&quot;);
+        initParams.put(&quot;loginPassword&quot;,&quot;123456&quot;);
+        initParams.put(&quot;allow&quot;,&quot;&quot;);//默认就是允许所有访问
+        initParams.put(&quot;deny&quot;,&quot;192.168.15.21&quot;);
+
+        bean.setInitParameters(initParams);
+        return bean;
+    &#125;
+
+
+    //2、配置一个web监控的filter
+    @Bean
+    public FilterRegistrationBean webStatFilter()&#123;
+        FilterRegistrationBean bean = new FilterRegistrationBean();
+        bean.setFilter(new WebStatFilter());
+
+        Map&lt;String,String&gt; initParams = new HashMap&lt;&gt;();
+        initParams.put(&quot;exclusions&quot;,&quot;*.js,*.css,/druid/*&quot;);
+
+        bean.setInitParameters(initParams);
+
+        bean.setUrlPatterns(Arrays.asList(&quot;/*&quot;));
+
+        return  bean;
+    &#125;
+&#125;
+</code></pre>
+<h2 id="整合MyBatis"><a href="#整合MyBatis" class="headerlink" title="整合MyBatis"></a>整合MyBatis</h2><pre><code class="xml">         &lt;dependency&gt;
+            &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+            &lt;version&gt;2.1.3&lt;/version&gt;
+        &lt;/dependency&gt;</code></pre>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180305194443.png" loading="lazy"></p>
+<p>步骤：</p>
+<p>​    1）、配置数据源相关属性（见上一节Druid）</p>
+<p>​    2）、给数据库建表</p>
+<p>​    3）、创建JavaBean</p>
+<h3 id="注解版"><a href="#注解版" class="headerlink" title="注解版"></a>注解版</h3><pre><code class="java">//指定这是一个操作数据库的mapper
+@Mapper
+public interface DepartmentMapper &#123;
+
+    @Select(&quot;select * from department where id=#&#123;id&#125;&quot;)
+    public Department getDeptById(Integer id);
+
+    @Delete(&quot;delete from department where id=#&#123;id&#125;&quot;)
+    public int deleteDeptById(Integer id);
+
+    @Options(useGeneratedKeys = true,keyProperty = &quot;id&quot;)
+    @Insert(&quot;insert into department(departmentName) values(#&#123;departmentName&#125;)&quot;)
+    public int insertDept(Department department);
+
+    @Update(&quot;update department set departmentName=#&#123;departmentName&#125; where id=#&#123;id&#125;&quot;)
+    public int updateDept(Department department);
+&#125;</code></pre>
+<p>问题：</p>
+<p>自定义MyBatis的配置规则；给容器中添加一个ConfigurationCustomizer；</p>
+<pre><code class="java">@org.springframework.context.annotation.Configuration
+public class MyBatisConfig &#123;
+
+    @Bean
+    public ConfigurationCustomizer configurationCustomizer()&#123;
+        return new ConfigurationCustomizer()&#123;
+
+            @Override
+            public void customize(Configuration configuration) &#123;
+                configuration.setMapUnderscoreToCamelCase(true);
+            &#125;
+        &#125;;
+    &#125;
+&#125;</code></pre>
+<pre><code class="java">使用MapperScan批量扫描所有的Mapper接口；
+@MapperScan(value = &quot;com.atguigu.springboot.mapper&quot;)
+@SpringBootApplication
+public class SpringBoot06DataMybatisApplication &#123;
+
+    public static void main(String[] args) &#123;
+        SpringApplication.run(SpringBoot06DataMybatisApplication.class, args);
+    &#125;
+&#125;</code></pre>
+<h3 id="配置文件版"><a href="#配置文件版" class="headerlink" title="配置文件版"></a>配置文件版</h3><pre><code class="yaml">mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml #指定全局配置文件的位置 可以不用,主配置文件中就可以进行配置
+  mapper-locations: classpath:mapper/*.xml  #指定sql映射文件的位置
+  type-aliases-package: com.soda.javabean #别名包</code></pre>
+<p>更多使用参照</p>
+<p><a target="_blank" rel="noopener" href="http://www.mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure/">http://www.mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure/</a></p>
+<p>主程序</p>
+<pre><code class="java">@SpringBootApplication
+@MapperScan(value = &quot;com.soda.mapper&quot;)
+public class MybatisDemoApplication &#123;
+
+    public static void main(String[] args) &#123;
+        SpringApplication.run(MybatisDemoApplication.class, args);
+    &#125;
+
+&#125;</code></pre>
+<p>mapper.xml</p>
+<pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;!DOCTYPE mapper
+        PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;
+        &quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
+&lt;mapper namespace=&quot;com.soda.mapper.AccountMapper&quot;&gt;
+
+    &lt;select id=&quot;findById&quot; resultType=&quot;Account&quot; &gt;
+      select * from account where id = #&#123;id&#125;
+    &lt;/select&gt;
+
+    &lt;select id=&quot;findAll&quot; resultType=&quot;List&quot;&gt;
+        select * from account
+    &lt;/select&gt;
+    &lt;!--useGeneratedKeys:插入成功后获取主键
+        keyProperty: 设置主键--&gt;
+    &lt;insert id=&quot;insertAccount&quot; useGeneratedKeys=&quot;true&quot; keyProperty=&quot;id&quot;&gt;
+        insert into account (id, name, money) values (null, #&#123;name&#125;, #&#123;money&#125;);
+    &lt;/insert&gt;
+&lt;/mapper&gt;</code></pre>
+<h2 id="整合SpringData-JPA"><a href="#整合SpringData-JPA" class="headerlink" title="整合SpringData JPA"></a>整合SpringData JPA</h2><h3 id="SpringData简介"><a href="#SpringData简介" class="headerlink" title="SpringData简介"></a>SpringData简介</h3><p><img src="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180306105412.png" loading="lazy"></p>
+<h3 id="整合SpringData-JPA-1"><a href="#整合SpringData-JPA-1" class="headerlink" title="整合SpringData JPA"></a>整合SpringData JPA</h3><p>JPA:ORM（Object Relational Mapping）；</p>
+<p>1）、编写一个实体类（bean）和数据表进行映射，并且配置好映射关系；</p>
+<pre><code class="java">//使用JPA注解配置映射关系
+@Entity //告诉JPA这是一个实体类（和数据表映射的类）
+@Table(name = &quot;tbl_user&quot;) //@Table来指定和哪个数据表对应;如果省略默认表名就是user；
+public class User &#123;
+
+    @Id //这是一个主键
+    @GeneratedValue(strategy = GenerationType.IDENTITY)//自增主键
+    private Integer id;
+
+    @Column(name = &quot;last_name&quot;,length = 50) //这是和数据表对应的一个列
+    private String lastName;
+    @Column //省略默认列名就是属性名
+    private String email;</code></pre>
+<p>2）、编写一个Dao接口来操作实体类对应的数据表（Repository）</p>
+<pre><code class="java">//继承JpaRepository来完成对数据库的操作
+public interface UserRepository extends JpaRepository&lt;User,Integer&gt; &#123;
+&#125;
+</code></pre>
+<p>3）、基本的配置JpaProperties</p>
+<pre><code class="yaml">spring:  
+ jpa:
+    hibernate:
+#     更新或者创建数据表结构
+      ddl-auto: update
+#    控制台显示SQL
+    show-sql: true</code></pre>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2020/11/04/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-boot%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE/" title="spring boot数据访问">http://soda1.github.io/2020/11/04/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-boot%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2020/11/04/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-boot-cache/" rel="prev" title="spring boot cache"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">spring boot cache</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2020/11/03/spring-framework-2.1.8RELEASE/spring-boot/2020-11-3-spring-boot%E5%AE%9A%E5%88%B6%E5%8C%96%E5%AE%B9%E5%99%A8/" rel="next" title="spring boot配置Servlet容器"><span class="post-nav-text">spring boot配置Servlet容器</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

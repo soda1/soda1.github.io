@@ -1,0 +1,203 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>explain关键字 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="概述使用EXPLAIN关键字可以模拟优化器执行SQL查询语句，从而知道MySQL是如何处理你的SQL语句的。分析你的查询语句或是表结构的性能瓶颈 使用 语法   Explain + SQL语句   查看优化后的SQL语句 show warnings;  简单例子 EXPLAIN select * from titles where to_date&#x3D;&#39;9999-01-01&#39;;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="explain关键字">
+<meta property="og:url" content="http://soda1.github.io/2020/11/13/mysql/%E9%AB%98%E7%BA%A7/2020_11_13-explain%E5%85%B3%E9%94%AE%E5%AD%97/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="概述使用EXPLAIN关键字可以模拟优化器执行SQL查询语句，从而知道MySQL是如何处理你的SQL语句的。分析你的查询语句或是表结构的性能瓶颈 使用 语法   Explain + SQL语句   查看优化后的SQL语句 show warnings;  简单例子 EXPLAIN select * from titles where to_date&#x3D;&#39;9999-01-01&#39;;">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201113172657250.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201113223418978.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201113223754251.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201113224234083.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/EF90801E-0F46-4006-86B0-D00FF9A41BAB.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201113231321133.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/2F45DD10-6247-4FC7-A7DA-509AE0D9C949.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201113231132956.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201113231242885.png">
+<meta property="article:published_time" content="2020-11-13T15:22:52.000Z">
+<meta property="article:modified_time" content="2022-05-28T20:34:11.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201113172657250.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">65</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">10</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8"><span class="toc-number">2.</span> <span class="toc-text">使用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Explain%E5%AD%97%E6%AE%B5"><span class="toc-number">3.</span> <span class="toc-text">Explain字段</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#id"><span class="toc-number">3.1.</span> <span class="toc-text">id</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#select-type"><span class="toc-number">3.2.</span> <span class="toc-text">select_type</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#table"><span class="toc-number">3.3.</span> <span class="toc-text">table</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#partitions"><span class="toc-number">3.4.</span> <span class="toc-text">partitions</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#type"><span class="toc-number">3.5.</span> <span class="toc-text">type</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#possible-keys"><span class="toc-number">3.6.</span> <span class="toc-text">possible_keys</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#key"><span class="toc-number">3.7.</span> <span class="toc-text">key</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#key-len"><span class="toc-number">3.8.</span> <span class="toc-text">key_len</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#ref"><span class="toc-number">3.9.</span> <span class="toc-text">ref</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#rows"><span class="toc-number">3.10.</span> <span class="toc-text">rows</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#filtered"><span class="toc-number">3.11.</span> <span class="toc-text">filtered</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Extra"><span class="toc-number">3.12.</span> <span class="toc-text">Extra</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2020/11/13/mysql/%E9%AB%98%E7%BA%A7/2020_11_13-explain%E5%85%B3%E9%94%AE%E5%AD%97/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">explain关键字</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2020-11-13 15:22:52" itemprop="dateCreated datePublished" datetime="2020-11-13T15:22:52+00:00">2020-11-13</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2022-05-28 20:34:11" itemprop="dateModified" datetime="2022-05-28T20:34:11+00:00">2022-05-28</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">1.7k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">6m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/mysql/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">mysql</span></a></span> > <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/mysql/adv/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">adv</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p>使用EXPLAIN关键字可以模拟优化器执行SQL查询语句，从而知道MySQL是如何处理你的SQL语句的。分析你的查询语句或是表结构的性能瓶颈</p>
+<h4 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h4><ul>
+<li><p>语法</p>
+<pre><code>  Explain + SQL语句</code></pre>
+<p>  查看优化后的SQL语句</p>
+<pre><code>show warnings;</code></pre>
+</li>
+<li><p>简单例子</p>
+<pre><code class="sql">EXPLAIN select * from titles where to_date=&#39;9999-01-01&#39;;</code></pre>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201113172657250.png" alt="image-20201113172657250" loading="lazy"></p>
+</li>
+</ul>
+<h4 id="Explain字段"><a href="#Explain字段" class="headerlink" title="Explain字段"></a>Explain字段</h4><h5 id="id"><a href="#id" class="headerlink" title="id"></a>id</h5><p>select查询的序列号,包含一组数字，表示查询中执行select子句或操作表的顺序</p>
+<ul>
+<li><p>id相同，执行顺序由上至下</p>
+<pre><code class="sql">EXPLAIN select * from t1,t2,t3 where t1.id = t2.id and t2.id = t3.id;</code></pre>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201113223418978.png" alt="image-20201113223418978" loading="lazy"></p>
+</li>
+<li><p>id不同，如果是子查询，id的序号会递增，id值越大优先级越高，越先被执行</p>
+<pre><code class="sql">explain select t2.id from t2 where t2.id = (select t3.id from t3 where t3.content=&#39;t3_664&#39;);</code></pre>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201113223754251.png" alt="image-20201113223754251" loading="lazy"></p>
+</li>
+<li><p>id相同不同，同时存在</p>
+<p>id如果相同，可以认为是一组，从上往下顺序执行；<br>在所有组中，id值越大，优先级越高，越先执行</p>
+</li>
+</ul>
+<h5 id="select-type"><a href="#select-type" class="headerlink" title="select_type"></a>select_type</h5><p>查询的类型，主要是用于区别：普通查询、联合查询、子查询等的复杂查询</p>
+<ul>
+<li><p>SIMPLE</p>
+<p>简单的 select 查询,查询中不包含子查询或者UNION</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201113224234083.png" alt="image-20201113224234083" loading="lazy"></p>
+</li>
+<li><p>PRIMARY</p>
+<p>查询中若包含任何复杂的子部分，最外层查询则被标记为Primary</p>
+</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/EF90801E-0F46-4006-86B0-D00FF9A41BAB.png" alt="image-20201113231321133" loading="lazy"></p>
+<ul>
+<li><p>DERIVED</p>
+<p>在FROM列表中包含的子查询被标记为DERIVED(衍生)</p>
+<p>MySQL会递归执行这些子查询, 把结果放在临时表里。</p>
+</li>
+<li><p>SUBQUERY</p>
+<p>在SELECT或WHERE列表中包含了子查询，子查询结果为单值</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201113231321133.png" alt="img" loading="lazy"> </p>
+</li>
+<li><p>DEPENDENT SUBQUERY</p>
+<p>在SELECT或WHERE列表中包含了子查询,子查询基于外层，子查询为多值</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/2F45DD10-6247-4FC7-A7DA-509AE0D9C949.png" alt="img" loading="lazy"> </p>
+</li>
+<li><p>UNCACHEABLE SUBQUERY</p>
+<p>无法被缓存的子查询</p>
+</li>
+<li><p>UNION</p>
+<p>若第二个SELECT出现在UNION之后，则被标记为UNION；</p>
+<p>若UNION包含在FROM子句的子查询中,外层SELECT将被标记为：DERIVED</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201113231132956.png" alt="image-20201113231132956" loading="lazy"></p>
+</li>
+<li><p>UNION RESULT</p>
+<p>从UNION表获取结果的SELECT</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201113231242885.png" alt="image-20201113231242885" loading="lazy"></p>
+</li>
+</ul>
+<h5 id="table"><a href="#table" class="headerlink" title="table"></a>table</h5><p>显示这一行的数据是关于哪张表的</p>
+<h5 id="partitions"><a href="#partitions" class="headerlink" title="partitions"></a>partitions</h5><h5 id="type"><a href="#type" class="headerlink" title="type"></a>type</h5><p>type显示的是访问类型，是较为重要的一个指标，结果值从最好到最坏依次是： </p>
+<p>system &gt; const &gt; eq_ref &gt; ref &gt; fulltext &gt; ref_or_null &gt; index_merge &gt; unique_subquery &gt; index_subquery &gt; range(尽量保证) &gt; index &gt; ALL </p>
+<p>一般来说，得保证查询至少达到range级别，最好能达到ref。</p>
+<blockquote>
+<p>The <code>type</code> column of <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/explain.html"><code>EXPLAIN</code></a> output describes how tables are joined. In JSON-formatted output, these are found as values of the <code>access_type</code> property. The following list describes the join types, ordered from the best type to the worst:</p>
+</blockquote>
+<ul>
+<li><p><strong>system</strong>：表只有一行记录（等于系统表），这是const类型的特列，平时不会出现，这个也可以忽略不计</p>
+</li>
+<li><p><strong>const</strong>：表示通过索引一次就找到了,const用于比较primary key或者unique索引。因为只匹配一行数据，所以很快。如将主键置于where列表中，MySQL就能将该查询转换为一个常量</p>
+</li>
+<li><p><strong>eq_ref</strong>：唯一性索引扫描，对于每个索引键，表中只有一条记录与之匹配。常见于主键或唯一索引扫描</p>
+</li>
+<li><p><strong>ref</strong>：非唯一性索引扫描，返回匹配某个单独值的所有行.本质上也是一种索引访问，它返回所有匹配某个单独值的行，然而，它可能会找到多个符合条件的行，所以他应该属于查找和扫描的混合体</p>
+</li>
+<li><p><strong>fulltext</strong>：执行使用全文索引</p>
+</li>
+<li><p><strong>ref_or_null</strong>：对于某个字段既需要关联条件，也需要null值得情况下。查询优化器会选择用ref_or_null连接查询。</p>
+</li>
+<li><p><strong>index_merge</strong>：在查询过程中需要多个索引组合使用，通常出现在有 or 的关键字的sql中</p>
+</li>
+<li><p><strong>unique_subquery</strong>：该联接类型类似于index_subquery。 子查询中的唯一索引</p>
+</li>
+<li><p><strong>index_subquery</strong>：利用索引来关联子查询，不再全表扫描。</p>
+</li>
+<li><p><strong>range</strong>：只检索给定范围的行,使用一个索引来选择行。key 列显示使用了哪个索引，一般就是在你的where语句中出现了between、&lt;、&gt;、in等的查询</p>
+<p>这种范围扫描索引扫描比全表扫描要好，因为它只需要开始于索引的某一点，而结束语另一点，不用扫描全部索引。</p>
+</li>
+<li><p><strong>index</strong>：Full Index Scan，index与ALL区别为index类型只遍历索引树。这通常比ALL快，<em>因为索引文件通常比数据文件小</em>。（也就是说虽然all和Index都是读全表，但index是从索引中读取的，而all是从硬盘中读的）</p>
+</li>
+<li><p><strong>ALL</strong>：Full Table Scan，将遍历全表以找到匹配的行</p>
+</li>
+</ul>
+<h5 id="possible-keys"><a href="#possible-keys" class="headerlink" title="possible_keys"></a>possible_keys</h5><p>显示可能应用在这张表中的索引，一个或多个。查询涉及到的字段上若存在索引，则该索引将被列出，但不一定被查询实际使用</p>
+<h5 id="key"><a href="#key" class="headerlink" title="key"></a>key</h5><p>实际使用的索引名。如果为NULL，则没有使用索引</p>
+<h5 id="key-len"><a href="#key-len" class="headerlink" title="key_len"></a>key_len</h5><p>表示索引中使用的字节数，可通过该列计算查询中使用的索引的长度。 </p>
+<p>key_len字段能够帮你检查是否充分的利用上了索引</p>
+<h5 id="ref"><a href="#ref" class="headerlink" title="ref"></a>ref</h5><p>显示索引的哪一列被使用了，如果可能的话，是一个常数。哪个索引列或常量被用来查找值</p>
+<h5 id="rows"><a href="#rows" class="headerlink" title="rows"></a>rows</h5><p>rows列显示MySQL认为它执行查询时必须检查的行数。越少越好</p>
+<h5 id="filtered"><a href="#filtered" class="headerlink" title="filtered"></a>filtered</h5><blockquote>
+<p>The <code>filtered</code> column indicates an estimated percentage of table rows that are filtered by the table condition. The maximum value is 100, which means no filtering of rows occurred. Values decreasing from 100 indicate increasing amounts of filtering. <code>rows</code> shows the estimated number of rows examined and <code>rows</code> × <code>filtered</code> shows the number of rows that are joined with the following table. For example, if <code>rows</code> is 1000 and <code>filtered</code> is 50.00 (50%), the number of rows to be joined with the following table is 1000 × 50% = 500.</p>
+</blockquote>
+<h5 id="Extra"><a href="#Extra" class="headerlink" title="Extra"></a>Extra</h5><p>包含不适合在其他列中显示但十分重要的额外信息</p>
+<ul>
+<li><p>Using filesort：说明mysql会对数据使用一个外部的索引排序，而不是按照表内的索引顺序进行读取。MySQL中无法利用索引完成的排序操作称为“文件排序”</p>
+</li>
+<li><p>Using temporary ：使了用临时表保存中间结果,MySQL在对查询结果排序时使用临时表。常见于排序 order by 和分组查询 group by。</p>
+</li>
+<li><p>Using index：表示相应的select操作中使用了覆盖索引(Covering Index)，避免访问了表的数据行，效率不错！</p>
+<p>如果同时出现using where，表明索引被用来执行索引键值的查找;如果没有同时出现using where，表明索引只是用来读取数据而非利用索引执行查找。</p>
+<p>覆盖索引：就是select的字段和查找时用的索引的字段是相同的，这样不用读取数据中查找其他行了。</p>
+</li>
+<li><p>Using where：使用where过滤</p>
+</li>
+<li><p>using join buffer：使用连接缓存</p>
+</li>
+<li><p>impossible where：where子句的值总是false，不能用来获取任何元组</p>
+</li>
+<li><p>select tables optimized away：在没有GROUPBY子句的情况下，基于索引优化MIN/MAX操作或者对于MyISAM存储引擎优化COUNT(*)操作，不必等到执行阶段再进行计算，查询执行计划生成的阶段即完成优化。</p>
+</li>
+</ul>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2020/11/13/mysql/%E9%AB%98%E7%BA%A7/2020_11_13-explain%E5%85%B3%E9%94%AE%E5%AD%97/" title="explain关键字">http://soda1.github.io/2020/11/13/mysql/%E9%AB%98%E7%BA%A7/2020_11_13-explain%E5%85%B3%E9%94%AE%E5%AD%97/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2020/11/14/mysql/%E9%AB%98%E7%BA%A7/2020_11_14-%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96/" rel="prev" title="索引优化技巧"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">索引优化技巧</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2020/11/12/mysql/%E9%AB%98%E7%BA%A7/2020_11_12-mysql%E7%B4%A2%E5%BC%95/" rel="next" title="mysql索引"><span class="post-nav-text">mysql索引</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

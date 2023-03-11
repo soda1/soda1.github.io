@@ -1,0 +1,574 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>spring boot cache | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="JSR107JSR是Java Specification Requests的缩写，意思是Java 规范提案。2012年10月26日JSR规范委员会发布了JSR 107（JCache API的首个早期草案）。JCache 规范定义了一种对Java对象临时在内存中进行缓存的方法，包括对象的创建、共享访问、假脱机（spooling）、失效、各JVM的一致性等，可被用于缓存JSP内最经常读取的数据。 Ja">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spring boot cache">
+<meta property="og:url" content="http://soda1.github.io/2020/11/04/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-boot-cache/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="JSR107JSR是Java Specification Requests的缩写，意思是Java 规范提案。2012年10月26日JSR规范委员会发布了JSR 107（JCache API的首个早期草案）。JCache 规范定义了一种对Java对象临时在内存中进行缓存的方法，包括对象的创建、共享访问、假脱机（spooling）、失效、各JVM的一致性等，可被用于缓存JSP内最经常读取的数据。 Ja">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201104233229140.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201104233659653.png">
+<meta property="article:published_time" content="2020-11-04T23:11:00.000Z">
+<meta property="article:modified_time" content="2022-05-28T20:34:10.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201104233229140.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">65</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">10</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#JSR107"><span class="toc-number">1.</span> <span class="toc-text">JSR107</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring%E7%BC%93%E5%AD%98%E6%8A%BD%E8%B1%A1"><span class="toc-number">2.</span> <span class="toc-text">Spring缓存抽象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%A0%E4%B8%AA%E9%87%8D%E8%A6%81%E6%A6%82%E5%BF%B5-amp-%E7%BC%93%E5%AD%98%E6%B3%A8%E8%A7%A3"><span class="toc-number">3.</span> <span class="toc-text">几个重要概念&amp;缓存注解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E4%BD%BF%E7%94%A8"><span class="toc-number">4.</span> <span class="toc-text">缓存使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8"><span class="toc-number">4.1.</span> <span class="toc-text">基本使用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CacheConfig"><span class="toc-number">4.2.</span> <span class="toc-text">@CacheConfig</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Caching"><span class="toc-number">4.3.</span> <span class="toc-text">@Caching</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis%E7%BC%93%E5%AD%98%E6%95%B4%E5%90%88"><span class="toc-number">5.</span> <span class="toc-text">Redis缓存整合</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-number">5.1.</span> <span class="toc-text">1. 环境搭建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-RedisTemplate"><span class="toc-number">5.2.</span> <span class="toc-text">2. RedisTemplate</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-Redis%E7%BC%93%E5%AD%98%E4%BD%BF%E7%94%A8"><span class="toc-number">5.3.</span> <span class="toc-text">3. Redis缓存使用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-Redis%E7%BC%93%E5%AD%98%E5%8E%9F%E7%90%86"><span class="toc-number">5.4.</span> <span class="toc-text">4. Redis缓存原理</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2020/11/04/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-boot-cache/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">spring boot cache</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2020-11-04 23:11:00" itemprop="dateCreated datePublished" datetime="2020-11-04T23:11:00+00:00">2020-11-04</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2022-05-28 20:34:10" itemprop="dateModified" datetime="2022-05-28T20:34:10+00:00">2022-05-28</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">3.6k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">16m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/spring-boot/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">spring boot</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h3 id="JSR107"><a href="#JSR107" class="headerlink" title="JSR107"></a>JSR107</h3><p>JSR是Java Specification Requests的缩写，意思是Java 规范提案。2012年10月26日JSR规范委员会发布了JSR 107（JCache API的首个早期草案）。JCache 规范定义了一种对Java对象临时在内存中进行缓存的方法，包括对象的创建、共享访问、假脱机（spooling）、失效、各JVM的一致性等，可被用于缓存JSP内最经常读取的数据。</p>
+<p>Java Caching定义了5个核心接口，分别是<strong>CachingProvider</strong>, <strong>CacheManager</strong>, <strong>Cache</strong>, <strong>Entry</strong> 和 <strong>Expiry</strong>。</p>
+<ul>
+<li><p><strong>CachingProvider</strong>定义了创建、配置、获取、管理和控制多个<strong>CacheManager</strong>。一个应用可以在运行期访问多个CachingProvider。</p>
+</li>
+<li><p><strong>CacheManager</strong>定义了创建、配置、获取、管理和控制多个唯一命名的<strong>Cache</strong>，这些Cache存在于CacheManager的上下文中。一个CacheManager仅被一个CachingProvider所拥有。</p>
+</li>
+<li><p><strong>Cache</strong>是一个类似Map的数据结构并临时存储以Key为索引的值。一个Cache仅被一个CacheManager所拥有。</p>
+</li>
+<li><p><strong>Entry</strong>是一个存储在Cache中的key-value对。</p>
+</li>
+<li><p><strong>Expiry</strong> 每一个存储在Cache中的条目有一个定义的有效期。一旦超过这个时间，条目为过期的状态。一旦过期，条目将不可访问、更新和删除。缓存有效期可以通过ExpiryPolicy设置。</p>
+</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201104233229140.png" alt="image-20201104233229140" loading="lazy"></p>
+<h3 id="Spring缓存抽象"><a href="#Spring缓存抽象" class="headerlink" title="Spring缓存抽象"></a>Spring缓存抽象</h3><p>Spring从3.1开始定义了<code>org.springframework.cache.Cache</code>和<code>org.springframework.cache.CacheManager</code>接口来统一不同的缓存技术.并支持使用JCache（JSR-107）注解简化我们开发</p>
+<ul>
+<li><p>Cache接口为缓存的组件规范定义，包含缓存的各种操作集合；</p>
+</li>
+<li><p>Cache接口下Spring提供了各种xxxCache的实现；如<code>RedisCache</code>，<code>EhCacheCache</code> , <code>ConcurrentMapCache</code>等；</p>
+</li>
+<li><p>每次调用需要缓存功能的方法时，Spring会检查检查指定参数的指定的目标方法是否已经被调用过；如果有就直接从缓存中获取方法调用后的结果，如果没有就调用方法并缓存结果后返回给用户。下次调用直接从缓存中获取。</p>
+</li>
+<li><p>使用Spring缓存抽象时我们需要关注以下两点；</p>
+<ol>
+<li>确定方法需要被缓存以及他们的缓存策略</li>
+<li>从缓存中读取之前缓存存储的数据</li>
+</ol>
+</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201104233659653.png" alt="image-20201104233659653" loading="lazy"></p>
+<h3 id="几个重要概念-amp-缓存注解"><a href="#几个重要概念-amp-缓存注解" class="headerlink" title="几个重要概念&amp;缓存注解"></a>几个重要概念&amp;缓存注解</h3><table>
+<thead>
+<tr>
+<th><strong>Cache</strong></th>
+<th>缓存接口，定义缓存操作。实现有：<code>RedisCache</code>、<code>EhCacheCache</code>、<code>ConcurrentMapCache</code>等</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>CacheManager</strong></td>
+<td><strong>缓存管理器，管理各种缓存（Cache）组件</strong></td>
+</tr>
+<tr>
+<td><strong>@Cacheable</strong></td>
+<td><strong>主要针对方法配置，能够根据方法的请求参数对其结果进行缓存</strong></td>
+</tr>
+<tr>
+<td><strong>@CacheEvict</strong></td>
+<td><strong>清空缓存</strong></td>
+</tr>
+<tr>
+<td><strong>@CachePut</strong></td>
+<td><strong>保证方法被调用，又希望结果被缓存。</strong></td>
+</tr>
+<tr>
+<td><strong>@EnableCaching</strong></td>
+<td><strong>开启基于注解的缓存</strong></td>
+</tr>
+<tr>
+<td><strong>keyGenerator</strong></td>
+<td><strong>缓存数据时key生成策略</strong></td>
+</tr>
+<tr>
+<td><strong>serialize</strong></td>
+<td><strong>缓存数据时value序列化策略</strong></td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th><code>@Cacheable</code>/<code>@CachePut</code>/<code>@CacheEvict</code> <strong>主要的参数</strong></th>
+<th>解释</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>value</td>
+<td>缓存的名称，在  spring 配置文件中定义，必须指定至少一个</td>
+<td><code>@Cacheable(value=”mycache”)</code> 或者      <code>@Cacheable(value=&#123;”cache1”,”cache2”&#125;</code></td>
+</tr>
+<tr>
+<td>key</td>
+<td>缓存的  key，可以为空，如果指定要按照  SpEL 表达式编写，如果不指定，则缺省按照方法的所有参数进行组合</td>
+<td><code>@Cacheable(value=”testcache”,key=”#userName”)</code></td>
+</tr>
+<tr>
+<td>condition</td>
+<td>缓存的条件，可以为空，使用  SpEL 编写，返回  true 或者 false，只有为  true 才进行缓存/清除缓存，在调用方法之前之后都能判断</td>
+<td><code>@Cacheable(value=”testcache”,condition=”#userName.length()&gt;2”)</code></td>
+</tr>
+<tr>
+<td>allEntries  (<strong>@CacheEvict</strong>  )</td>
+<td>是否清空所有缓存内容，缺省为  false，如果指定为 true，则方法调用后将立即清空所有缓存</td>
+<td><code>@CachEvict(value=”testcache”,allEntries=true)</code></td>
+</tr>
+<tr>
+<td>beforeInvocation  <strong>(@CacheEvict)</strong></td>
+<td>是否在方法执行前就清空，缺省为  false，如果指定为 true，则在方法还没有执行的时候就清空缓存，缺省情况下，如果方法执行抛出异常，则不会清空缓存</td>
+<td><code>@CachEvict(value=”testcache”，beforeInvocation=true)</code></td>
+</tr>
+<tr>
+<td>unless  <strong>(@CachePut)</strong>  <strong>(@Cacheable)</strong></td>
+<td>用于否决缓存的，不像condition，该表达式只在方法执行之后判断，此时可以拿到返回值result进行判断。条件为true不会缓存，fasle才缓存</td>
+<td><code>@Cacheable(value=”testcache”,unless=”#result  == null”)</code></td>
+</tr>
+</tbody></table>
+<p><strong>Cache</strong> <strong>SpEL</strong> <strong>available metadata</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>名字</strong></th>
+<th><strong>位置</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>示例</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>methodName</td>
+<td>root object</td>
+<td>当前被调用的方法名</td>
+<td>#root.methodName</td>
+</tr>
+<tr>
+<td>method</td>
+<td>root object</td>
+<td>当前被调用的方法</td>
+<td>#root.method.name</td>
+</tr>
+<tr>
+<td>target</td>
+<td>root object</td>
+<td>当前被调用的目标对象</td>
+<td>#root.target</td>
+</tr>
+<tr>
+<td>targetClass</td>
+<td>root object</td>
+<td>当前被调用的目标对象类</td>
+<td>#root.targetClass</td>
+</tr>
+<tr>
+<td>args</td>
+<td>root object</td>
+<td>当前被调用的方法的参数列表</td>
+<td>#root.args[0]</td>
+</tr>
+<tr>
+<td>caches</td>
+<td>root object</td>
+<td>当前方法调用使用的缓存列表（如@Cacheable(value={“cache1”,  “cache2”})），则有两个cache</td>
+<td>#root.caches[0].name</td>
+</tr>
+<tr>
+<td><em>argument name</em></td>
+<td>evaluation context</td>
+<td>方法参数的名字. 可以直接 #参数名 ，也可以使用 #p0或#a0 的形式，0代表参数的索引；</td>
+<td>#iban 、 #a0 、 #p0</td>
+</tr>
+<tr>
+<td>result</td>
+<td>evaluation context</td>
+<td>方法执行后的返回值（仅当方法执行之后的判断有效，如‘unless’，’cache put’的表达式 ’cache evict’的表达式beforeInvocation=false）</td>
+<td>#result</td>
+</tr>
+</tbody></table>
+<h3 id="缓存使用"><a href="#缓存使用" class="headerlink" title="缓存使用"></a>缓存使用</h3><h4 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h4><ol>
+<li><p>引入<code>spring-boot-starter-cache</code>模块</p>
+<pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-cache&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+</li>
+<li><p><code>@EnableCaching</code>开启缓存</p>
+<pre><code class="java">@SpringBootApplication
+@MapperScan(&quot;com.soda.mapper&quot;)
+@EnableCaching
+public class CacheDemoApplication &#123;
+
+    public static void main(String[] args) &#123;
+        SpringApplication.run(CacheDemoApplication.class, args);
+    &#125;
+
+&#125;</code></pre>
+</li>
+<li><p>使用缓存注解<code>@Cacheable</code></p>
+<pre><code class="java">    //在第一次查询时会先去缓存看有没有这个key,没有就调用目标方法,最后存在缓存中
+    @Cacheable(cacheNames = &quot;emp&quot;, key = &quot;#id&quot;)
+    public Account findById(Integer id) &#123;
+        System.out.println(&quot;查询&quot; + id + &quot;号账户&quot;);
+        return accountMapper.findById(id);
+    &#125;
+
+    //在调用目标方法后更新缓存
+    @CachePut(value = &quot;emp&quot;, key = &quot;#result.id&quot;)
+    public Account updateAccount(Float money, Integer id) &#123;
+        accountMapper.updateAccount(money, id);
+        return accountMapper.findById(id);
+
+    &#125;
+    //调用目标方法后删除缓存
+    @CacheEvict(value = &#123;&quot;emp&quot;&#125;, key = &quot;#id&quot;)
+    public Integer delEmp(Integer id)&#123;
+        System.out.println(&quot;删除员工：&quot;+id);
+        employeeMapper.delEmp(id);
+        return id;
+    &#125;
+
+</code></pre>
+</li>
+</ol>
+<pre><code>
+#### 自定义KeyGenerator
+
+可以自定义**key**的生成策略,只需要实现一个`KeyGenerator`将其注入进容器中
+
+```java
+@Configuration
+public class MyCacheConfig &#123;
+ @Bean(&quot;myKeyGenerator&quot;)
+ public KeyGenerator myKeyGenerator() &#123;
+     return new KeyGenerator()&#123;
+        /**
+          * @param target 添加注解方法所在类的对象
+          * @param method 添加注解的方法
+          * @param params 添加注解方法的参数
+          * @return
+          */
+         @Override
+         public Object generate(Object target, Method method, Object... params) &#123;
+             return method.getName()+&quot;[&quot;+ Arrays.asList(params).toString()+&quot;----&quot;+target+&quot;]&quot;;
+         &#125;
+     &#125;;
+ &#125;
+&#125;</code></pre>
+<p>在方法上指定<strong>keyGenerator</strong></p>
+<pre><code class="java">
+   @Cacheable(cacheNames = &quot;emp&quot;,keyGenerator = &quot;myKeyGenerator&quot;)
+    public Account findById(Integer id) &#123;
+        System.out.println(&quot;查询&quot; + id + &quot;号账户&quot;);
+        return accountMapper.findById(id);
+    &#125;
+</code></pre>
+<h4 id="CacheConfig"><a href="#CacheConfig" class="headerlink" title="@CacheConfig"></a><strong>@CacheConfig</strong></h4><p>标注在类上，用于抽取@Cacheable的公共属性</p>
+<p>由于一个类中可能会使用多次@Cacheable等注解，所以各项属性可以抽取到@CacheConfig</p>
+<pre><code class="java">@CacheConfig(cacheNames = &quot;emp&quot;) //可以在类上标注好公共属性,类方法就可以不用写了</code></pre>
+<h4 id="Caching"><a href="#Caching" class="headerlink" title="@Caching"></a><strong>@Caching</strong></h4><p>组合使用<code>@Cacheable</code>、<code>@CachePut</code>、<code>@CacheEvict</code></p>
+<pre><code class="java">    @Caching(
+            cacheable = &#123;@Cacheable(value = &quot;emp&quot;, key = &quot;#name&quot;)&#125;,
+            put = &#123;@CachePut(cacheNames = &quot;emp&quot;, key = &quot;#result.id&quot;)&#125; //调用目标方法后会将保存key:id value:Account的键值对
+    )
+    public Account findByName(String name) &#123;
+        System.out.println(&quot;查询名字为&quot; + name + &quot;的账户&quot;);
+        return accountMapper.findByName(name);
+    &#125;
+</code></pre>
+<p>经历过一次查询后，通过<strong>id</strong>查询的时候不会调用<code>findById()</code>方法。由于<code>@CachePut</code>是每次调用方法后执行的，所以<code>findByName()</code>每次调用都会执行</p>
+<h3 id="Redis缓存整合"><a href="#Redis缓存整合" class="headerlink" title="Redis缓存整合"></a>Redis缓存整合</h3><h4 id="1-环境搭建"><a href="#1-环境搭建" class="headerlink" title="1. 环境搭建"></a>1. 环境搭建</h4><p>导入依赖</p>
+<pre><code>       &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-data-redis&lt;/artifactId&gt;
+        &lt;/dependency&gt;</code></pre>
+<p>在主配置中指定<strong>Redis</strong>服务器地址（如果不指定就默认为localhost:6739)</p>
+<pre><code>#redis服务器主机地址
+spring.redis.host=127.0.0.1</code></pre>
+<h4 id="2-RedisTemplate"><a href="#2-RedisTemplate" class="headerlink" title="2. RedisTemplate"></a>2. RedisTemplate</h4><p><code>RedisAutoConfiguration</code>向容器中导入了两个bean：<code>RedisTemplate&lt;Object, Object&gt;</code>和<code>StringRedisTemplate</code>，分别操作k-v都为对象和k-v都为字符串的值</p>
+<p><strong>Redis常见的五大数据类型</strong></p>
+<p>String（字符串）、List（列表）、Set（集合）、Hash（散列）、ZSet（有序集合）</p>
+<pre><code class="java"> stringRedisTemplate.opsForValue()[String（字符串）]
+
+ stringRedisTemplate.opsForList()[List（列表）]
+
+ stringRedisTemplate.opsForSet()[Set（集合）]
+
+ stringRedisTemplate.opsForHash()[Hash（散列）]
+
+ stringRedisTemplate.opsForZSet()[ZSet（有序集合）]</code></pre>
+<p>当<strong>Redis</strong>存储对象时，默认使用将对象以<strong>jdk序列化数据</strong>的方式存储在redis中，如果要以<strong>Json</strong>的方式来存储数据，可以自定义一个<code>RedisTemplate</code>，将<code>DefaultSerializer</code>设置为<strong>json</strong>格式的序列化器。但这样做有一个缺点就是你如果要对不同的类进行序列化你就要定义多个<code>RedisTemplate</code></p>
+<pre><code class="java">//生成一个序列化器为json的redisTemp
+@Bean(name = &quot;myRedisTemplate&quot;)
+public RedisTemplate MyRedisTemplate(RedisConnectionFactory redisConnectionFactory) &#123;
+    RedisTemplate&lt;Object, Object&gt; template = new RedisTemplate&lt;&gt;();
+    //设置序列化器，序列化对象为Object
+    template.setDefaultSerializer(new Jackson2JsonRedisSerializer&lt;Account&gt;(Account.class));
+    template.setConnectionFactory(redisConnectionFactory);
+    return template;
+&#125;</code></pre>
+<h4 id="3-Redis缓存使用"><a href="#3-Redis缓存使用" class="headerlink" title="3. Redis缓存使用"></a>3. Redis缓存使用</h4><p>在导入<strong>redis</strong>依赖后<code>org.springframework.boot.autoconfigure.cache.RedisCacheConfiguration</code>类就会自动生效，创建<code>RedisCacheManager</code>，<code>ConcurrentMapCacheManager</code>就不会创建。并使用RedisCache进行缓存数据，要缓存的对象的类要实现Serializable接口，默认情况下是以<strong>jdk序列化数据</strong>存在redis中（以String的形式)， 如下：</p>
+<pre><code>k:&quot;emp::1&quot;
+v:
+\xAC\xED\x00\x05sr\x00$cn.edu.ustc.springboot.bean.Employeeuqf\x03p\x9A\xCF\xE0\x02\x00\x05L\x00\x03dIdt\x00\x13Ljava/lang/Integer;L\x00\x05emailt\x00\x12Ljava/lang/String;L\x00\x06genderq\x00~\x00\x01L\x00\x02idq\x00~\x00\x01L\x00\x08lastNameq\x00~\x00\x02xpsr\x00\x11java.lang.Integer\x12\xE2\xA0\xA4\xF7\x81\x878\x02\x00\x01I\x00\x05valuexr\x00\x10java.lang.Number\x86\xAC\x95\x1D\x0B\x94\xE0\x8B\x02\x00\x00xp\x00\x00\x00\x03t\x00\x07cch@aaasq\x00~\x00\x04\x00\x00\x00\x01q\x00~\x00\x08t\x00\x03cch</code></pre>
+<p>要想让对象以<strong>json形式</strong>存储在redis中，需要定义一个<code>org.springframework.data.redis.cache.RedisCacheConfiguration</code>对象放进容器中，使用<code>GenericJackson2JsonRedisSerializer</code>类对<strong>value</strong>进行序列化，并且如果要使配置文件中的配置生效，还要在<code>RedisCacheConfiguration</code>设置各项参数。其实这配置是参考<code>org.springframework.boot.autoconfigure.cache.RedisCacheConfiguration</code>的<code>determineConfiguration()</code>方法来写的</p>
+<pre><code class="java">//自定义一个Redis缓存配置，使用Json格式序列化器
+@Bean
+public RedisCacheConfiguration redisCacheConfiguration(CacheProperties cacheProperties) &#123;
+    CacheProperties.Redis redisProperties = cacheProperties.getRedis();
+    org.springframework.data.redis.cache.RedisCacheConfiguration config = org.springframework.data.redis.cache.RedisCacheConfiguration
+            .defaultCacheConfig();
+    config = config.serializeValuesWith(
+            RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+    if (redisProperties.getTimeToLive() != null) &#123;
+        config = config.entryTtl(redisProperties.getTimeToLive());
+    &#125;
+    if (redisProperties.getKeyPrefix() != null) &#123;
+        config = config.prefixKeysWith(redisProperties.getKeyPrefix());
+    &#125;
+    if (!redisProperties.isCacheNullValues()) &#123;
+        config = config.disableCachingNullValues();
+    &#125;
+    if (!redisProperties.isUseKeyPrefix()) &#123;
+        config = config.disableKeyPrefix();
+    &#125;
+    return config;
+&#125;</code></pre>
+<p>序列化数据如下：</p>
+<pre><code class="json">k:&quot;emp::1&quot;
+
+v:
+&#123;
+  &quot;@class&quot;: &quot;com.soda.javabean.Account&quot;,
+  &quot;id&quot;: 1,
+  &quot;name&quot;: &quot;aaa&quot;,
+  &quot;money&quot;: 200.0
+&#125;</code></pre>
+<p><strong>注意</strong>，这里必须用<code>GenericJackson2JsonRedisSerializer</code>进行value的序列化解析，如果使用<code>Jackson2JsonRedisSerializer</code>，则只能转换指定的一种类对象。</p>
+<h4 id="4-Redis缓存原理"><a href="#4-Redis缓存原理" class="headerlink" title="4. Redis缓存原理"></a>4. Redis缓存原理</h4><p>配置类<code>RedisCacheConfiguration</code>向容器中导入了其定制的RedisCacheManager，在默认的RedisCacheManager的配置中，是使用jdk序列化value值</p>
+<pre><code>@Configuration(proxyBeanMethods = false)
+@ConditionalOnClass(RedisConnectionFactory.class)
+@AutoConfigureAfter(RedisAutoConfiguration.class)
+@ConditionalOnBean(RedisConnectionFactory.class)
+@ConditionalOnMissingBean(CacheManager.class)
+@Conditional(CacheCondition.class)
+class RedisCacheConfiguration &#123;
+
+    //向容器中导入RedisCacheManager
+    @Bean
+    RedisCacheManager cacheManager(CacheProperties cacheProperties, CacheManagerCustomizers cacheManagerCustomizers,
+            ObjectProvider&lt;org.springframework.data.redis.cache.RedisCacheConfiguration&gt; redisCacheConfiguration,
+            ObjectProvider&lt;RedisCacheManagerBuilderCustomizer&gt; redisCacheManagerBuilderCustomizers,
+            RedisConnectionFactory redisConnectionFactory, ResourceLoader resourceLoader) &#123;
+        //使用determineConfiguration()的返回值生成RedisCacheManagerBuilder
+        //调用了RedisCacheManagerBuilder的cacheDefaults()方法(见下一代码块)
+        RedisCacheManagerBuilder builder = RedisCacheManager.builder(redisConnectionFactory).cacheDefaults(
+                determineConfiguration(cacheProperties, redisCacheConfiguration, resourceLoader.getClassLoader()));
+        List&lt;String&gt; cacheNames = cacheProperties.getCacheNames();
+        if (!cacheNames.isEmpty()) &#123;
+            builder.initialCacheNames(new LinkedHashSet&lt;&gt;(cacheNames));
+        &#125;
+        redisCacheManagerBuilderCustomizers.orderedStream().forEach((customizer) -&gt; customizer.customize(builder));
+        //使用RedisCacheManagerBuilder的build()方法创建RedisCacheManager并进行定制操作
+        return cacheManagerCustomizers.customize(builder.build());
+    &#125;
+
+
+    private org.springframework.data.redis.cache.RedisCacheConfiguration determineConfiguration(
+            CacheProperties cacheProperties,
+            ObjectProvider&lt;org.springframework.data.redis.cache.RedisCacheConfiguration&gt; redisCacheConfiguration,
+            ClassLoader classLoader) &#123;
+        //如果容器中存在RedisCacheConfiguration就直接返回，否则调用RedisCacheConfiguration()创建
+        return redisCacheConfiguration.getIfAvailable(() -&gt; createConfiguration(cacheProperties, classLoader));
+    &#125;
+
+
+    //createConfiguration()定义了其序列化value的规则
+    private org.springframework.data.redis.cache.RedisCacheConfiguration createConfiguration(
+            CacheProperties cacheProperties, ClassLoader classLoader) &#123;
+        Redis redisProperties = cacheProperties.getRedis();
+        org.springframework.data.redis.cache.RedisCacheConfiguration config = org.springframework.data.redis.cache.RedisCacheConfiguration
+                .defaultCacheConfig();
+        //使用jdk序列化器对value进行序列化
+        config = config.serializeValuesWith(
+                SerializationPair.fromSerializer(new JdkSerializationRedisSerializer(classLoader)));
+        //设置properties文件中设置的各项属性
+        if (redisProperties.getTimeToLive() != null) &#123;
+            config = config.entryTtl(redisProperties.getTimeToLive());
+        &#125;
+        if (redisProperties.getKeyPrefix() != null) &#123;
+            config = config.prefixKeysWith(redisProperties.getKeyPrefix());
+        &#125;
+        if (!redisProperties.isCacheNullValues()) &#123;
+            config = config.disableCachingNullValues();
+        &#125;
+        if (!redisProperties.isUseKeyPrefix()) &#123;
+            config = config.disableKeyPrefix();
+        &#125;
+        return config;
+    &#125;
+
+&#125;</code></pre>
+<p>RedisCacheManager的直接构造类，该类保存了配置类RedisCacheConfiguration，该配置在会传递给RedisCacheManager</p>
+<pre><code>public static class RedisCacheManagerBuilder &#123;
+
+        private final RedisCacheWriter cacheWriter;
+        //默认缓存配置使用RedisCacheConfiguration的默认配置
+        //该默认配置缓存时默认将k按字符串存储，v按jdk序列化数据存储(见下一代码块)
+        private RedisCacheConfiguration defaultCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig();
+        private final Map&lt;String, RedisCacheConfiguration&gt; initialCaches = new LinkedHashMap&lt;&gt;();
+        private boolean enableTransactions;
+        boolean allowInFlightCacheCreation = true;
+
+        private RedisCacheManagerBuilder(RedisCacheWriter cacheWriter) &#123;
+            this.cacheWriter = cacheWriter;
+        &#125;
+
+
+        //传入RedisCacheManagerBuilder使用的缓存配置规则RedisCacheConfiguration类
+        public RedisCacheManagerBuilder cacheDefaults(RedisCacheConfiguration defaultCacheConfiguration) &#123;
+
+            Assert.notNull(defaultCacheConfiguration, &quot;DefaultCacheConfiguration must not be null!&quot;);
+
+            this.defaultCacheConfiguration = defaultCacheConfiguration;
+
+            return this;
+        &#125;
+
+
+    //使用默认defaultCacheConfiguration创建RedisCacheManager
+    public RedisCacheManager build() &#123;
+
+            RedisCacheManager cm = new RedisCacheManager(cacheWriter, defaultCacheConfiguration, initialCaches,
+                    allowInFlightCacheCreation);
+
+            cm.setTransactionAware(enableTransactions);
+
+            return cm;
+        &#125;</code></pre>
+<p>RedisCacheConfiguration保存了许多缓存规则，这些规则都保存在RedisCacheManagerBuilder的RedisCacheConfiguration defaultCacheConfiguration属性中，并且当RedisCacheManagerBuilder创建RedisCacheManager传递过去</p>
+<pre><code>public class RedisCacheConfiguration &#123;
+
+    private final Duration ttl;
+    private final boolean cacheNullValues;
+    private final CacheKeyPrefix keyPrefix;
+    private final boolean usePrefix;
+
+    private final SerializationPair&lt;String&gt; keySerializationPair;
+    private final SerializationPair&lt;Object&gt; valueSerializationPair;
+
+    private final ConversionService conversionService;
+
+    //默认缓存配置
+    public static RedisCacheConfiguration defaultCacheConfig(@Nullable ClassLoader classLoader) &#123;
+
+            DefaultFormattingConversionService conversionService = new DefaultFormattingConversionService();
+
+            registerDefaultConverters(conversionService);
+
+            return new RedisCacheConfiguration(Duration.ZERO, true, true, CacheKeyPrefix.simple(),
+                                     SerializationPair.fromSerializer(RedisSerializer.string()),//key使用字符串
+                                               SerializationPair.fromSerializer(RedisSerializer.java(classLoader)), conversionService);
+        //value按jdk序列化存储
+    &#125;</code></pre>
+<p>RedisCacheManager在创建RedisCache时将RedisCacheConfiguration传递过去，并在创建RedisCache时通过createRedisCache()起作用</p>
+<pre><code>public class RedisCacheManager extends AbstractTransactionSupportingCacheManager &#123;
+
+    private final RedisCacheWriter cacheWriter;
+    private final RedisCacheConfiguration defaultCacheConfig;
+    private final Map&lt;String, RedisCacheConfiguration&gt; initialCacheConfiguration;
+    private final boolean allowInFlightCacheCreation;
+
+        protected RedisCache createRedisCache(String name, @Nullable RedisCacheConfiguration cacheConfig) &#123;
+        //如果调用该方法时RedisCacheConfiguration有值则使用定制的，否则则使用默认的RedisCacheConfiguration defaultCacheConfig，即RedisCacheManagerBuilder传递过来的配置
+        return new RedisCache(name, cacheWriter, cacheConfig != null ? cacheConfig : defaultCacheConfig);
+    &#125;</code></pre>
+<p>RedisCache，Redis缓存，具体负责将缓存数据序列化的地方，将RedisCacheConfiguration的序列化对SerializationPair提取出来并使用其定义的序列化方式分别对k和v进行序列化操作</p>
+<pre><code>public class RedisCache extends AbstractValueAdaptingCache &#123;
+
+    private static final byte[] BINARY_NULL_VALUE = RedisSerializer.java().serialize(NullValue.INSTANCE);
+
+    private final String name;
+    private final RedisCacheWriter cacheWriter;
+    private final RedisCacheConfiguration cacheConfig;
+    private final ConversionService conversionService;
+
+    public void put(Object key, @Nullable Object value) &#123;
+
+        Object cacheValue = preProcessCacheValue(value);
+
+        if (!isAllowNullValues() &amp;&amp; cacheValue == null) &#123;
+
+            throw new IllegalArgumentException(String.format(
+                    &quot;Cache &#39;%s&#39; does not allow &#39;null&#39; values. Avoid storing null via &#39;@Cacheable(unless=\&quot;#result == null\&quot;)&#39; or configure RedisCache to allow &#39;null&#39; via RedisCacheConfiguration.&quot;,
+                    name));
+        &#125;
+
+        //在put k-v时使用cacheConfig中的k-v序列化器分别对k-v进行序列化
+        cacheWriter.put(name, createAndConvertCacheKey(key), serializeCacheValue(cacheValue), cacheConfig.getTtl());
+    &#125;
+
+    //从cacheConfig(即RedisCacheConfiguration)中获取KeySerializationPair并写入key值
+    protected byte[] serializeCacheKey(String cacheKey) &#123;
+        return ByteUtils.getBytes(cacheConfig.getKeySerializationPair().write(cacheKey));
+    &#125;
+
+
+    //从cacheConfig(即RedisCacheConfiguration)中获取ValueSerializationPair并写入key值
+    protected byte[] serializeCacheValue(Object value) &#123;
+
+        if (isAllowNullValues() &amp;&amp; value instanceof NullValue) &#123;
+            return BINARY_NULL_VALUE;
+        &#125;
+
+        return ByteUtils.getBytes(cacheConfig.getValueSerializationPair().write(value));
+    &#125;</code></pre>
+<p>分析到这也就不难理解，要使用json保存序列化数据时，需要自定义RedisCacheConfiguration，在RedisCacheConfiguration中定义序列化转化规则，并向RedisCacheManager传入我们自己定制的RedisCacheConfiguration了，我定制的序列化规则会跟随RedisCacheConfiguration一直传递到RedisCache，并在序列化时发挥作用。</p>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2020/11/04/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-boot-cache/" title="spring boot cache">http://soda1.github.io/2020/11/04/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-boot-cache/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2020/11/05/spring-framework-2.1.8RELEASE/spring-boot/2020-11-5-spring-boot%E4%B8%8E%E6%B6%88%E6%81%AF/" rel="prev" title="spring boot消息整合"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">spring boot消息整合</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2020/11/04/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-boot%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE/" rel="next" title="spring boot数据访问"><span class="post-nav-text">spring boot数据访问</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

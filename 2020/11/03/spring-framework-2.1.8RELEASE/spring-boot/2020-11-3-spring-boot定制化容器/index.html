@@ -1,0 +1,580 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>spring boot配置Servlet容器 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="配置嵌入式Servlet容器SpringBoot默认使用Tomcat作为嵌入式的Servlet容器；  如何定制和修改Servlet容器的相关配置； 修改和server有关的配置（ServerProperties【也是EmbeddedServletContainerCustomizer】）； server.port&#x3D;8081 server.context-path&#x3D;&#x2F;crud  server.to">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spring boot配置Servlet容器">
+<meta property="og:url" content="http://soda1.github.io/2020/11/03/spring-framework-2.1.8RELEASE/spring-boot/2020-11-3-spring-boot%E5%AE%9A%E5%88%B6%E5%8C%96%E5%AE%B9%E5%99%A8/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="配置嵌入式Servlet容器SpringBoot默认使用Tomcat作为嵌入式的Servlet容器；  如何定制和修改Servlet容器的相关配置； 修改和server有关的配置（ServerProperties【也是EmbeddedServletContainerCustomizer】）； server.port&#x3D;8081 server.context-path&#x3D;&#x2F;crud  server.to">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180301142915.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180302144835.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180302114401.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180302144910.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180302221835.png">
+<meta property="article:published_time" content="2020-11-03T23:04:55.000Z">
+<meta property="article:modified_time" content="2022-05-28T20:34:10.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180301142915.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">65</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">10</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E5%B5%8C%E5%85%A5%E5%BC%8FServlet%E5%AE%B9%E5%99%A8"><span class="toc-number">1.</span> <span class="toc-text">配置嵌入式Servlet容器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%AE%9A%E5%88%B6%E5%92%8C%E4%BF%AE%E6%94%B9Servlet%E5%AE%B9%E5%99%A8%E7%9A%84%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE%EF%BC%9B"><span class="toc-number">1.1.</span> <span class="toc-text">如何定制和修改Servlet容器的相关配置；</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E5%86%8CServlet%E4%B8%89%E5%A4%A7%E7%BB%84%E4%BB%B6%E3%80%90Servlet%E3%80%81Filter%E3%80%81Listener%E3%80%91"><span class="toc-number">2.</span> <span class="toc-text">注册Servlet三大组件【Servlet、Filter、Listener】</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ServletRegistrationBean"><span class="toc-number">2.1.</span> <span class="toc-text">ServletRegistrationBean</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#FilterRegistrationBean"><span class="toc-number">2.2.</span> <span class="toc-text">FilterRegistrationBean</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ServletListenerRegistrationBean"><span class="toc-number">2.3.</span> <span class="toc-text">ServletListenerRegistrationBean</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9B%BF%E6%8D%A2%E4%B8%BA%E5%85%B6%E4%BB%96%E5%B5%8C%E5%85%A5%E5%BC%8FServlet%E5%AE%B9%E5%99%A8"><span class="toc-number">3.</span> <span class="toc-text">替换为其他嵌入式Servlet容器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8FServlet%E5%AE%B9%E5%99%A8%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E5%8E%9F%E7%90%86"><span class="toc-number">4.</span> <span class="toc-text">嵌入式Servlet容器自动配置原理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9%E3%80%81%E4%BD%BF%E7%94%A8%E5%A4%96%E7%BD%AE%E7%9A%84Servlet%E5%AE%B9%E5%99%A8"><span class="toc-number"></span> <span class="toc-text">9、使用外置的Servlet容器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.</span> <span class="toc-text">步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">原理</span></a></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2020/11/03/spring-framework-2.1.8RELEASE/spring-boot/2020-11-3-spring-boot%E5%AE%9A%E5%88%B6%E5%8C%96%E5%AE%B9%E5%99%A8/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">spring boot配置Servlet容器</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2020-11-03 23:04:55" itemprop="dateCreated datePublished" datetime="2020-11-03T23:04:55+00:00">2020-11-03</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2022-05-28 20:34:10" itemprop="dateModified" datetime="2022-05-28T20:34:10+00:00">2022-05-28</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">2.8k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">13m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/spring-boot/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">spring boot</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h3 id="配置嵌入式Servlet容器"><a href="#配置嵌入式Servlet容器" class="headerlink" title="配置嵌入式Servlet容器"></a>配置嵌入式Servlet容器</h3><p>SpringBoot默认使用Tomcat作为嵌入式的Servlet容器；</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180301142915.png" alt=" " loading="lazy"></p>
+<h4 id="如何定制和修改Servlet容器的相关配置；"><a href="#如何定制和修改Servlet容器的相关配置；" class="headerlink" title="如何定制和修改Servlet容器的相关配置；"></a>如何定制和修改Servlet容器的相关配置；</h4><ol>
+<li><p>修改和server有关的配置（ServerProperties【也是EmbeddedServletContainerCustomizer】）；</p>
+<pre><code class="properties">server.port=8081
+server.context-path=/crud
+
+server.tomcat.uri-encoding=UTF-8
+
+//通用的Servlet容器设置
+server.xxx
+//Tomcat的设置
+server.tomcat.xxx</code></pre>
+</li>
+<li><p>编写一个<code>WebServerFactoryCustomizer</code>嵌入式的Servlet容器的定制器来修改Servlet容器的配置</p>
+<pre><code class="java">    @Bean
+    public WebServerFactoryCustomizer myWebServerFactoryCustomizer() &#123;
+        return (WebServerFactoryCustomizer&lt;ConfigurableTomcatWebServerFactory&gt;) factory -&gt; factory.setPort(8083);
+    &#125;</code></pre>
+<p>这里有一个问题就是SpringBoot是怎么使用我定制化的Tomcat容器的，因为在<code>EmbeddedWebServerFactoryCustomizerAutoConfiguration</code>已经定义了一个了</p>
+<pre><code class="java">@Bean
+public TomcatWebServerFactoryCustomizer tomcatWebServerFactoryCustomizer(Environment environment,
+      ServerProperties serverProperties) &#123;
+   return new TomcatWebServerFactoryCustomizer(environment, serverProperties);
+&#125;</code></pre>
+</li>
+</ol>
+<h3 id="注册Servlet三大组件【Servlet、Filter、Listener】"><a href="#注册Servlet三大组件【Servlet、Filter、Listener】" class="headerlink" title="注册Servlet三大组件【Servlet、Filter、Listener】"></a>注册Servlet三大组件【Servlet、Filter、Listener】</h3><p>由于SpringBoot默认是以jar包的方式启动嵌入式的Servlet容器来启动SpringBoot的web应用，没有web.xml文件。</p>
+<p>注册三大组件用以下方式</p>
+<h4 id="ServletRegistrationBean"><a href="#ServletRegistrationBean" class="headerlink" title="ServletRegistrationBean"></a>ServletRegistrationBean</h4><pre><code class="java">//注册三大组件
+@Bean
+public ServletRegistrationBean myServlet()&#123;
+    ServletRegistrationBean registrationBean = new ServletRegistrationBean(new MyServlet(),&quot;/myServlet&quot;);
+    return registrationBean;
+&#125;
+</code></pre>
+<h4 id="FilterRegistrationBean"><a href="#FilterRegistrationBean" class="headerlink" title="FilterRegistrationBean"></a>FilterRegistrationBean</h4><pre><code class="java">@Bean
+public FilterRegistrationBean myFilter()&#123;
+    FilterRegistrationBean registrationBean = new FilterRegistrationBean();
+    registrationBean.setFilter(new MyFilter());
+    registrationBean.setUrlPatterns(Arrays.asList(&quot;/hello&quot;,&quot;/myServlet&quot;));
+    return registrationBean;
+&#125;</code></pre>
+<h4 id="ServletListenerRegistrationBean"><a href="#ServletListenerRegistrationBean" class="headerlink" title="ServletListenerRegistrationBean"></a>ServletListenerRegistrationBean</h4><pre><code class="java">@Bean
+public ServletListenerRegistrationBean myListener()&#123;
+    ServletListenerRegistrationBean&lt;MyListener&gt; registrationBean = new ServletListenerRegistrationBean&lt;&gt;(new MyListener());
+    return registrationBean;
+&#125;</code></pre>
+<p>SpringBoot帮我们自动SpringMVC的时候，自动的注册SpringMVC的前端控制器；<code>DIspatcherServlet</code>；</p>
+<p><code>DispatcherServletAutoConfiguration</code>中：</p>
+<pre><code class="java">@Bean(name = DEFAULT_DISPATCHER_SERVLET_REGISTRATION_BEAN_NAME)
+@ConditionalOnBean(value = DispatcherServlet.class, name = DEFAULT_DISPATCHER_SERVLET_BEAN_NAME)
+public ServletRegistrationBean dispatcherServletRegistration(
+      DispatcherServlet dispatcherServlet) &#123;
+   ServletRegistrationBean registration = new ServletRegistrationBean(
+         dispatcherServlet, this.serverProperties.getServletMapping());
+    //默认拦截： /  所有请求；包静态资源，但是不拦截jsp请求；   /*会拦截jsp
+    //可以通过server.servletPath来修改SpringMVC前端控制器默认拦截的请求路径
+
+   registration.setName(DEFAULT_DISPATCHER_SERVLET_BEAN_NAME);
+   registration.setLoadOnStartup(
+         this.webMvcProperties.getServlet().getLoadOnStartup());
+   if (this.multipartConfig != null) &#123;
+      registration.setMultipartConfig(this.multipartConfig);
+   &#125;
+   return registration;
+&#125;
+</code></pre>
+<h3 id="替换为其他嵌入式Servlet容器"><a href="#替换为其他嵌入式Servlet容器" class="headerlink" title="替换为其他嵌入式Servlet容器"></a>替换为其他嵌入式Servlet容器</h3><p><img src="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180302144835.png" loading="lazy"></p>
+<p>默认支持：</p>
+<p>Tomcat（默认使用）</p>
+<pre><code class="xml">&lt;dependency&gt;
+   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+   &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+   引入web模块默认就是使用嵌入式的Tomcat作为Servlet容器；
+&lt;/dependency&gt;</code></pre>
+<p>Jetty</p>
+<pre><code class="xml">&lt;!-- 引入web模块 --&gt;
+&lt;dependency&gt;
+   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+   &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+    &lt;!--将内置Tomcat去掉--&gt;
+   &lt;exclusions&gt;
+      &lt;exclusion&gt;
+         &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
+         &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;/exclusion&gt;
+   &lt;/exclusions&gt;
+&lt;/dependency&gt;
+&lt;!--引入其他的Servlet容器--&gt;
+&lt;dependency&gt;
+   &lt;artifactId&gt;spring-boot-starter-jetty&lt;/artifactId&gt;
+   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+&lt;/dependency&gt;</code></pre>
+<p>Undertow</p>
+<pre><code class="xml">&lt;!-- 引入web模块 --&gt;
+&lt;dependency&gt;
+   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+   &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+
+   &lt;exclusions&gt;
+      &lt;exclusion&gt;
+         &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
+         &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;/exclusion&gt;
+   &lt;/exclusions&gt;
+&lt;/dependency&gt;
+
+&lt;!--引入其他的Servlet容器--&gt;
+&lt;dependency&gt;
+   &lt;artifactId&gt;spring-boot-starter-undertow&lt;/artifactId&gt;
+   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+&lt;/dependency&gt;</code></pre>
+<h3 id="嵌入式Servlet容器自动配置原理"><a href="#嵌入式Servlet容器自动配置原理" class="headerlink" title="嵌入式Servlet容器自动配置原理"></a>嵌入式Servlet容器自动配置原理</h3><p><code>EmbeddedWebServerFactoryCustomizerAutoConfiguration</code>：嵌入式的Servlet容器自动配置</p>
+<pre><code class="java">@Configuration
+@ConditionalOnWebApplication
+@EnableConfigurationProperties(ServerProperties.class)
+public class EmbeddedWebServerFactoryCustomizerAutoConfiguration &#123;
+
+   /**
+    * Nested configuration if Tomcat is being used.
+    */
+   @Configuration
+   @ConditionalOnClass(&#123; Tomcat.class, UpgradeProtocol.class &#125;)
+   public static class TomcatWebServerFactoryCustomizerConfiguration &#123;
+
+      @Bean
+      public TomcatWebServerFactoryCustomizer tomcatWebServerFactoryCustomizer(Environment environment,
+            ServerProperties serverProperties) &#123;
+         return new TomcatWebServerFactoryCustomizer(environment, serverProperties);
+      &#125;
+
+   &#125;
+
+   /**
+    * Nested configuration if Jetty is being used.
+    */
+   @Configuration
+   @ConditionalOnClass(&#123; Server.class, Loader.class, WebAppContext.class &#125;)
+   public static class JettyWebServerFactoryCustomizerConfiguration &#123;
+
+      @Bean
+      public JettyWebServerFactoryCustomizer jettyWebServerFactoryCustomizer(Environment environment,
+            ServerProperties serverProperties) &#123;
+         return new JettyWebServerFactoryCustomizer(environment, serverProperties);
+      &#125;
+
+   &#125;
+
+   /**
+    * Nested configuration if Undertow is being used.
+    */
+   @Configuration
+   @ConditionalOnClass(&#123; Undertow.class, SslClientAuthMode.class &#125;)
+   public static class UndertowWebServerFactoryCustomizerConfiguration &#123;
+
+      @Bean
+      public UndertowWebServerFactoryCustomizer undertowWebServerFactoryCustomizer(Environment environment,
+            ServerProperties serverProperties) &#123;
+         return new UndertowWebServerFactoryCustomizer(environment, serverProperties);
+      &#125;
+
+   &#125;
+
+   /**
+    * Nested configuration if Netty is being used.
+    */
+   @Configuration
+   @ConditionalOnClass(HttpServer.class)
+   public static class NettyWebServerFactoryCustomizerConfiguration &#123;
+
+      @Bean
+      public NettyWebServerFactoryCustomizer nettyWebServerFactoryCustomizer(Environment environment,
+            ServerProperties serverProperties) &#123;
+         return new NettyWebServerFactoryCustomizer(environment, serverProperties);
+      &#125;
+
+   &#125;
+
+&#125;</code></pre>
+<pre><code class="java">@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
+@Configuration
+@ConditionalOnWebApplication
+@Import(BeanPostProcessorsRegistrar.class)
+//导入BeanPostProcessorsRegistrar：Spring注解版；给容器中导入一些组件
+//导入了EmbeddedServletContainerCustomizerBeanPostProcessor：
+//后置处理器：bean初始化前后（创建完对象，还没赋值赋值）执行初始化工作
+public class EmbeddedServletContainerAutoConfiguration &#123;
+
+    @Configuration
+    @ConditionalOnClass(&#123; Servlet.class, Tomcat.class &#125;)//判断当前是否引入了Tomcat依赖；
+    @ConditionalOnMissingBean(value = EmbeddedServletContainerFactory.class, search = SearchStrategy.CURRENT)//判断当前容器没有用户自己定义EmbeddedServletContainerFactory：嵌入式的Servlet容器工厂；作用：创建嵌入式的Servlet容器
+    public static class EmbeddedTomcat &#123;
+
+        @Bean
+        public TomcatEmbeddedServletContainerFactory tomcatEmbeddedServletContainerFactory() &#123;
+            return new TomcatEmbeddedServletContainerFactory();
+        &#125;
+
+    &#125;
+
+    /**
+     * Nested configuration if Jetty is being used.
+     */
+    @Configuration
+    @ConditionalOnClass(&#123; Servlet.class, Server.class, Loader.class,
+            WebAppContext.class &#125;)
+    @ConditionalOnMissingBean(value = EmbeddedServletContainerFactory.class, search = SearchStrategy.CURRENT)
+    public static class EmbeddedJetty &#123;
+
+        @Bean
+        public JettyEmbeddedServletContainerFactory jettyEmbeddedServletContainerFactory() &#123;
+            return new JettyEmbeddedServletContainerFactory();
+        &#125;
+
+    &#125;
+
+    /**
+     * Nested configuration if Undertow is being used.
+     */
+    @Configuration
+    @ConditionalOnClass(&#123; Servlet.class, Undertow.class, SslClientAuthMode.class &#125;)
+    @ConditionalOnMissingBean(value = EmbeddedServletContainerFactory.class, search = SearchStrategy.CURRENT)
+    public static class EmbeddedUndertow &#123;
+
+        @Bean
+        public UndertowEmbeddedServletContainerFactory undertowEmbeddedServletContainerFactory() &#123;
+            return new UndertowEmbeddedServletContainerFactory();
+        &#125;
+
+    &#125;</code></pre>
+<p>1）、EmbeddedServletContainerFactory（嵌入式Servlet容器工厂）</p>
+<pre><code class="java">public interface EmbeddedServletContainerFactory &#123;
+
+   //获取嵌入式的Servlet容器
+   EmbeddedServletContainer getEmbeddedServletContainer(
+         ServletContextInitializer... initializers);
+
+&#125;</code></pre>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180302114401.png" loading="lazy"></p>
+<p>2）、EmbeddedServletContainer：（嵌入式的Servlet容器）</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180302144910.png" loading="lazy"></p>
+<p>3）、以<strong>TomcatEmbeddedServletContainerFactory</strong>为例</p>
+<pre><code class="java">@Override
+public EmbeddedServletContainer getEmbeddedServletContainer(
+      ServletContextInitializer... initializers) &#123;
+    //创建一个Tomcat
+   Tomcat tomcat = new Tomcat();
+
+    //配置Tomcat的基本环节
+   File baseDir = (this.baseDirectory != null ? this.baseDirectory
+         : createTempDir(&quot;tomcat&quot;));
+   tomcat.setBaseDir(baseDir.getAbsolutePath());
+   Connector connector = new Connector(this.protocol);
+   tomcat.getService().addConnector(connector);
+   customizeConnector(connector);
+   tomcat.setConnector(connector);
+   tomcat.getHost().setAutoDeploy(false);
+   configureEngine(tomcat.getEngine());
+   for (Connector additionalConnector : this.additionalTomcatConnectors) &#123;
+      tomcat.getService().addConnector(additionalConnector);
+   &#125;
+   prepareContext(tomcat.getHost(), initializers);
+
+    //将配置好的Tomcat传入进去，返回一个EmbeddedServletContainer；并且启动Tomcat服务器
+   return getTomcatEmbeddedServletContainer(tomcat);
+&#125;</code></pre>
+<p>4）、我们对嵌入式容器的配置修改是怎么生效？</p>
+<pre><code>ServerProperties、EmbeddedServletContainerCustomizer</code></pre>
+<p><strong>EmbeddedServletContainerCustomizer</strong>：定制器帮我们修改了Servlet容器的配置？</p>
+<p>怎么修改的原理？</p>
+<p>5）、容器中导入了<strong>EmbeddedServletContainerCustomizerBeanPostProcessor</strong></p>
+<pre><code class="java">//初始化之前
+@Override
+public Object postProcessBeforeInitialization(Object bean, String beanName)
+      throws BeansException &#123;
+    //如果当前初始化的是一个ConfigurableEmbeddedServletContainer类型的组件
+   if (bean instanceof ConfigurableEmbeddedServletContainer) &#123;
+       //
+      postProcessBeforeInitialization((ConfigurableEmbeddedServletContainer) bean);
+   &#125;
+   return bean;
+&#125;
+
+private void postProcessBeforeInitialization(
+            ConfigurableEmbeddedServletContainer bean) &#123;
+    //获取所有的定制器，调用每一个定制器的customize方法来给Servlet容器进行属性赋值；
+    for (EmbeddedServletContainerCustomizer customizer : getCustomizers()) &#123;
+        customizer.customize(bean);
+    &#125;
+&#125;
+
+private Collection&lt;EmbeddedServletContainerCustomizer&gt; getCustomizers() &#123;
+    if (this.customizers == null) &#123;
+        // Look up does not include the parent context
+        this.customizers = new ArrayList&lt;EmbeddedServletContainerCustomizer&gt;(
+            this.beanFactory
+            //从容器中获取所有这葛类型的组件：EmbeddedServletContainerCustomizer
+            //定制Servlet容器，给容器中可以添加一个EmbeddedServletContainerCustomizer类型的组件
+            .getBeansOfType(EmbeddedServletContainerCustomizer.class,
+                            false, false)
+            .values());
+        Collections.sort(this.customizers, AnnotationAwareOrderComparator.INSTANCE);
+        this.customizers = Collections.unmodifiableList(this.customizers);
+    &#125;
+    return this.customizers;
+&#125;
+
+ServerProperties也是定制器</code></pre>
+<p>步骤：</p>
+<p>1）、SpringBoot根据导入的依赖情况，给容器中添加相应的EmbeddedServletContainerFactory【TomcatEmbeddedServletContainerFactory】</p>
+<p>2）、容器中某个组件要创建对象就会惊动后置处理器；EmbeddedServletContainerCustomizerBeanPostProcessor；</p>
+<p>只要是嵌入式的Servlet容器工厂，后置处理器就工作；</p>
+<p>3）、后置处理器，从容器中获取所有的<strong>EmbeddedServletContainerCustomizer</strong>，调用定制器的定制方法</p>
+<p>###5）、嵌入式Servlet容器启动原理；</p>
+<p>什么时候创建嵌入式的Servlet容器工厂？什么时候获取嵌入式的Servlet容器并启动Tomcat；</p>
+<p>获取嵌入式的Servlet容器工厂：</p>
+<p>1）、SpringBoot应用启动运行run方法</p>
+<p>2）、refreshContext(context);SpringBoot刷新IOC容器【创建IOC容器对象，并初始化容器，创建容器中的每一个组件】；如果是web应用创建<strong>AnnotationConfigEmbeddedWebApplicationContext</strong>，否则：<strong>AnnotationConfigApplicationContext</strong></p>
+<p>3）、refresh(context);<strong>刷新刚才创建好的ioc容器；</strong></p>
+<pre><code class="java">public void refresh() throws BeansException, IllegalStateException &#123;
+   synchronized (this.startupShutdownMonitor) &#123;
+      // Prepare this context for refreshing.
+      prepareRefresh();
+
+      // Tell the subclass to refresh the internal bean factory.
+      ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+      // Prepare the bean factory for use in this context.
+      prepareBeanFactory(beanFactory);
+
+      try &#123;
+         // Allows post-processing of the bean factory in context subclasses.
+         postProcessBeanFactory(beanFactory);
+
+         // Invoke factory processors registered as beans in the context.
+         invokeBeanFactoryPostProcessors(beanFactory);
+
+         // Register bean processors that intercept bean creation.
+         registerBeanPostProcessors(beanFactory);
+
+         // Initialize message source for this context.
+         initMessageSource();
+
+         // Initialize event multicaster for this context.
+         initApplicationEventMulticaster();
+
+         // Initialize other special beans in specific context subclasses.
+         onRefresh();
+
+         // Check for listener beans and register them.
+         registerListeners();
+
+         // Instantiate all remaining (non-lazy-init) singletons.
+         finishBeanFactoryInitialization(beanFactory);
+
+         // Last step: publish corresponding event.
+         finishRefresh();
+      &#125;
+
+      catch (BeansException ex) &#123;
+         if (logger.isWarnEnabled()) &#123;
+            logger.warn(&quot;Exception encountered during context initialization - &quot; +
+                  &quot;cancelling refresh attempt: &quot; + ex);
+         &#125;
+
+         // Destroy already created singletons to avoid dangling resources.
+         destroyBeans();
+
+         // Reset &#39;active&#39; flag.
+         cancelRefresh(ex);
+
+         // Propagate exception to caller.
+         throw ex;
+      &#125;
+
+      finally &#123;
+         // Reset common introspection caches in Spring&#39;s core, since we
+         // might not ever need metadata for singleton beans anymore...
+         resetCommonCaches();
+      &#125;
+   &#125;
+&#125;</code></pre>
+<p>4）、  onRefresh(); web的ioc容器重写了onRefresh方法</p>
+<p>5）、webioc容器会创建嵌入式的Servlet容器；<strong>createEmbeddedServletContainer</strong>();</p>
+<p><strong>6）、获取嵌入式的Servlet容器工厂：</strong></p>
+<p>EmbeddedServletContainerFactory containerFactory = getEmbeddedServletContainerFactory();</p>
+<p>​    从ioc容器中获取EmbeddedServletContainerFactory 组件；<strong>TomcatEmbeddedServletContainerFactory</strong>创建对象，后置处理器一看是这个对象，就获取所有的定制器来先定制Servlet容器的相关配置；</p>
+<p>7）、<strong>使用容器工厂获取嵌入式的Servlet容器</strong>：this.embeddedServletContainer = containerFactory      .getEmbeddedServletContainer(getSelfInitializer());</p>
+<p>8）、嵌入式的Servlet容器创建对象并启动Servlet容器；</p>
+<p><strong>先启动嵌入式的Servlet容器，再将ioc容器中剩下没有创建出的对象获取出来；</strong></p>
+<p><strong>==IOC容器启动创建嵌入式的Servlet容器==</strong></p>
+<h2 id="9、使用外置的Servlet容器"><a href="#9、使用外置的Servlet容器" class="headerlink" title="9、使用外置的Servlet容器"></a>9、使用外置的Servlet容器</h2><p>嵌入式Servlet容器：应用打成可执行的jar</p>
+<p>​        优点：简单、便携；</p>
+<p>​        缺点：默认不支持JSP、优化定制比较复杂（使用定制器【ServerProperties、自定义EmbeddedServletContainerCustomizer】，自己编写嵌入式Servlet容器的创建工厂【EmbeddedServletContainerFactory】）；</p>
+<p>外置的Servlet容器：外面安装Tomcat—应用war包的方式打包；</p>
+<h3 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h3><p>1）、必须创建一个war项目；（利用idea创建好目录结构）</p>
+<p>2）、将嵌入式的Tomcat指定为provided；</p>
+<pre><code class="xml">&lt;dependency&gt;
+   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+   &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
+   &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+<p>3）、必须编写一个<strong>SpringBootServletInitializer</strong>的子类，并调用configure方法</p>
+<pre><code class="java">public class ServletInitializer extends SpringBootServletInitializer &#123;
+
+   @Override
+   protected SpringApplicationBuilder configure(SpringApplicationBuilder application) &#123;
+       //传入SpringBoot应用的主程序
+      return application.sources(SpringBoot04WebJspApplication.class);
+   &#125;
+
+&#125;</code></pre>
+<p>4）、启动服务器就可以使用；</p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>jar包：执行SpringBoot主类的main方法，启动ioc容器，创建嵌入式的Servlet容器；</p>
+<p>war包：启动服务器，<strong>服务器启动SpringBoot应用</strong>【SpringBootServletInitializer】，启动ioc容器；</p>
+<p>servlet3.0（Spring注解版）：</p>
+<p>8.2.4 Shared libraries / runtimes pluggability：</p>
+<p>规则：</p>
+<p>​    1）、服务器启动（web应用启动）会创建当前web应用里面每一个jar包里面ServletContainerInitializer实例：</p>
+<p>​    2）、ServletContainerInitializer的实现放在jar包的META-INF/services文件夹下，有一个名为javax.servlet.ServletContainerInitializer的文件，内容就是ServletContainerInitializer的实现类的全类名</p>
+<p>​    3）、还可以使用@HandlesTypes，在应用启动的时候加载我们感兴趣的类；</p>
+<p>流程：</p>
+<p>1）、启动Tomcat</p>
+<p>2）、org\springframework\spring-web\4.3.14.RELEASE\spring-web-4.3.14.RELEASE.jar!\META-INF\services\javax.servlet.ServletContainerInitializer：</p>
+<p>Spring的web模块里面有这个文件：<strong>org.springframework.web.SpringServletContainerInitializer</strong></p>
+<p>3）、SpringServletContainerInitializer将@HandlesTypes(WebApplicationInitializer.class)标注的所有这个类型的类都传入到onStartup方法的Set&lt;Class&lt;?&gt;&gt;；为这些WebApplicationInitializer类型的类创建实例；</p>
+<p>4）、每一个WebApplicationInitializer都调用自己的onStartup；</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180302221835.png" loading="lazy"></p>
+<p>5）、相当于我们的SpringBootServletInitializer的类会被创建对象，并执行onStartup方法</p>
+<p>6）、SpringBootServletInitializer实例执行onStartup的时候会createRootApplicationContext；创建容器</p>
+<pre><code class="java">protected WebApplicationContext createRootApplicationContext(
+      ServletContext servletContext) &#123;
+    //1、创建SpringApplicationBuilder
+   SpringApplicationBuilder builder = createSpringApplicationBuilder();
+   StandardServletEnvironment environment = new StandardServletEnvironment();
+   environment.initPropertySources(servletContext, null);
+   builder.environment(environment);
+   builder.main(getClass());
+   ApplicationContext parent = getExistingRootWebApplicationContext(servletContext);
+   if (parent != null) &#123;
+      this.logger.info(&quot;Root context already created (using as parent).&quot;);
+      servletContext.setAttribute(
+            WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, null);
+      builder.initializers(new ParentContextApplicationContextInitializer(parent));
+   &#125;
+   builder.initializers(
+         new ServletContextApplicationContextInitializer(servletContext));
+   builder.contextClass(AnnotationConfigEmbeddedWebApplicationContext.class);
+
+    //调用configure方法，子类重写了这个方法，将SpringBoot的主程序类传入了进来
+   builder = configure(builder);
+
+    //使用builder创建一个Spring应用
+   SpringApplication application = builder.build();
+   if (application.getSources().isEmpty() &amp;&amp; AnnotationUtils
+         .findAnnotation(getClass(), Configuration.class) != null) &#123;
+      application.getSources().add(getClass());
+   &#125;
+   Assert.state(!application.getSources().isEmpty(),
+         &quot;No SpringApplication sources have been defined. Either override the &quot;
+               + &quot;configure method or add an @Configuration annotation&quot;);
+   // Ensure error pages are registered
+   if (this.registerErrorPageFilter) &#123;
+      application.getSources().add(ErrorPageFilterConfiguration.class);
+   &#125;
+    //启动Spring应用
+   return run(application);
+&#125;</code></pre>
+<p>7）、Spring的应用就启动并且创建IOC容器</p>
+<pre><code class="java">public ConfigurableApplicationContext run(String... args) &#123;
+   StopWatch stopWatch = new StopWatch();
+   stopWatch.start();
+   ConfigurableApplicationContext context = null;
+   FailureAnalyzers analyzers = null;
+   configureHeadlessProperty();
+   SpringApplicationRunListeners listeners = getRunListeners(args);
+   listeners.starting();
+   try &#123;
+      ApplicationArguments applicationArguments = new DefaultApplicationArguments(
+            args);
+      ConfigurableEnvironment environment = prepareEnvironment(listeners,
+            applicationArguments);
+      Banner printedBanner = printBanner(environment);
+      context = createApplicationContext();
+      analyzers = new FailureAnalyzers(context);
+      prepareContext(context, environment, listeners, applicationArguments,
+            printedBanner);
+
+       //刷新IOC容器
+      refreshContext(context);
+      afterRefresh(context, applicationArguments);
+      listeners.finished(context, null);
+      stopWatch.stop();
+      if (this.logStartupInfo) &#123;
+         new StartupInfoLogger(this.mainApplicationClass)
+               .logStarted(getApplicationLog(), stopWatch);
+      &#125;
+      return context;
+   &#125;
+   catch (Throwable ex) &#123;
+      handleRunFailure(context, listeners, analyzers, ex);
+      throw new IllegalStateException(ex);
+   &#125;
+&#125;</code></pre>
+<p><strong>==启动Servlet容器，再启动SpringBoot应用==</strong></p>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2020/11/03/spring-framework-2.1.8RELEASE/spring-boot/2020-11-3-spring-boot%E5%AE%9A%E5%88%B6%E5%8C%96%E5%AE%B9%E5%99%A8/" title="spring boot配置Servlet容器">http://soda1.github.io/2020/11/03/spring-framework-2.1.8RELEASE/spring-boot/2020-11-3-spring-boot%E5%AE%9A%E5%88%B6%E5%8C%96%E5%AE%B9%E5%99%A8/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2020/11/04/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-boot%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE/" rel="prev" title="spring boot数据访问"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">spring boot数据访问</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2020/11/03/spring-framework-2.1.8RELEASE/spring-boot/2020-11-3-spring-MVC%E5%8E%9F%E7%90%86/" rel="next" title="spring MVC原理"><span class="post-nav-text">spring MVC原理</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

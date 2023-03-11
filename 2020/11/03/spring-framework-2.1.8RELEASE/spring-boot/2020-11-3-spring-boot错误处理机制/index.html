@@ -1,0 +1,315 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>spring boot错误处理机制 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="默认效果 浏览器，返回一个默认的错误页面  浏览器发送请求的请求头：   如果是其他客户端，默认响应一个json数据    ​        客户端发送的请求头： ​         原理从ErrorMvcAutoConfiguration入手  该配置类给容器中添加了以下组件 DefaultErrorAttributes@Bean @ConditionalOnMissingBean(value">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spring boot错误处理机制">
+<meta property="og:url" content="http://soda1.github.io/2020/11/03/spring-framework-2.1.8RELEASE/spring-boot/2020-11-3-spring-boot%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="默认效果 浏览器，返回一个默认的错误页面  浏览器发送请求的请求头：   如果是其他客户端，默认响应一个json数据    ​        客户端发送的请求头： ​         原理从ErrorMvcAutoConfiguration入手  该配置类给容器中添加了以下组件 DefaultErrorAttributes@Bean @ConditionalOnMissingBean(value">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180226173408.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180226180347.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180226173527.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180226180504.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201103184333717.png">
+<meta property="article:published_time" content="2020-11-03T12:24:29.000Z">
+<meta property="article:modified_time" content="2022-05-28T20:34:10.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180226173408.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">65</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">10</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4%E6%95%88%E6%9E%9C"><span class="toc-number">1.</span> <span class="toc-text">默认效果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">原理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#DefaultErrorAttributes"><span class="toc-number">2.1.</span> <span class="toc-text">DefaultErrorAttributes</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#BasicErrorController"><span class="toc-number">2.2.</span> <span class="toc-text">BasicErrorController</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ErrorPageCustomizer"><span class="toc-number">2.3.</span> <span class="toc-text">ErrorPageCustomizer</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DefaultErrorViewResolver"><span class="toc-number">2.4.</span> <span class="toc-text">DefaultErrorViewResolver</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.5.</span> <span class="toc-text">步骤</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E5%88%B6%E9%94%99%E8%AF%AF%E5%93%8D%E5%BA%94%EF%BC%9A"><span class="toc-number">3.</span> <span class="toc-text">定制错误响应：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9A%E5%88%B6%E9%94%99%E8%AF%AF%E7%9A%84%E9%A1%B5%E9%9D%A2"><span class="toc-number">3.1.</span> <span class="toc-text">定制错误的页面</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%AE%9A%E5%88%B6%E9%94%99%E8%AF%AF%E7%9A%84json%E6%95%B0%E6%8D%AE"><span class="toc-number">3.2.</span> <span class="toc-text">如何定制错误的json数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B0%86%E6%88%91%E4%BB%AC%E7%9A%84%E5%AE%9A%E5%88%B6%E6%95%B0%E6%8D%AE%E6%90%BA%E5%B8%A6%E5%87%BA%E5%8E%BB%EF%BC%9B"><span class="toc-number">3.3.</span> <span class="toc-text">将我们的定制数据携带出去；</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2020/11/03/spring-framework-2.1.8RELEASE/spring-boot/2020-11-3-spring-boot%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E6%9C%BA%E5%88%B6/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">spring boot错误处理机制</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2020-11-03 12:24:29" itemprop="dateCreated datePublished" datetime="2020-11-03T12:24:29+00:00">2020-11-03</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2022-05-28 20:34:10" itemprop="dateModified" datetime="2022-05-28T20:34:10+00:00">2022-05-28</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">1.4k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">6m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/spring-boot/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">spring boot</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h3 id="默认效果"><a href="#默认效果" class="headerlink" title="默认效果"></a>默认效果</h3><ul>
+<li><p>浏览器，返回一个默认的错误页面</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180226173408.png" loading="lazy"></p>
+<p>浏览器发送请求的请求头：</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180226180347.png" loading="lazy"></p>
+</li>
+<li><p>如果是其他客户端，默认响应一个json数据</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180226173527.png" loading="lazy"></p>
+</li>
+</ul>
+<p>​        客户端发送的请求头：</p>
+<p>​        <img src="https://raw.githubusercontent.com/soda1/img/main/%E6%90%9C%E7%8B%97%E6%88%AA%E5%9B%BE20180226180504.png" loading="lazy"></p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>从<code>ErrorMvcAutoConfiguration</code>入手</p>
+<p> 该配置类给容器中添加了以下组件</p>
+<h4 id="DefaultErrorAttributes"><a href="#DefaultErrorAttributes" class="headerlink" title="DefaultErrorAttributes"></a>DefaultErrorAttributes</h4><pre><code class="java">@Bean
+@ConditionalOnMissingBean(value = ErrorAttributes.class, search = SearchStrategy.CURRENT) //我们也可以自己定义一个ErrorAttributes
+public DefaultErrorAttributes errorAttributes() &#123;
+   return new DefaultErrorAttributes(this.serverProperties.getError().isIncludeException());
+&#125;</code></pre>
+<pre><code class="java">public class DefaultErrorAttributes implements ErrorAttributes, HandlerExceptionResolver, Ordered &#123;
+    //该方法帮我们在页面共享信息，也就是WhtieLable Page的一些属性展示
+    @Override
+    public Map&lt;String, Object&gt; getErrorAttributes(WebRequest webRequest, boolean includeStackTrace) &#123;
+       Map&lt;String, Object&gt; errorAttributes = new LinkedHashMap&lt;&gt;();
+       errorAttributes.put(&quot;timestamp&quot;, new Date());
+       addStatus(errorAttributes, webRequest);
+       addErrorDetails(errorAttributes, webRequest, includeStackTrace);
+       addPath(errorAttributes, webRequest);
+       return errorAttributes;
+    &#125;
+&#125;</code></pre>
+<h4 id="BasicErrorController"><a href="#BasicErrorController" class="headerlink" title="BasicErrorController"></a>BasicErrorController</h4><p>处理默认/error请求</p>
+<pre><code class="java">@Bean
+@ConditionalOnMissingBean(value = ErrorController.class, search = SearchStrategy.CURRENT)
+public BasicErrorController basicErrorController(ErrorAttributes errorAttributes) &#123;
+   return new BasicErrorController(errorAttributes, this.serverProperties.getError(), this.errorViewResolvers);
+&#125;</code></pre>
+<pre><code class="java">@Controller
+@RequestMapping(&quot;$&#123;server.error.path:$&#123;error.path:/error&#125;&#125;&quot;)
+public class BasicErrorController extends AbstractErrorController &#123;
+
+    //处理浏览器请求，用于返回html数据
+      @RequestMapping(produces = MediaType.TEXT_HTML_VALUE) 
+    public ModelAndView errorHtml(HttpServletRequest request, HttpServletResponse response) &#123;
+        HttpStatus status = getStatus(request);
+        Map&lt;String, Object&gt; model = Collections
+                .unmodifiableMap(getErrorAttributes(request, isIncludeStackTrace(request, MediaType.TEXT_HTML)));
+        response.setStatus(status.value());
+        ModelAndView modelAndView = resolveErrorView(request, response, status, model); //通过调用DefaultErrorViewResolver来获取ModelAndView
+        return (modelAndView != null) ? modelAndView : new ModelAndView(&quot;error&quot;, model);//如果没有定制页面就使用静态错误页面(StaticView)
+    &#125;
+
+    //处理其他客户请求，返回Json数据
+    @RequestMapping 
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; error(HttpServletRequest request) &#123;
+        Map&lt;String, Object&gt; body = getErrorAttributes(request, isIncludeStackTrace(request, MediaType.ALL));
+        HttpStatus status = getStatus(request);
+        return new ResponseEntity&lt;&gt;(body, status);
+    &#125;
+&#125;</code></pre>
+<h4 id="ErrorPageCustomizer"><a href="#ErrorPageCustomizer" class="headerlink" title="ErrorPageCustomizer"></a>ErrorPageCustomizer</h4><p>错误页面定制</p>
+<pre><code class="java">@Bean
+public ErrorPageCustomizer errorPageCustomizer() &#123;
+   return new ErrorPageCustomizer(this.serverProperties, this.dispatcherServletPath);
+&#125;</code></pre>
+<pre><code class="java">private static class ErrorPageCustomizer implements ErrorPageRegistrar, Ordered &#123;
+
+   private final ServerProperties properties;
+
+   private final DispatcherServletPath dispatcherServletPath;
+
+   protected ErrorPageCustomizer(ServerProperties properties, DispatcherServletPath dispatcherServletPath) &#123;
+      this.properties = properties;
+      this.dispatcherServletPath = dispatcherServletPath;
+   &#125;
+
+   @Override
+   public void registerErrorPages(ErrorPageRegistry errorPageRegistry) &#123;
+
+      ErrorPage errorPage = new ErrorPage(
+            this.dispatcherServletPath.getRelativePath(this.properties.getError().getPath()));
+
+      errorPageRegistry.addErrorPages(errorPage);
+   &#125;
+
+   @Override
+   public int getOrder() &#123;
+      return 0;
+   &#125;
+
+&#125;</code></pre>
+<p><code>this.dispatcherServletPath.getRelativePath(this.properties.getError().getPath())</code> 通过 <code>ErrorProperties</code>获取</p>
+<pre><code class="java">public class ErrorProperties &#123;
+
+   /**
+    * Path of the error controller.
+    */
+   @Value(&quot;$&#123;error.path:/error&#125;&quot;)
+   private String path = &quot;/error&quot;;
+&#125;</code></pre>
+<h4 id="DefaultErrorViewResolver"><a href="#DefaultErrorViewResolver" class="headerlink" title="DefaultErrorViewResolver"></a>DefaultErrorViewResolver</h4><p>默认错误视图解析器</p>
+<pre><code class="java">@Bean
+@ConditionalOnBean(DispatcherServlet.class)
+@ConditionalOnMissingBean
+public DefaultErrorViewResolver conventionErrorViewResolver() &#123;
+   return new DefaultErrorViewResolver(this.applicationContext, this.resourceProperties);
+&#125;</code></pre>
+<pre><code class="java">public class DefaultErrorViewResolver implements ErrorViewResolver, Ordered &#123;
+
+    //ViewName Map
+    private static final Map&lt;Series, String&gt; SERIES_VIEWS;
+
+    static &#123;
+        Map&lt;Series, String&gt; views = new EnumMap&lt;&gt;(Series.class);
+        views.put(Series.CLIENT_ERROR, &quot;4xx&quot;);
+        views.put(Series.SERVER_ERROR, &quot;5xx&quot;);
+        SERIES_VIEWS = Collections.unmodifiableMap(views);
+    &#125;
+
+    //解析视图
+    @Override
+    public ModelAndView resolveErrorView(HttpServletRequest request, HttpStatus status, Map&lt;String, Object&gt; model) &#123;
+       //先找寻具体状态码的html
+        ModelAndView modelAndView = resolve(String.valueOf(status.value()), model);
+        //如果找不到就去找4xx.html/5xx.html
+       if (modelAndView == null &amp;&amp; SERIES_VIEWS.containsKey(status.series())) &#123;
+          modelAndView = resolve(SERIES_VIEWS.get(status.series()), model);
+       &#125;
+       return modelAndView;
+    &#125;
+
+    private ModelAndView resolve(String viewName, Map&lt;String, Object&gt; model) &#123;
+        //视图名
+       String errorViewName = &quot;error/&quot; + viewName;
+        //模板引擎是否可以解析这个页面地址
+       TemplateAvailabilityProvider provider = this.templateAvailabilityProviders.getProvider(errorViewName,
+             this.applicationContext);
+        //如果可以解析就直接返回
+       if (provider != null) &#123;
+          return new ModelAndView(errorViewName, model);
+       &#125;
+        //模板引擎不可用就去静态资源文件夹下找errorViewName对应页面 error/404.html
+       return resolveResource(errorViewName, model);
+    &#125;
+&#125;</code></pre>
+<h4 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h4><ol>
+<li><p>系统出现4xx或者5xx之类的错误；<code>ErrorPageCustomizer</code>就会生效（定制错误的响应规则）</p>
+</li>
+<li><p>来到/error请求，就会被<code>BasicErrorController</code>处理；</p>
+</li>
+<li><p>获取响应响应页面,<code>BasicErrorController</code>通过调用<code>resolveErrorView()</code>方法来解析得到页面</p>
+<pre><code class="java">protected ModelAndView resolveErrorView(HttpServletRequest request,
+      HttpServletResponse response, HttpStatus status, Map&lt;String, Object&gt; model) &#123;
+    //所有的ErrorViewResolver得到ModelAndView
+   for (ErrorViewResolver resolver : this.errorViewResolvers) &#123;
+      ModelAndView modelAndView = resolver.resolveErrorView(request, status, model);
+      if (modelAndView != null) &#123;
+         return modelAndView;
+      &#125;
+   &#125;
+   return null;
+&#125;</code></pre>
+</li>
+</ol>
+<h3 id="定制错误响应："><a href="#定制错误响应：" class="headerlink" title="定制错误响应："></a>定制错误响应：</h3><h4 id="定制错误的页面"><a href="#定制错误的页面" class="headerlink" title="定制错误的页面"></a>定制错误的页面</h4><ol>
+<li><p>由<code>DefaultErrorViewResolver</code>的<code>resolveErrorView()</code>可以知道页码查找顺序如下：</p>
+<p>模板引擎状态码.html-&gt;静态资源状态码.html-&gt;模板引擎4xx.html-&gt;静态资源4xx.html-&gt;默认静态页面</p>
+</li>
+<li><p>页面能获取的信息<code>DefaultErrorAttributes</code>；</p>
+<ul>
+<li>timestamp：时间戳</li>
+<li>status：状态码</li>
+<li>error：错误提示</li>
+<li>exception：异常对象</li>
+<li>message：异常消息</li>
+<li>errors：JSR303数据校验的错误都在这里</li>
+</ul>
+</li>
+</ol>
+<h4 id="如何定制错误的json数据"><a href="#如何定制错误的json数据" class="headerlink" title="如何定制错误的json数据"></a>如何定制错误的json数据</h4><ol>
+<li><p>自定义异常处理&amp;返回定制json数据；</p>
+<pre><code class="java">@ControllerAdvice
+public class MyExceptionHandler &#123;
+
+    @ResponseBody
+    @ExceptionHandler(UserNotExistException.class)
+    public Map&lt;String,Object&gt; handleException(Exception e)&#123;
+        Map&lt;String,Object&gt; map = new HashMap&lt;&gt;();
+        map.put(&quot;code&quot;,&quot;user.notexist&quot;);
+        map.put(&quot;message&quot;,e.getMessage());
+        return map;
+    &#125;
+&#125;
+//没有自适应效果...</code></pre>
+</li>
+<li><p>转发到/error进行自适应响应效果处理</p>
+<pre><code class="java"> @ExceptionHandler(UserNotExistException.class)
+    public String handleException(Exception e, HttpServletRequest request)&#123;
+        Map&lt;String,Object&gt; map = new HashMap&lt;&gt;();
+        //传入我们自己的错误状态码  4xx 5xx，否则就不会进入定制错误页面的解析流程
+        /**
+         * Integer statusCode = (Integer) request
+         .getAttribute(&quot;javax.servlet.error.status_code&quot;);
+         */
+        request.setAttribute(&quot;javax.servlet.error.status_code&quot;,500);
+        map.put(&quot;code&quot;,&quot;user.notexist&quot;);
+        map.put(&quot;message&quot;,e.getMessage());
+        //转发到/error
+        return &quot;forward:/error&quot;;
+    &#125;</code></pre>
+</li>
+</ol>
+<h4 id="将我们的定制数据携带出去；"><a href="#将我们的定制数据携带出去；" class="headerlink" title="将我们的定制数据携带出去；"></a>将我们的定制数据携带出去；</h4><p>出现错误以后，会来到/error请求，会被BasicErrorController处理，响应出去可以获取的数据是由<code>getErrorAttributes()</code>得到的（是AbstractErrorController（ErrorController）规定的方法）</p>
+<ol>
+<li>完全来编写一个ErrorController的实现类【或者是编写AbstractErrorController的子类】，放在容器中；</li>
+</ol>
+<ol start="2">
+<li><p>页面上能用的数据或者是json返回能用的数据都是通过<code>errorAttributes.getErrorAttributes()</code>得到,也就是<code>DefaultErrorAttributes.getErrorAttributes()</code>。因此可以自定义一个<code>DefaultErrorAttributes</code>重写<code>getErrorAttributes()</code></p>
+<pre><code class="java">//给容器中加入我们自己定义的ErrorAttributes
+@Component
+public class MyDefaultErrorAttributes extends DefaultErrorAttributes &#123;
+    public MyDefaultErrorAttributes() &#123;
+        super();
+    &#125;
+
+    public MyDefaultErrorAttributes(boolean includeException) &#123;
+        super(includeException);
+    &#125;
+    @Override
+    public Map&lt;String, Object&gt; getErrorAttributes(WebRequest webRequest, boolean includeStackTrace) &#123;
+        Map&lt;String, Object&gt; errorAttributes = super.getErrorAttributes(webRequest, includeStackTrace);
+        errorAttributes.put(&quot;name&quot;, &quot;libin&quot;);
+        errorAttributes.put(&quot;age&quot;, 18);
+        errorAttributes.put(&quot;score&quot;, 98);
+        return errorAttributes;
+    &#125;
+&#125;</code></pre>
+<p>最终的效果：响应是自适应的，可以通过定制ErrorAttributes改变需要返回的内容，</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201103184333717.png" alt="image-20201103184333717" loading="lazy"></p>
+</li>
+</ol>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2020/11/03/spring-framework-2.1.8RELEASE/spring-boot/2020-11-3-spring-boot%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E6%9C%BA%E5%88%B6/" title="spring boot错误处理机制">http://soda1.github.io/2020/11/03/spring-framework-2.1.8RELEASE/spring-boot/2020-11-3-spring-boot%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E6%9C%BA%E5%88%B6/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2020/11/03/spring-framework-2.1.8RELEASE/spring-boot/2020-11-3-spring-MVC%E5%8E%9F%E7%90%86/" rel="prev" title="spring MVC原理"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">spring MVC原理</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2020/11/02/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-MVC%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/" rel="next" title="spring MVC自动配置类"><span class="post-nav-text">spring MVC自动配置类</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

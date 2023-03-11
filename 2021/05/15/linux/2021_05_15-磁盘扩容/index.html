@@ -1,0 +1,157 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>磁盘扩容 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="磁盘扩容（centos7）lvm结构  lvm 的结构  在centos中，对于储存和磁盘空间的管理是lvm。 常用的 fdisk -l 命令，显示的就是物理分区。  物理卷（PV)：由物理盘割分出来的分区  逻辑卷组(VG)：由多个物理卷组成 逻辑卷(LV)：由逻辑卷组分割而成  扩容逻辑就是将新增的物理盘切分成物理卷，然后将新增物理卷加入逻辑卷所在的逻辑卷组，最后进行逻辑卷扩容。 对根目录扩容">
+<meta property="og:type" content="article">
+<meta property="og:title" content="磁盘扩容">
+<meta property="og:url" content="http://soda1.github.io/2021/05/15/linux/2021_05_15-%E7%A3%81%E7%9B%98%E6%89%A9%E5%AE%B9/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="磁盘扩容（centos7）lvm结构  lvm 的结构  在centos中，对于储存和磁盘空间的管理是lvm。 常用的 fdisk -l 命令，显示的就是物理分区。  物理卷（PV)：由物理盘割分出来的分区  逻辑卷组(VG)：由多个物理卷组成 逻辑卷(LV)：由逻辑卷组分割而成  扩容逻辑就是将新增的物理盘切分成物理卷，然后将新增物理卷加入逻辑卷所在的逻辑卷组，最后进行逻辑卷扩容。 对根目录扩容">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20210515164512.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20210515173418.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20210515173751.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20210515174406.png">
+<meta property="article:published_time" content="2021-05-15T16:27:15.000Z">
+<meta property="article:modified_time" content="2022-05-28T20:34:11.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/20210515164512.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">65</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">10</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A3%81%E7%9B%98%E6%89%A9%E5%AE%B9%EF%BC%88centos7%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">磁盘扩容（centos7）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#lvm%E7%BB%93%E6%9E%84"><span class="toc-number">1.1.</span> <span class="toc-text">lvm结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AF%B9%E6%A0%B9%E7%9B%AE%E5%BD%95%E6%89%A9%E5%AE%B9"><span class="toc-number">1.2.</span> <span class="toc-text">对根目录扩容</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E7%89%A9%E7%90%86%E5%88%86%E5%8C%BA"><span class="toc-number">1.2.1.</span> <span class="toc-text">创建物理分区</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E7%89%A9%E7%90%86%E5%8D%B7%EF%BC%9A"><span class="toc-number">1.2.2.</span> <span class="toc-text">创建物理卷：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B0%86%E7%89%A9%E7%90%86%E5%8D%B7%E6%B7%BB%E5%8A%A0%E5%88%B0%E5%8D%B7%E7%BB%84"><span class="toc-number">1.2.3.</span> <span class="toc-text">将物理卷添加到卷组</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%80%BB%E8%BE%91%E5%8D%B7%E8%BF%9B%E8%A1%8C%E6%89%A9%E5%AE%B9%E3%80%82"><span class="toc-number">1.2.4.</span> <span class="toc-text">逻辑卷进行扩容。</span></a></li></ol></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2021/05/15/linux/2021_05_15-%E7%A3%81%E7%9B%98%E6%89%A9%E5%AE%B9/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">磁盘扩容</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2021-05-15 16:27:15" itemprop="dateCreated datePublished" datetime="2021-05-15T16:27:15+00:00">2021-05-15</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2022-05-28 20:34:11" itemprop="dateModified" datetime="2022-05-28T20:34:11+00:00">2022-05-28</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">685</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">2m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/linux/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">linux</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h3 id="磁盘扩容（centos7）"><a href="#磁盘扩容（centos7）" class="headerlink" title="磁盘扩容（centos7）"></a>磁盘扩容（centos7）</h3><h4 id="lvm结构"><a href="#lvm结构" class="headerlink" title="lvm结构"></a>lvm结构</h4><p><img src="https://raw.githubusercontent.com/soda1/img/main/20210515164512.png" alt="img" loading="lazy"></p>
+<center> lvm 的结构</center>
+
+<p>在centos中，对于储存和磁盘空间的管理是lvm。 常用的 fdisk -l 命令，显示的就是物理分区。</p>
+<ul>
+<li>物理卷（PV)：由物理盘割分出来的分区 </li>
+<li>逻辑卷组(VG)：由多个物理卷组成</li>
+<li>逻辑卷(LV)：由逻辑卷组分割而成</li>
+</ul>
+<p><strong>扩容逻辑就是将新增的物理盘切分成物理卷，然后将新增物理卷加入逻辑卷所在的逻辑卷组，最后进行逻辑卷扩容。</strong></p>
+<h4 id="对根目录扩容"><a href="#对根目录扩容" class="headerlink" title="对根目录扩容"></a>对根目录扩容</h4><h5 id="创建物理分区"><a href="#创建物理分区" class="headerlink" title="创建物理分区"></a>创建物理分区</h5><pre><code># /dev/sda为通过fdisk -l 查看到的物理磁盘(第一行)
+fdisk /dev/sda 
+
+#进入fdisk命令行 n为创建一个新的分区
+Command (m for help): n 
+
+# 这里需要选择时创建主分区还是扩展分区，都可以，这里直接选了主分区
+Partition type:   
+   p   primary (2 primary, 0 extended, 2 free)   
+   e   extended
+# 选择创建一个主分区，主分区只能有4个，编号为1-4,下面的全部直接回车就好了，会自动将剩余所用空间都创建
+Select (default p): p 
+
+Partition number (3,4, default 3):   
+First sector (104857600-209715199, default 104857600): 
+Using default value 104857600
+Last sector, +sectors or +size&#123;K,M,G&#125; (104857600-209715199, default 209715199): 
+Using default value 209715199
+Partition 3 of type Linux and of size 50 GiB is set
+
+# t为修改分区类型 修改为lvm
+Command (m for help): t
+# 刚才创建的分区编号为3
+Partition number (1-3, default 3): 3  
+# 8e就是 lvm格式的分区
+Hex code (type L to list all codes): 8e
+Changed type of partition &#39;Linux&#39; to &#39;Linux LVM&#39;
+
+# w保存并写入磁盘。
+Command (m for help): w  
+The partition table has been altered!
+
+Calling ioctl() to re-read partition table.
+
+WARNING: Re-reading the partition table failed with error 16: Device or resource busy.
+The kernel still uses the old table. The new table will be used at
+the next reboot or after you run partprobe(8) or kpartx(8)
+Syncing disks.
+#报错无法读取分区信息，可以执行下面指令
+partprobe</code></pre>
+<h5 id="创建物理卷："><a href="#创建物理卷：" class="headerlink" title="创建物理卷："></a>创建物理卷：</h5><p> 将物理分区3 创建物理卷，这里这个/dev/sda3是第一步创建的物理分区，通过fdisk -l 就可以看到是，在第一个物理磁盘/dev/sda下面的分区(一个磁盘可以有多个分区)，原本已有/dev/sda1,/dev/sda2</p>
+<p>通过第一步创建生成/dev/sda3这个分区，然后将这个分区 创建成物理卷</p>
+<ol>
+<li><p>将分区3创建物理卷</p>
+<pre><code class="sh">pvcreate /dev/sda3</code></pre>
+</li>
+<li><p>查看物理卷</p>
+<pre><code class="sh">pvdisplay</code></pre>
+</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20210515173418.png" alt="image-20210515173404164" loading="lazy"></p>
+<h5 id="将物理卷添加到卷组"><a href="#将物理卷添加到卷组" class="headerlink" title="将物理卷添加到卷组"></a>将物理卷添加到卷组</h5><ol>
+<li><p>查看卷组</p>
+<pre><code class="sh">vgdisplay</code></pre>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20210515173751.png" alt="image-20210515173719857" loading="lazy"></p>
+</li>
+<li><p>加入卷组</p>
+<pre><code>vgextend centos /dev/sda3</code></pre>
+</li>
+</ol>
+<h5 id="逻辑卷进行扩容。"><a href="#逻辑卷进行扩容。" class="headerlink" title="逻辑卷进行扩容。"></a>逻辑卷进行扩容。</h5><ol>
+<li><p>查看逻辑卷</p>
+<pre><code>lvdisplay</code></pre>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20210515174406.png" alt="image-20210515174036139" loading="lazy"></p>
+</li>
+<li><p>将剩余百分百空间都添加到逻辑卷中</p>
+<pre><code>lvextend -l +100%FREE /dev/centos/root</code></pre>
+</li>
+<li><p>重新识别分区大小</p>
+<pre><code>xfs_growfs /dev/centos/root</code></pre>
+</li>
+<li><p>通过df -h就可以看到新增容量了</p>
+</li>
+</ol>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2021/05/15/linux/2021_05_15-%E7%A3%81%E7%9B%98%E6%89%A9%E5%AE%B9/" title="磁盘扩容">http://soda1.github.io/2021/05/15/linux/2021_05_15-%E7%A3%81%E7%9B%98%E6%89%A9%E5%AE%B9/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2021/05/25/mysql/%E9%AB%98%E7%BA%A7/2021_05_25-mysql%E6%9D%83%E9%99%90/" rel="prev" title="mysql权限操作"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">mysql权限操作</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2021/04/04/spring-framework-2.1.8RELEASE/spring-boot/2021_04_04-spring-boot-rabbitmq%E9%85%8D%E7%BD%AE/" rel="next" title="spring boot rabbitmq配置"><span class="post-nav-text">spring boot rabbitmq配置</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

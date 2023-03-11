@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>Kafka入门 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="前言Kafka是以消息引擎起家，在设计之初旨在实现以下三大特性：  提供一套 API 实现生产者和消费者； 降低网络传输和磁盘存储开销； 实现高伸缩性架构  到现如今发展成一个分布式流处理平台 消息模型 Producer&#x2F;Consumer Model（队列模型）:  生产者产生消息放在队列一端，消费者从队列的另一端进行消费，如果没有消费者，那么消息就会保存在队列中直到队列满或者有消费者上线  Pu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka入门">
+<meta property="og:url" content="http://soda1.github.io/2023/02/28/kafka/01.kafka%E5%85%A5%E9%97%A8/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="前言Kafka是以消息引擎起家，在设计之初旨在实现以下三大特性：  提供一套 API 实现生产者和消费者； 降低网络传输和磁盘存储开销； 实现高伸缩性架构  到现如今发展成一个分布式流处理平台 消息模型 Producer&#x2F;Consumer Model（队列模型）:  生产者产生消息放在队列一端，消费者从队列的另一端进行消费，如果没有消费者，那么消息就会保存在队列中直到队列满或者有消费者上线  Pu">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230301145154.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230301145213.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230228191503.png">
+<meta property="article:published_time" content="2023-02-28T18:47:50.000Z">
+<meta property="article:modified_time" content="2023-03-06T19:56:40.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/20230301145154.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">65</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">10</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.</span> <span class="toc-text">消息模型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5"><span class="toc-number">3.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E6%8F%8F%E8%BF%B0"><span class="toc-number">4.</span> <span class="toc-text">参数描述</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Broke-config"><span class="toc-number">4.1.</span> <span class="toc-text">Broke config</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Topic-config"><span class="toc-number">4.2.</span> <span class="toc-text">Topic config</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#JVM-config"><span class="toc-number">4.3.</span> <span class="toc-text">JVM config</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2023/02/28/kafka/01.kafka%E5%85%A5%E9%97%A8/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Kafka入门</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2023-02-28 18:47:50" itemprop="dateCreated datePublished" datetime="2023-02-28T18:47:50+00:00">2023-02-28</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2023-03-06 19:56:40" itemprop="dateModified" datetime="2023-03-06T19:56:40+00:00">2023-03-06</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">1.1k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">4m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/Kafka/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">Kafka</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>Kafka是以消息引擎起家，在设计之初旨在实现以下三大特性：</p>
+<ul>
+<li>提供一套 API 实现生产者和消费者；</li>
+<li>降低网络传输和磁盘存储开销；</li>
+<li>实现高伸缩性架构</li>
+</ul>
+<p>到现如今发展成一个分布式流处理平台</p>
+<h4 id="消息模型"><a href="#消息模型" class="headerlink" title="消息模型"></a>消息模型</h4><ul>
+<li><p>Producer/Consumer Model（队列模型）:</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230301145154.png" loading="lazy"></p>
+<p>生产者产生消息放在队列一端，消费者从队列的另一端进行消费，如果没有消费者，那么消息就会保存在队列中直到队列满或者有消费者上线</p>
+</li>
+<li><p>Publisher/Subscriber Model（发布/订阅模型）</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230301145213.png" loading="lazy"></p>
+</li>
+</ul>
+<p>Kafka同时支持以上两种模型</p>
+<h4 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h4><p><img src="https://raw.githubusercontent.com/soda1/img/main/20230228191503.png" loading="lazy"></p>
+<p>图片展示了Kafka作为消息引擎的大致结构，术语解释如下：</p>
+<ul>
+<li>Broker：表示的是一个Kafka实例</li>
+<li>Record：Kafka处理的主要对象，由Producer产生，&lt;key, value&gt;形式，key可以为空</li>
+<li>Topic：作为Record的容器，多用来区分不同的业务</li>
+<li>Partition：每一个Partition下的消息都是有序的，Topic下可以有多个Partition</li>
+<li>Offset：表示的是消息的位置信息</li>
+<li>Replica：副本，每个分区都可以保存多个副本，从而实现高可用</li>
+<li>Producer：可以向主题<strong>发布</strong>消息的客户端</li>
+<li>Consumer：向主题<strong>订阅</strong>消息的客户端，同一时间内一个Partition只能被一个Consumer消费  </li>
+<li>Consumer Offset：表示的是消费者的消费进度</li>
+<li>Consumer Group：由多个Consumer组成,同时消费多个分区</li>
+<li>Leader副本：对位提供数据读写服务的分区副本称为Leader，其余的称为Follower</li>
+</ul>
+<h4 id="参数描述"><a href="#参数描述" class="headerlink" title="参数描述"></a>参数描述</h4><p>Kafka有着很多的配置参数，下面是一些比较重要的参数</p>
+<h5 id="Broke-config"><a href="#Broke-config" class="headerlink" title="Broke config"></a>Broke config</h5><ul>
+<li><p>broker.id：broker id，用于集群标识实例，不可重复，默认值为0</p>
+</li>
+<li><p>log.dirs：日志数据路径，这个是没有默认值的，需要自己去指定，可以指定多个路径，用逗号隔开。/home/kafka1/,/home/kafak2/</p>
+</li>
+<li><p>log.dir：这个用于指定单个路径，如果log.dirs没有设置的话就会使用这个</p>
+</li>
+<li><p>zookeeper.connect：zookeeper连接配置，以hostname:port的格式配置，配置多个是以逗号隔开</p>
+</li>
+<li><p>listeners：监听器,多个以逗号隔开，格式为<code>协议://hostname:port</code>，比如 <code>PLAINTEXT://myhost:9092</code>。协议如果不写，那么就必须要配置listener.security.protocol.map</p>
+</li>
+<li><p>advertised.listeners：这个是用于客户端的，客户端在做初始连接时获取的元信息会包含这些配置，这样客户端才会知道它需要请求的broker地址。当客户端和Kafka在不同的网络中就需要配置</p>
+<p>listeners和advertised.listeners的区别参考<a target="_blank" rel="noopener" href="https://rmoff.net/2018/08/02/kafka-listeners-explained/" title="Kafka Listeners - Explained">这篇文章</a></p>
+</li>
+<li><p>allow.auto.create.topics：是否允许自动创建Topic，default：true，建议false，避免创建一些奇怪的Topic</p>
+</li>
+<li><p>unclean.leader.election.enable：是否允许Unclean Leader选举，default：false。该选项决定同步落后太多的副本是否可以参与选举</p>
+</li>
+<li><p>auto.leader.rebalance.enable：允许Kafka定期对一些Topic分区进行Leader重选， default：true，建议生产环境中设为false</p>
+</li>
+<li><p>log.retention.{hour|minutes|ms}：数据留存时间，优先级上来说 ms 设置最高、minutes 次之、hour 最低。Kafka数据默认保存7天</p>
+</li>
+<li><p>log.retention.bytes：限制Broker保存数据的总容量大小，default：-1（无限制）</p>
+</li>
+<li><p>message.max.bytes：消息能正常接收的最大值</p>
+</li>
+<li><pre><code>num.network.threads：接收和响应请求线程数
+num.io.threads：处理请求的线程数
+这两个参数理解需要看Broker内部结构，num.network.threads对应Network Layer层Processor Thread线程数，num.io.threads是API Layer层的API Thread数</code></pre>
+</li>
+</ul>
+<h5 id="Topic-config"><a href="#Topic-config" class="headerlink" title="Topic config"></a>Topic config</h5><ul>
+<li>retention.ms：设置该Topic消息保存时长，该值会覆盖Broker端的全局参数配置</li>
+<li>retention.bytes：设置为该Topic预留多少磁盘空间</li>
+<li>max.message.bytes：该Topic可以正常接收到消息的最大值，会覆盖全局参数</li>
+</ul>
+<h5 id="JVM-config"><a href="#JVM-config" class="headerlink" title="JVM config"></a>JVM config</h5><p>Kafka是运行在JVM上的，因此配置JVM参数的重要性就不言而喻了</p>
+<ul>
+<li>KAFKA_HEAP_OPTS：指定堆大小，业界推荐6GB</li>
+<li>KAFKA_JVM_PERFORMANCE_OPTS：指定GC参数，一般配置收集器为G1</li>
+</ul>
+<p>配置示例</p>
+<pre><code class="bash">export KAFKA_HEAP_OPTS=--Xms6g  --Xmx6g
+export  KAFKA_JVM_PERFORMANCE_OPTS= -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=true
+#启动
+bin/kafka-server-start.sh config/server.properties</code></pre>
+<p>更多参数参考<a target="_blank" rel="noopener" href="https://kafka.apache.org/28/documentation.html#brokerconfigs">Kafka Doc</a>，这个文档写的很好，结构很清晰</p>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2023/02/28/kafka/01.kafka%E5%85%A5%E9%97%A8/" title="Kafka入门">http://soda1.github.io/2023/02/28/kafka/01.kafka%E5%85%A5%E9%97%A8/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/03/01/kafka/02.%E8%BF%9B%E9%98%B6/" rel="prev" title="Kafka进阶"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">Kafka进阶</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/01/14/linux/%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87/" rel="next" title="性能指标"><span class="post-nav-text">性能指标</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>spring boot消息整合 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="一、消息简介消息代理规范 JMS（Java Message Service）JAVA消息服务 基于JVM消息代理的规范。ActiveMQ、HornetMQ是JMS实现   AMQP（Advanced Message Queuing Protocol） 高级消息队列协议，也是一个消息代理的规范，兼容JMS RabbitMQ是AMQP的实现    JMS与AMQP对比    JMS AMQP    定">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spring boot消息整合">
+<meta property="og:url" content="http://soda1.github.io/2020/11/05/spring-framework-2.1.8RELEASE/spring-boot/2020-11-5-spring-boot%E4%B8%8E%E6%B6%88%E6%81%AF/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="一、消息简介消息代理规范 JMS（Java Message Service）JAVA消息服务 基于JVM消息代理的规范。ActiveMQ、HornetMQ是JMS实现   AMQP（Advanced Message Queuing Protocol） 高级消息队列协议，也是一个消息代理的规范，兼容JMS RabbitMQ是AMQP的实现    JMS与AMQP对比    JMS AMQP    定">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/68747470733a2f2f692e6c6f6c692e6e65742f323032302f31302f30332f6e624a4e34357a36443375457339372e706e67">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/68747470733a2f2f692e6c6f6c692e6e65742f323032302f31302f30332f484d6b346f4b664243736a6d3263592e706e67">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201105180407445.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/68747470733a2f2f692e6c6f6c692e6e65742f323032302f31302f30332f715754516f35617a637869684156552e706e67">
+<meta property="article:published_time" content="2020-11-05T17:49:18.000Z">
+<meta property="article:modified_time" content="2022-05-28T20:34:10.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/68747470733a2f2f692e6c6f6c692e6e65742f323032302f31302f30332f6e624a4e34357a36443375457339372e706e67"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">65</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">10</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%B6%88%E6%81%AF%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">一、消息简介</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E4%BB%A3%E7%90%86%E8%A7%84%E8%8C%83"><span class="toc-number">1.1.</span> <span class="toc-text">消息代理规范</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#JMS%E4%B8%8EAMQP%E5%AF%B9%E6%AF%94"><span class="toc-number">1.2.</span> <span class="toc-text">JMS与AMQP对比</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8"><span class="toc-number">1.3.</span> <span class="toc-text">作用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E5%BD%A2%E5%BC%8F"><span class="toc-number">1.4.</span> <span class="toc-text">消息队列的形式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">1.5.</span> <span class="toc-text">应用场景</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81RabbitMQ"><span class="toc-number"></span> <span class="toc-text">二、RabbitMQ</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">1. 核心概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6"><span class="toc-number">2.</span> <span class="toc-text">2. 运行机制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81-Springboot%E4%B8%AD%E7%9A%84RabbitMQ"><span class="toc-number"></span> <span class="toc-text">三、 Springboot中的RabbitMQ</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.</span> <span class="toc-text">1. 环境准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-RabbitMQ%E5%AE%A2%E6%88%B7%E7%AB%AFAPI"><span class="toc-number">2.</span> <span class="toc-text">2. RabbitMQ客户端API</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%B6%88%E6%81%AF%E7%9A%84%E7%9B%91%E5%90%AC"><span class="toc-number">3.</span> <span class="toc-text">3.消息的监听</span></a></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2020/11/05/spring-framework-2.1.8RELEASE/spring-boot/2020-11-5-spring-boot%E4%B8%8E%E6%B6%88%E6%81%AF/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">spring boot消息整合</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2020-11-05 17:49:18" itemprop="dateCreated datePublished" datetime="2020-11-05T17:49:18+00:00">2020-11-05</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2022-05-28 20:34:10" itemprop="dateModified" datetime="2022-05-28T20:34:10+00:00">2022-05-28</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">2.1k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">8m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/spring-boot/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">spring boot</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h3 id="一、消息简介"><a href="#一、消息简介" class="headerlink" title="一、消息简介"></a>一、消息简介</h3><h4 id="消息代理规范"><a href="#消息代理规范" class="headerlink" title="消息代理规范"></a>消息代理规范</h4><ul>
+<li>JMS（Java Message Service）JAVA消息服务<ul>
+<li>基于JVM消息代理的规范。ActiveMQ、HornetMQ是JMS实现</li>
+</ul>
+</li>
+<li>AMQP（Advanced Message Queuing Protocol）<ul>
+<li>高级消息队列协议，也是一个消息代理的规范，兼容JMS</li>
+<li>RabbitMQ是AMQP的实现</li>
+</ul>
+</li>
+</ul>
+<h4 id="JMS与AMQP对比"><a href="#JMS与AMQP对比" class="headerlink" title="JMS与AMQP对比"></a>JMS与AMQP对比</h4><table>
+<thead>
+<tr>
+<th></th>
+<th>JMS</th>
+<th>AMQP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>定义</td>
+<td>Java  api</td>
+<td>网络线级协议</td>
+</tr>
+<tr>
+<td>跨语言</td>
+<td>否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>跨平台</td>
+<td>否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>Model</td>
+<td>提供两种消息模型：  （1）、Peer-2-Peer  （2）、Pub/sub</td>
+<td>提供了五种消息模型：  （1）、direct  exchange  （2）、fanout  exchange  （3）、topic  change  （4）、headers  exchange  （5）、system  exchange  本质来讲，后四种和JMS的pub/sub模型没有太大差别，仅是在路由机制上做了更详细的划分；</td>
+</tr>
+<tr>
+<td>支持消息类型</td>
+<td>多种消息类型：  TextMessage  MapMessage  BytesMessage  StreamMessage  ObjectMessage  Message  （只有消息头和属性）</td>
+<td>byte[]  当实际应用时，有复杂的消息，可以将消息序列化后发送。</td>
+</tr>
+<tr>
+<td>综合评价</td>
+<td>JMS  定义了JAVA  API层面的标准；在java体系中，多个client均可以通过JMS进行交互，不需要应用修改代码，但是其对跨平台的支持较差；</td>
+<td>AMQP定义了wire-level层的协议标准；天然具有跨平台、跨语言特性。</td>
+</tr>
+</tbody></table>
+<h4 id="作用"><a href="#作用" class="headerlink" title="作用"></a><strong>作用</strong></h4><p>通过消息服务中间件来提升系统异步通信、扩展解耦能力</p>
+<p>当消息发送者发送消息以后，将由消息代理接管，消息代理保证消息传递到指定目的地</p>
+<h4 id="消息队列的形式"><a href="#消息队列的形式" class="headerlink" title="消息队列的形式"></a>消息队列的形式</h4><p>消息队列主要有两种形式的目的地</p>
+<ol>
+<li><p>队列（queue）：点对点消息通信（point-to-point）</p>
+<p>消息发送者发送消息，消息代理将其放入一个队列中，消息接收者从队列中获取消息内容，消息读取后被移出队列。消息只有唯一的发送者和接受者，但并不是说只能有一个接收者</p>
+</li>
+<li><p>主题（topic）：发布（publish）/订阅（subscribe）消息通信</p>
+<p>发送者（发布者）发送消息到主题，多个接收者（订阅者）监听（订阅）这个主题，那么就会在消息到达时同时收到消息</p>
+</li>
+</ol>
+<h4 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a><strong>应用场景</strong></h4><ol>
+<li><p>异步处理</p>
+<p> 用户注册操作和消息处理并行，提高响应速度</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/68747470733a2f2f692e6c6f6c692e6e65742f323032302f31302f30332f6e624a4e34357a36443375457339372e706e67" alt="img" loading="lazy"></p>
+</li>
+</ol>
+<ol start="2">
+<li><p>应用解耦</p>
+<p>在下单时库存系统不能正常使用。也不影响正常下单，因为下单后，订单系统写入消息队列就不再关心其他的后续操作了。实现订单系统与库存系统的应用解耦</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/68747470733a2f2f692e6c6f6c692e6e65742f323032302f31302f30332f484d6b346f4b664243736a6d3263592e706e67" alt="img" loading="lazy"></p>
+</li>
+<li><p>流量削峰</p>
+<p>用户的请求，服务器接收后，首先写入消息队列。假如消息队列长度超过最大数量，则直接抛弃用户请求或跳转到错误页面</p>
+<p>秒杀业务根据消息队列中的请求信息，再做后续处理</p>
+</li>
+</ol>
+<h2 id="二、RabbitMQ"><a href="#二、RabbitMQ" class="headerlink" title="二、RabbitMQ"></a>二、RabbitMQ</h2><p>RabbitMQ是一个由erlang开发的AMQP(Advanved Message Queue Protocol)的开源实现。</p>
+<h3 id="1-核心概念"><a href="#1-核心概念" class="headerlink" title="1. 核心概念"></a>1. 核心概念</h3><ul>
+<li><strong>Message</strong><ul>
+<li>消息，消息是不具名的，它由消息头和消息体组成</li>
+<li>消息头，包括routing-key（路由键）、priority（相对于其他消息的优先权）、delivery-mode（指出该消息可能需要持久性存储）等</li>
+</ul>
+</li>
+<li><strong>Publisher</strong><ul>
+<li>消息的生产者，也是一个向交换器发布消息的客户端应用程序</li>
+</ul>
+</li>
+<li><strong>Exchange</strong><ul>
+<li>交换器，将生产者消息路由给服务器中的队列</li>
+<li>类型有direct(默认)，fanout, topic, 和headers，具有不同转发策略</li>
+</ul>
+</li>
+<li><strong>Queue</strong><ul>
+<li>消息队列，保存消息直到发送给消费者</li>
+</ul>
+</li>
+<li><strong>Binding</strong><ul>
+<li>绑定，用于消息队列和交换器之间的关联</li>
+</ul>
+</li>
+<li><strong>Connection</strong><ul>
+<li>网络连接，比如一个TCP连接</li>
+</ul>
+</li>
+<li><strong>Consumer</strong><ul>
+<li>消息的消费者，表示一个从消息队列中取得消息的客户端应用程序</li>
+</ul>
+</li>
+<li><strong>Virtual Host</strong><ul>
+<li>虚拟主机，表示一批交换器、消息队列和相关对象。</li>
+<li>vhost 是 AMQP 概念的基础，必须在连接时指定</li>
+<li>RabbitMQ 默认的 vhost 是 /</li>
+</ul>
+</li>
+<li><strong>Broker</strong><ul>
+<li>消息队列服务器实体</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-运行机制"><a href="#2-运行机制" class="headerlink" title="2. 运行机制"></a>2. 运行机制</h3><p><strong>消息路由</strong></p>
+<p>AMQP 中增加了Exchange 和 Binding 的角色， Binding 决定交换器的消息应该发送到那个队列</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201105180407445.png" alt="image-20201105180407445" loading="lazy"></p>
+<p><strong>Exchange 类型</strong></p>
+<ol>
+<li><p><strong>direct</strong></p>
+<p>点对点模式，消息中的路由键（routing key）如果和 Binding 中的 binding key 一致， 交换器就将消息发到对应的队列中。</p>
+</li>
+<li><p><strong>fanout</strong></p>
+<p>广播模式，每个发到 fanout 类型交换器的消息都会分到所有绑定的队列上去</p>
+</li>
+<li><p><strong>topic</strong></p>
+<p>将路由键和某个模式进行匹配，此时队列需要绑定到一个模式上。它将路由键和绑定键的字符串切分成单词，这些单词之间用点隔开。 识别通配符： # 匹配 0 个或多个单词， *匹配一个单词</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/68747470733a2f2f692e6c6f6c692e6e65742f323032302f31302f30332f715754516f35617a637869684156552e706e67" alt="img" loading="lazy"></p>
+</li>
+</ol>
+<h2 id="三、-Springboot中的RabbitMQ"><a href="#三、-Springboot中的RabbitMQ" class="headerlink" title="三、 Springboot中的RabbitMQ"></a>三、 Springboot中的RabbitMQ</h2><h3 id="1-环境准备"><a href="#1-环境准备" class="headerlink" title="1. 环境准备"></a>1. 环境准备</h3><p>在docker中安装rabbitmq并运行</p>
+<pre><code># 5672为服务端口，15672为web控制台端口
+docker run -d -p 5672:5672 -p 15672:15672 38e57f281891</code></pre>
+<p>如果要修改账号密码</p>
+<pre><code>1、进入docker 的 RabbitMQ 容器中
+docker exec -it rabbitmq01 bash
+
+2、查看用户
+rabbitmqctl list_users
+
+3、修改密码
+rabbitmqctl change_password userName newPassword
+
+4、如果不想要guest的账号也可以新增账号
+ rabbitmqctl add_user userName newPassword
+
+5、看guest不爽，你还可以delete它
+rabbitmqctl delete_user guest
+
+6、最后别忘了给自己添加的账号增加超级管理员权限
+rabbitmqctl set_user_tags userName administrator</code></pre>
+<p>导入依赖</p>
+<pre><code class="xml">    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-amqp&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;!--自定义消息转化器Jackson2JsonMessageConverter所需依赖--&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
+        &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+    &lt;/dependency&gt;</code></pre>
+<p>配置文件</p>
+<pre><code class="yml">spring:
+  rabbitmq:
+    host: localhost # 指定rebbitmq服务器主机
+    username: guest #默认值为guest
+    password: guest #默认值为guest
+    port: 5672      #默认值为5672</code></pre>
+<h3 id="2-RabbitMQ客户端API"><a href="#2-RabbitMQ客户端API" class="headerlink" title="2. RabbitMQ客户端API"></a>2. RabbitMQ客户端API</h3><p><code>RabbitAutoConfiguration</code>中有内部类<code>RabbitTemplateConfiguration</code>,在该类中向容器中分别导入了<code>RabbitTemplate</code>和<code>AmqpAdmin</code></p>
+<p>在测试类中分别注入</p>
+<pre><code>    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private AmqpAdmin amqpAdmin;</code></pre>
+<ul>
+<li><p><strong>RabbitTemplate消息发送处理组件</strong></p>
+<p> 可用来发送和接收消息</p>
+<pre><code class="java">        //发送消息
+        rabbitTemplate.convertAndSend(&quot;amq.direct&quot;,&quot;ustc&quot;,&quot;aaaa&quot;);
+        Book book = new Book();
+        book.setName(&quot;西游记&quot;);
+        book.setPrice(23.2f);
+        //Book要实现Serializable接口
+        //exchage:amq.direct key:ustc message:book
+        rabbitTemplate.convertAndSend(&quot;amq.direct&quot;,&quot;ustc&quot;,book);
+
+        //接收消息
+        //queue:amp.queue
+        Object o = rabbitTemplate.receiveAndConvert(&quot;amp.queue&quot;);
+        System.out.println(o.getClass());  //class cn.edu.ustc.springboot.bean.Book
+        System.out.println(o);            //Book&#123;name=&#39;西游记&#39;, price=23.2&#125;</code></pre>
+<p>默认的消息转化器是<code>SimpleMessageConverter</code>，对于对象以<strong>jdk</strong>序列化方式存储，若要以<strong>Json</strong>方式存储对象，就要自定义消息转换器</p>
+<pre><code class="java">@Configuration
+public class AmqpConfig &#123;
+    @Bean
+    public MessageConverter messageConverter() &#123;
+        //在容器中导入Json的消息转换器
+        return new Jackson2JsonMessageConverter();
+    &#125;
+&#125;</code></pre>
+</li>
+<li><p><strong>AmqpAdmin管理组件</strong></p>
+<p> 用于创建和删除<strong>exchange</strong>、<strong>binding</strong>和<strong>queue</strong></p>
+<pre><code class="java">//创建Direct类型的Exchange
+amqpAdmin.declareExchange(new DirectExchange(&quot;admin.direct&quot;));
+//创建Queue
+amqpAdmin.declareQueue(new Queue(&quot;admin.test&quot;));
+//将创建的队列与Exchange绑定
+amqpAdmin.declareBinding(new Binding(&quot;admin.test&quot;, Binding.DestinationType.QUEUE,&quot;admin.direct&quot;,&quot;admin.test&quot;,null));</code></pre>
+<p>也可以自定义组件</p>
+<pre><code class="java">//定义一个queue
+@Bean(&quot;consumerQueue&quot;)
+public Queue getQueue() &#123;
+ return new Queue(&quot;soda.queue&quot;, true);
+&#125;
+
+//定义一个exchange
+@Bean(&quot;consumerExchange&quot;)
+public Exchange getChange() &#123;
+    return new DirectExchange(&quot;soda.exchange&quot;, true, false);
+&#125;
+//queue与exchange进行绑定，route key 为：soda.test
+@Bean
+public Binding binding(@Qualifier(&quot;consumerQueue&quot;) Queue queue, @Qualifier(&quot;consumerExchange&quot;) Exchange exchange) &#123;
+    return BindingBuilder.bind(queue).to(exchange).with(&quot;soda.test&quot;).noargs();
+&#125;</code></pre>
+</li>
+</ul>
+<h3 id="3-消息的监听"><a href="#3-消息的监听" class="headerlink" title="3.消息的监听"></a>3.消息的监听</h3><ul>
+<li><p>在回调方法上标注<code>@RabbitListener</code>注解，并设置其属性<strong>queues</strong>，注册监听队列，当该队列收到消息时，标注方法遍会调用</p>
+</li>
+<li><p>可分别使用<strong>Message</strong>和保存消息所属对象进行消息接收，若使用<strong>Object</strong>对象进行消息接收，实际上接收到的也是<strong>Message</strong></p>
+</li>
+<li><p>如果知道接收的消息是何种类型的对象，可在方法参数中直接加上该类型参数，也可接收到</p>
+<pre><code class="java">import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class myListener &#123;
+
+    @RabbitListener(queues = &#123;&quot;soda.queue&quot;&#125;)
+    public void receive1(Object object, Message message)&#123;
+
+        System.out.println(message == object); //true
+    &#125;
+
+    @RabbitListener(queues = &#123;&quot;soda.queue&quot;&#125;)
+    public void receive3( String string)&#123;
+        System.out.println(&quot;收到消息: &quot; + string);
+
+    &#125;
+&#125;</code></pre>
+</li>
+<li><p>若消息中含有不同的对象，可以使用<code>@RabbitHandler</code>进行分别接收</p>
+<pre><code class="java">@RabbitListener(queues = &#123;&quot;admin.test&quot;&#125;)
+@Service
+public class BookService &#123;
+
+    @RabbitHandler
+    public void receive4(Book book)&#123;
+        System.out.println(&quot;4收到消息：book:&quot; + book);
+    &#125;
+
+    @RabbitHandler
+    public void receive5(Student student)&#123;
+        System.out.println(&quot;5收到消息：student:&quot; + student);
+    &#125;</code></pre>
+</li>
+</ul>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2020/11/05/spring-framework-2.1.8RELEASE/spring-boot/2020-11-5-spring-boot%E4%B8%8E%E6%B6%88%E6%81%AF/" title="spring boot消息整合">http://soda1.github.io/2020/11/05/spring-framework-2.1.8RELEASE/spring-boot/2020-11-5-spring-boot%E4%B8%8E%E6%B6%88%E6%81%AF/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2020/11/09/mysql/%E5%9F%BA%E7%A1%80/2020_11_9-DQL/" rel="prev" title="DQL数据库查询语言"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">DQL数据库查询语言</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2020/11/04/spring-framework-2.1.8RELEASE/spring-boot/2020-11-4-spring-boot-cache/" rel="next" title="spring boot cache"><span class="post-nav-text">spring boot cache</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

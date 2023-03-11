@@ -1,0 +1,253 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>JVM Architecture | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="结构图 JVM架构如图所示，主要分为ClassLoader Subsystem， Runtime Data Area，Execution Engine ClassLoader Subsystem它的职能主要是动态加载创建类对象，类在第一次被引用时就需要创建类对象，一个类对象被创建包含Loading、Linking、initialization三个阶段。 Loading在Loading阶段有3个类加">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM Architecture">
+<meta property="og:url" content="http://soda1.github.io/2023/03/10/java/jvm/jvm%20architecture/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="结构图 JVM架构如图所示，主要分为ClassLoader Subsystem， Runtime Data Area，Execution Engine ClassLoader Subsystem它的职能主要是动态加载创建类对象，类在第一次被引用时就需要创建类对象，一个类对象被创建包含Loading、Linking、initialization三个阶段。 Loading在Loading阶段有3个类加">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230310143101.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230310173929.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230311015106.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230311031540.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230311033334.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230311033405.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230311033431.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230311160312.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230311171414.png">
+<meta property="article:published_time" content="2023-03-10T13:20:55.000Z">
+<meta property="article:modified_time" content="2023-03-11T19:53:11.741Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/20230310143101.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">65</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">10</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%93%E6%9E%84%E5%9B%BE"><span class="toc-number">1.</span> <span class="toc-text">结构图</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ClassLoader-Subsystem"><span class="toc-number">2.</span> <span class="toc-text">ClassLoader Subsystem</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Loading"><span class="toc-number">2.1.</span> <span class="toc-text">Loading</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Delegation-Hierarchy-Algorithm"><span class="toc-number">2.2.</span> <span class="toc-text">Delegation Hierarchy Algorithm</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Linking"><span class="toc-number">2.3.</span> <span class="toc-text">Linking</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Initialization"><span class="toc-number">2.4.</span> <span class="toc-text">Initialization</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Runtime-Data-Area"><span class="toc-number">3.</span> <span class="toc-text">Runtime Data Area</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Execution-Engine"><span class="toc-number">4.</span> <span class="toc-text">Execution Engine</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Interpreter"><span class="toc-number">4.1.</span> <span class="toc-text">Interpreter</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#JIT-Compiler"><span class="toc-number">4.2.</span> <span class="toc-text">JIT Compiler</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Garbage-Collector"><span class="toc-number">4.3.</span> <span class="toc-text">Garbage Collector</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%97%A0%E7%94%A8%E5%AF%B9%E8%B1%A1%E5%AE%9A%E4%B9%89"><span class="toc-number">4.3.1.</span> <span class="toc-text">无用对象定义</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%AE%97%E6%B3%95"><span class="toc-number">4.3.2.</span> <span class="toc-text">垃圾回收算法</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6"><span class="toc-number">4.3.3.</span> <span class="toc-text">垃圾回收</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">4.3.4.</span> <span class="toc-text">垃圾回收器</span></a></li></ol></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2023/03/10/java/jvm/jvm%20architecture/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">JVM Architecture</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2023-03-10 13:20:55" itemprop="dateCreated datePublished" datetime="2023-03-10T13:20:55+00:00">2023-03-10</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2023-03-11 19:53:11" itemprop="dateModified" datetime="2023-03-11T19:53:11+00:00">2023-03-11</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">2.3k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">9m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/java/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">java</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h4 id="结构图"><a href="#结构图" class="headerlink" title="结构图"></a>结构图</h4><p><img src="https://raw.githubusercontent.com/soda1/img/main/20230310143101.png" loading="lazy"></p>
+<p>JVM架构如图所示，主要分为ClassLoader Subsystem， Runtime Data Area，Execution Engine</p>
+<h4 id="ClassLoader-Subsystem"><a href="#ClassLoader-Subsystem" class="headerlink" title="ClassLoader Subsystem"></a>ClassLoader Subsystem</h4><p>它的职能主要是动态加载创建类对象，类在第一次被引用时就需要创建类对象，一个类对象被创建包含Loading、Linking、initialization三个阶段。</p>
+<h5 id="Loading"><a href="#Loading" class="headerlink" title="Loading"></a>Loading</h5><p>在Loading阶段有3个类加载器用来加载Class文件</p>
+<ol>
+<li><p>BootStrap ClassLoader（启动类加载器）</p>
+<p>加载<code>$JAVA_HOME/jre/lib</code>路径的核心类（rt.jar etc)，它是所有加载器的顶级父类</p>
+</li>
+<li><p>Extension ClassLoader（扩展类加载器）</p>
+<p>加载<code>$JAVA_HOME/jre/lib/ext</code>路径下的类或在系统属性<code>java.ext.dirs</code>列出的目录，它的上层父类是BootStrap ClassLoader</p>
+</li>
+<li><p>Application ClassLoader（应用程序类加载器）</p>
+<p>现在叫做System ClassLoader，用于加载应用路径下的类，它的上层父类是Extension ClassLoader</p>
+</li>
+</ol>
+<h5 id="Delegation-Hierarchy-Algorithm"><a href="#Delegation-Hierarchy-Algorithm" class="headerlink" title="Delegation Hierarchy Algorithm"></a><strong>Delegation Hierarchy Algorithm</strong></h5><p>中文习惯叫双亲委派机制，哪个家伙起的名，真的谢谢。<strong>主要思想就是在需要加载一个类的时候优先由其父类加载器进行尝试加载，如果父类加载器不能加载才有当前类路径下的加载器进行加载</strong></p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230310173929.jpg" loading="lazy"></p>
+<p>目的：避免同一个类被多次加载，保证Java稳定允许</p>
+<h5 id="Linking"><a href="#Linking" class="headerlink" title="Linking"></a>Linking</h5><ol>
+<li><p>Verify</p>
+<p>验证class文件中的字节流是否符合虚拟机的要求，包括有<strong>文件格式的验证，元数据的验证，字节码验证，符号引用验证</strong></p>
+</li>
+<li><p>Prepare</p>
+<p>对静态变量进行内存分配，并赋予初始值</p>
+</li>
+<li><p>Resolve</p>
+<p>将方法区对象内的运行时常量池中的符号引用解析成直接引用</p>
+<blockquote>
+<p>When a Java class is compiled, all references to variables and methods are stored in the class’s constant pool as a symbolic reference. A symbolic reference is a logical reference not a reference that actually points to a physical memory location. The JVM implementation can choose when to resolve symbolic references, this can happen when the class file is verified, after being loaded, called eager or static resolution, instead this can happen when the symbolic reference is used for the first time called lazy or late resolution. However the JVM has to behave as if the resolution occurred when each reference is first used and throw any resolution errors at this point. Binding is the process of the field, method or class identified by the symbolic reference being replaced by a direct reference, this only happens once because the symbolic reference is completely replaced. If the symbolic reference refers to a class that has not yet been resolved then this class will be loaded. Each direct reference is stored as an offset against the storage structure associated with the runtime location of the variable or method.</p>
+</blockquote>
+</li>
+</ol>
+<h5 id="Initialization"><a href="#Initialization" class="headerlink" title="Initialization"></a>Initialization</h5><p>所有静态变量都会被赋予初始值，静态代码块将会被执行</p>
+<h4 id="Runtime-Data-Area"><a href="#Runtime-Data-Area" class="headerlink" title="Runtime Data Area"></a>Runtime Data Area</h4><p>这个是Java内存管理区域，以下图分析会比较清晰</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230311015106.png" loading="lazy"></p>
+<p><strong>Non Heap</strong></p>
+<ul>
+<li><p>method area</p>
+<p>方法区用于存储每个Class对象的信息：</p>
+<ul>
+<li>Classloader Reference</li>
+<li>Field data</li>
+<li>Run Time Constant Pool</li>
+<li>Method data</li>
+<li>Method code</li>
+</ul>
+</li>
+<li><p>interned String 字符串常量池，在1.8版本它被移到Heap里面了</p>
+</li>
+</ul>
+<p>**Heap **</p>
+<p>所有的对象实例都会存储在堆这里，为所有线程共享</p>
+<p>generation及垃圾回收内容查看<a href="#Garbage-Collector">Garbage Collector</a></p>
+<p><strong>Stack</strong></p>
+<p>每个线程都有以下三个组件</p>
+<ol>
+<li><p>Program Counter</p>
+<p>PC用于存储当前指令运行位置的，如果当前调用的native方法，那么PC值为undefine，JVM用PC来跟踪其执行指令位置，方便在线程在获得cpu时间片后继续运行下去</p>
+</li>
+<li><p>Stack</p>
+<p>按照先进后出规则执行，由存储调用方法的栈帧组成，每个栈帧包含如下信息：</p>
+<ul>
+<li>本地变量数组（基本类型，对象引用）</li>
+<li>返回值</li>
+<li>操作数栈</li>
+<li>执行方法地址</li>
+</ul>
+</li>
+<li><p>Native Stack</p>
+<p>类似于Stack</p>
+</li>
+</ol>
+<h4 id="Execution-Engine"><a href="#Execution-Engine" class="headerlink" title="Execution Engine"></a>Execution Engine</h4><h5 id="Interpreter"><a href="#Interpreter" class="headerlink" title="Interpreter"></a><strong>Interpreter</strong></h5><p>用于解释字节码，将其转换成系统识别指令，使其能运行。缺点在于每次执行方法都要先解释一遍</p>
+<h5 id="JIT-Compiler"><a href="#JIT-Compiler" class="headerlink" title="JIT Compiler"></a><strong>JIT Compiler</strong></h5><p>用于改正解释器缺点，当代码第一次运行时会使用解释器来解释代码，后面如果发现有重复代码时，会使用JIT编译器，将代码编译成native code。native code将直接用于重复方法的调用，从而提高系统性能</p>
+<h5 id="Garbage-Collector"><a href="#Garbage-Collector" class="headerlink" title="Garbage Collector"></a><strong>Garbage Collector</strong></h5><p>垃圾回收器用于回收无用对象，从而释放内存，防止内存泄露。Java中的垃圾回收是自动的，也可以通过调用<code>System.gc()</code>来触发</p>
+<h6 id="无用对象定义"><a href="#无用对象定义" class="headerlink" title="无用对象定义"></a><strong>无用对象定义</strong></h6><p>在Java中有一些对象被称为 <strong>Garbage Collection Roots</strong>（GC Roots)，它们在垃圾回收中被作为Root对象来用于进行可达性分析。如下图所示，如果一个对象和任何GC Root间不存在<strong>引用链</strong>，那么就说明该对象是无用对象</p>
+<blockquote>
+<p>Every object tree must have one or more root objects. As long as the application can reach those roots, the whole tree is reachable.But when are those root objects considered reachable? Special objects called garbage-collection roots (GC roots; see Figure below) are always reachable and so is any object that has a garbage-collection root at its own root.</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230311031540.jpg" loading="lazy"></p>
+<p>有4种类型GC Roots</p>
+<ul>
+<li>Local variables</li>
+<li>Static variables</li>
+<li>Active Java threads </li>
+<li>JNI References</li>
+</ul>
+<p><strong>回收器针对Java引用类型回收策略</strong></p>
+<ul>
+<li><p>Strong Reference（强引用）</p>
+<p>只要可达GC root就不会回收</p>
+</li>
+<li><p>Soft Reference（软引用）</p>
+<p>内存空间不足的时候就会被回收</p>
+</li>
+<li><p>Weak Reference（弱应用）</p>
+<p>只要被垃圾回收期扫描到就会回收</p>
+</li>
+<li><p>Phantom Reference（虚引用）</p>
+<p>任何时候都会被回收</p>
+</li>
+</ul>
+<h6 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h6><ul>
+<li><p>标记 — 清除算法</p>
+<p>将可回收对象先标记出来，然后再清除。这种算法会造成内存碎片，导致本来有足够的容量来分配给新的对象，但却无法分配</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230311033334.png" loading="lazy"></p>
+</li>
+<li><p>复制算法</p>
+<p>复制算法从标记-清除算法演进而来，解决了内存碎片化问题。将内存分为均等两块，每次只用一块，当一块内存用完时，就将存活的对象搬到另一块去，然后把直接清理内存空间。算法的弊端在于只能使用一半的内存</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230311033405.png" loading="lazy"></p>
+</li>
+<li><p>标记整理算法</p>
+<p>标记整理算法中标记过程和标记清除算法一致，然后整理时存活对象会向一端移动，最后清除存活对象边界以外的内存区域。由于内存的频繁移动，在效率上会比复制算法差</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230311033431.png" loading="lazy"></p>
+</li>
+</ul>
+<h6 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h6><p>大多数对象的生命周期都是非常短的，只有少部分的对象会一直存在，因此JVM将Heap分成了几部分，如下面官方图所示</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230311160312.png" loading="lazy"></p>
+<ul>
+<li><p>Young Generation</p>
+<p>新创建对象会被分配在年轻代的Eden区里面，当Eden区满后会触发Minor GC，存活下来的对象会进入Survivor区且被标记年龄 = 1，而原先在Survivor区继续存活下来的对象则年龄+1，然后将Eden区清空</p>
+<p>Survivor区又细分为S0和S1两个区，原因在于Survivor区的对象也会有被清理掉的可能性，这样会产生内存碎片，JVM采用了复制算法来整理内存</p>
+<p>在经历多轮的GC后，Survivor中存活的对象一旦达到年轻代设置的年龄上限后会进入老年代，还有一些特殊的情况会直接进入老年区：</p>
+<ul>
+<li>当对象无法放入Survivor区</li>
+<li>当大对象无法放入清理后的Eden区</li>
+</ul>
+<p>年轻代Minor GC具体流程查看<a target="_blank" rel="noopener" href="https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/gc01/index.html">Java Garbage Collection Basics</a></p>
+</li>
+<li><p>Old Generation</p>
+<p>老年代用于放置长期存活的对象，当老年代无法存放新的对象时会触发Major GC，对老年代进行垃圾回收，释放内存</p>
+</li>
+<li><p>Permanent generation</p>
+<p>永久代存储的是Class对象及方法，对应JVM结构中的方法区，触发Full GC时会对永久代进行垃圾回收</p>
+<p>永久代不属于Heap，上面的官方图是从generation的角度来解释其内存结构，下面图可以很好描述</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230311171414.png" loading="lazy"></p>
+<p>在1.8版本使用 Meta space来替代Permanent generation</p>
+</li>
+</ul>
+<h6 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h6><ul>
+<li><p>The Serial GC</p>
+<p>串行化收集器，Minor 和Major GC都是串行进行的，即单线程。使用标记整理算法，存在Stop The World问题</p>
+<p>应用场景：适合客户端模式下的虚拟机（需要比较少的内存）</p>
+<p>使用：<code>-XX:+UseSerialGC</code></p>
+</li>
+<li><p>The Parallel GC</p>
+<p>并行收集器使用多线程来对年轻代进行垃圾回收，默认使用CPU个数的线程进程回收，存在Stop The World问题</p>
+<p>应用场景：适用于追求高吞吐量，不需要太多交互</p>
+<p>使用：</p>
+<ul>
+<li><code>-XX:+UseParallelGC</code>：年轻代回收使用多线程，老年代回收使用的单线程</li>
+<li><code>-XX:+UseParallelOldGC</code>：年轻代老年代都是用多线程</li>
+</ul>
+<p>老年代都使用标记-整理算法，年轻代用复制算法</p>
+</li>
+<li><p>The Concurrent Mark Sweep (CMS) Collector</p>
+<p>CMS是一种以并发的方式进行垃圾回收，以最短回收卡顿时间为目标的收集器，主要用于老年代，采用标记-清除算法，会造成碎片化问题，引发Full GC，导致临时使用Serial GC进行老年代垃圾回收</p>
+<p>CMS用于年轻代时和并行收集器采用同样算法</p>
+<p>应用场景：重视服务器响应速度，要求系统停顿时间最短。</p>
+<p>使用：<code>-XX:+UseConcMarkSweepGC</code></p>
+</li>
+<li><p>The G1 Garbage Collector</p>
+<p>G1收集器设计用于取代CMS，具有并发、并行，低卡顿时间等特点。G1整体来看使用标记-整理算法，局部使用复制算法</p>
+<p>应用场景：面向服务端应用</p>
+<p>使用：<code>-XX:+UseG1GC</code></p>
+</li>
+</ul>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://dzone.com/articles/jvm-architecture-explained" title="The JVM Architecture Explained">The JVM Architecture Explained</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.jamesdbloom.com/JVMInternals.html" title="JVM Internals">JVM Internals</a></p>
+<p><a target="_blank" rel="noopener" href="https://dzone.com/articles/jvm-memory-architecture-and-gc" title="JVM Memory Architecture and GC Algorithm Basics">JVM Memory Architecture and GC Algorithm Basics</a></p>
+<p><a target="_blank" rel="noopener" href="https://dzone.com/articles/java-memory-management" title="Java Memory Management">Java Memory Management</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.w3resource.com/java-tutorial/garbage-collection-in-java.php" title="Garbage Collection in Java">Garbage Collection in Java</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/gc01/index.html" title="Java Garbage Collection Basics">Java Garbage Collection Basics</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.jamesdbloom.com/JVMInternals.html" title="JVM Internals"></a></p>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2023/03/10/java/jvm/jvm%20architecture/" title="JVM Architecture">http://soda1.github.io/2023/03/10/java/jvm/jvm%20architecture/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/03/12/java/jvm/JVM%E8%B0%83%E4%BC%98/" rel="prev" title="JVM调优"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">JVM调优</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/03/09/mysql/%E9%AB%98%E7%BA%A7/mysql%E6%89%A9%E5%AE%B9/" rel="next" title="mysql扩容"><span class="post-nav-text">mysql扩容</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>
