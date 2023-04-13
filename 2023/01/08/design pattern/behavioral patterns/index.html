@@ -1,0 +1,190 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>behavioral patterns | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="观察者模式一对多依赖关系，被依赖对象叫做被观察者，依赖对象叫做观察者。也被称为发布订阅模式  模板模式定义一个骨架算法（业务步骤），然后具体的算法由子类去实现。 假如有一批不同格式的数据需要处理，处理的步骤基本一致，差异在于数据提取细节不同。这时候就可以使用模板模式来定义业务步骤，将数据提取这一步骤由子类去实现。   策略模式定义一族算法类，将每个算法分别封装起来，让它们可以互相替换。策略模式可以">
+<meta property="og:type" content="article">
+<meta property="og:title" content="behavioral patterns">
+<meta property="og:url" content="http://soda1.github.io/2023/01/08/design%20pattern/behavioral%20patterns/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="观察者模式一对多依赖关系，被依赖对象叫做被观察者，依赖对象叫做观察者。也被称为发布订阅模式  模板模式定义一个骨架算法（业务步骤），然后具体的算法由子类去实现。 假如有一批不同格式的数据需要处理，处理的步骤基本一致，差异在于数据提取细节不同。这时候就可以使用模板模式来定义业务步骤，将数据提取这一步骤由子类去实现。   策略模式定义一族算法类，将每个算法分别封装起来，让它们可以互相替换。策略模式可以">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230108144537.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230108152126.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230108152407.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230108155021.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230108155846.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230108171118.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230108223336.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230108225709.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230108235041.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230109001300.png">
+<meta property="article:published_time" content="2023-01-08T00:41:59.000Z">
+<meta property="article:modified_time" content="2023-01-09T00:17:25.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/20230108144537.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">72</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">11</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">观察者模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">模板模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">策略模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F"><span class="toc-number">4.</span> <span class="toc-text">责任链模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F"><span class="toc-number">5.</span> <span class="toc-text">状态模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F"><span class="toc-number">6.</span> <span class="toc-text">迭代器模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BF%E9%97%AE%E8%80%85%E6%A8%A1%E5%BC%8F%EF%BC%88TODO%EF%BC%89"><span class="toc-number">7.</span> <span class="toc-text">访问者模式（TODO）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%87%E5%BF%98%E5%BD%95%E6%A8%A1%E5%BC%8F"><span class="toc-number">8.</span> <span class="toc-text">备忘录模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F%EF%BC%88%E4%B8%8D%E5%A4%AA%E6%98%8E%E7%99%BD%EF%BC%89"><span class="toc-number">9.</span> <span class="toc-text">命令模式（不太明白）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A3%E9%87%8A%E5%99%A8%E6%A8%A1%E5%BC%8F"><span class="toc-number">10.</span> <span class="toc-text">解释器模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E4%BB%8B%E6%A8%A1%E5%BC%8F"><span class="toc-number">11.</span> <span class="toc-text">中介模式</span></a></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2023/01/08/design%20pattern/behavioral%20patterns/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">behavioral patterns</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2023-01-08 00:41:59" itemprop="dateCreated datePublished" datetime="2023-01-08T00:41:59+00:00">2023-01-08</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2023-01-09 00:17:25" itemprop="dateModified" datetime="2023-01-09T00:17:25+00:00">2023-01-09</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">1.4k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">6m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/design-pattern/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">design_pattern</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h4 id="观察者模式"><a href="#观察者模式" class="headerlink" title="观察者模式"></a>观察者模式</h4><p>一对多依赖关系，被依赖对象叫做被观察者，依赖对象叫做观察者。也被称为<strong>发布订阅模式</strong></p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230108144537.png" alt="image-20230108144537852" loading="lazy"></p>
+<h4 id="模板模式"><a href="#模板模式" class="headerlink" title="模板模式"></a>模板模式</h4><p>定义一个骨架算法（业务步骤），然后具体的算法由子类去实现。</p>
+<p>假如有一批不同格式的数据需要处理，处理的步骤基本一致，差异在于数据提取细节不同。这时候就可以使用模板模式来定义业务步骤，将数据提取这一步骤由子类去实现。</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230108152126.png" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230108152407.png" loading="lazy"></p>
+<h4 id="策略模式"><a href="#策略模式" class="headerlink" title="策略模式"></a>策略模式</h4><p>定义一族算法类，将每个算法分别封装起来，让它们可以互相替换。策略模式可以使算法的变化独立于使用它们的客户端（这里的客户端代指使用算法的代码）</p>
+<p>一般策略模式会配合工厂模式一起使用，根据条件来选用不同的策略。</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230108155021.png" loading="lazy"></p>
+<h4 id="责任链模式"><a href="#责任链模式" class="headerlink" title="责任链模式"></a>责任链模式</h4><p>将请求的发送和接收解耦，让多个接收对象都有机会处理同一个请求。将这些接收对象串成一条链，并沿着这条链传递这个请求，直到链上的某个接收对象能够处理它为止。链上的每个处理器都有自己的职责。</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230108155846.png" loading="lazy"></p>
+<h4 id="状态模式"><a href="#状态模式" class="headerlink" title="状态模式"></a>状态模式</h4><p>一般用于状态机，将状态转换逻辑拆分到不同的状态类中，从而消除if-else（switch-case）条件</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230108171118.png" loading="lazy"></p>
+<h4 id="迭代器模式"><a href="#迭代器模式" class="headerlink" title="迭代器模式"></a>迭代器模式</h4><p>对于集合，可能会有不同的方式来遍历元素，数组和链表比较简单，直接遍历即可，但对于tree这种结构有多种遍历方式（前序，后序，中序），这时候就需要使用迭代器模式。具体来说就是在<strong>集合类组合一个迭代类</strong>。</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230108223336.png" loading="lazy"></p>
+<h4 id="访问者模式（TODO）"><a href="#访问者模式（TODO）" class="headerlink" title="访问者模式（TODO）"></a>访问者模式（TODO）</h4><h4 id="备忘录模式"><a href="#备忘录模式" class="headerlink" title="备忘录模式"></a>备忘录模式</h4><p>在不违背封装原则的前提下，捕获一个对象的内部状态，并在该对象之外保存这个状态，以便之后恢复对象为先前的状态。</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230108225709.png" loading="lazy"></p>
+<h4 id="命令模式（不太明白）"><a href="#命令模式（不太明白）" class="headerlink" title="命令模式（不太明白）"></a>命令模式（不太明白）</h4><p>将请求转换为一个包含与请求相关的所有信息的独立对象。 该转换让你能根据不同的请求将方法参数化、 延迟请求执行或将其放入队列中， 且能实现可撤销操作。</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230108235041.png" loading="lazy"></p>
+<ol>
+<li><p>The <strong>Sender</strong> class (aka <em>invoker</em>) is responsible for initiating requests. This class must have a field for storing a reference to a command object. The sender triggers that command instead of sending the request directly to the receiver. Note that the sender isn’t responsible for creating the command object. Usually, it gets a pre-created command from the client via the constructor.</p>
+</li>
+<li><p>The <strong>Command</strong> interface usually declares just a single method for executing the command.</p>
+</li>
+<li><p><strong>Concrete Commands</strong> implement various kinds of requests. A concrete command isn’t supposed to perform the work on its own, but rather to pass the call to one of the business logic objects. However, for the sake of simplifying the code, these classes can be merged.</p>
+<p>Parameters required to execute a method on a receiving object can be declared as fields in the concrete command. You can make command objects immutable by only allowing the initialization of these fields via the constructor.</p>
+</li>
+<li><p>The <strong>Receiver</strong> class contains some business logic. Almost any object may act as a receiver. Most commands only handle the details of how a request is passed to the receiver, while the receiver itself does the actual work.</p>
+</li>
+<li><p>The <strong>Client</strong> creates and configures concrete command objects. The client must pass all of the request parameters, including a receiver instance, into the command’s constructor. After that, the resulting command may be associated with one or multiple senders.</p>
+</li>
+</ol>
+<h4 id="解释器模式"><a href="#解释器模式" class="headerlink" title="解释器模式"></a>解释器模式</h4><p>解释器模式为某个语言定义它的语法（或者叫文法）表示，并定义一个解释器用来处理这个语法。</p>
+<pre><code class="java">public interface Expression &#123;
+  long interpret();
+&#125;
+public class NumberExpression implements Expression &#123;
+  private long number;
+  public NumberExpression(long number) &#123;
+    this.number = number;
+  &#125;
+  public NumberExpression(String number) &#123;
+    this.number = Long.parseLong(number);
+  &#125;
+  @Override
+  public long interpret() &#123;
+    return this.number;
+  &#125;
+&#125;
+public class AdditionExpression implements Expression &#123;
+  private Expression exp1;
+  private Expression exp2;
+  public AdditionExpression(Expression exp1, Expression exp2) &#123;
+    this.exp1 = exp1;
+    this.exp2 = exp2;
+  &#125;
+  @Override
+  public long interpret() &#123;
+    return exp1.interpret() + exp2.interpret();
+  &#125;
+&#125;
+// SubstractionExpression/MultiplicationExpression/DivisionExpression与AdditionExpression代码结构类似，这里就省略了
+public class ExpressionInterpreter &#123;
+  private Deque&lt;Expression&gt; numbers = new LinkedList&lt;&gt;();
+  public long interpret(String expression) &#123;
+    String[] elements = expression.split(&quot; &quot;);
+    int length = elements.length;
+    for (int i = 0; i &lt; (length+1)/2; ++i) &#123;
+      numbers.addLast(new NumberExpression(elements[i]));
+    &#125;
+    for (int i = (length+1)/2; i &lt; length; ++i) &#123;
+      String operator = elements[i];
+      boolean isValid = &quot;+&quot;.equals(operator) || &quot;-&quot;.equals(operator)
+              || &quot;*&quot;.equals(operator) || &quot;/&quot;.equals(operator);
+      if (!isValid) &#123;
+        throw new RuntimeException(&quot;Expression is invalid: &quot; + expression);
+      &#125;
+      Expression exp1 = numbers.pollFirst();
+      Expression exp2 = numbers.pollFirst();
+      Expression combinedExp = null;
+      if (operator.equals(&quot;+&quot;)) &#123;
+        combinedExp = new AdditionExpression(exp1, exp2);
+      &#125; else if (operator.equals(&quot;-&quot;)) &#123;
+        combinedExp = new AdditionExpression(exp1, exp2);
+      &#125; else if (operator.equals(&quot;*&quot;)) &#123;
+        combinedExp = new AdditionExpression(exp1, exp2);
+      &#125; else if (operator.equals(&quot;/&quot;)) &#123;
+        combinedExp = new AdditionExpression(exp1, exp2);
+      &#125;
+      long result = combinedExp.interpret();
+      numbers.addFirst(new NumberExpression(result));
+    &#125;
+    if (numbers.size() != 1) &#123;
+      throw new RuntimeException(&quot;Expression is invalid: &quot; + expression);
+    &#125;
+    return numbers.pop().interpret();
+  &#125;
+&#125;</code></pre>
+<h4 id="中介模式"><a href="#中介模式" class="headerlink" title="中介模式"></a>中介模式</h4><p>定义了一个单独的（中介）对象，来封装一组对象之间的交互。将这组对象之间的交互委派给与中介对象交互，来避免对象之间的直接交互。</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230109001300.png" loading="lazy"></p>
+<ol>
+<li><p><strong>Components</strong> are various classes that contain some business logic. Each component has a reference to a mediator, declared with the type of the mediator interface. The component isn’t aware of the actual class of the mediator, so you can reuse the component in other programs by linking it to a different mediator.</p>
+</li>
+<li><p>The <strong>Mediator</strong> interface declares methods of communication with components, which usually include just a single notification method. Components may pass any context as arguments of this method, including their own objects, but only in such a way that no coupling occurs between a receiving component and the sender’s class.</p>
+</li>
+<li><p><strong>Concrete Mediators</strong> encapsulate relations between various components. Concrete mediators often keep references to all components they manage and sometimes even manage their lifecycle.</p>
+</li>
+<li><p>Components must not be aware of other components. If something important happens within or to a component, it must only notify the mediator. When the mediator receives the notification, it can easily identify the sender, which might be just enough to decide what component should be triggered in return.</p>
+<p>From a component’s perspective, it all looks like a total black box. The sender doesn’t know who’ll end up handling its request, and the receiver doesn’t know who sent the request in the first place.</p>
+</li>
+</ol>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2023/01/08/design%20pattern/behavioral%20patterns/" title="behavioral patterns">http://soda1.github.io/2023/01/08/design%20pattern/behavioral%20patterns/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/01/14/linux/%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87/" rel="prev" title="性能指标"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">性能指标</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/01/08/design%20pattern/UML/" rel="next" title="UML对象关系"><span class="post-nav-text">UML对象关系</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

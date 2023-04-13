@@ -1,0 +1,309 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>creator patterns | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="单例模式只允许类创建一个实例 创建方式 饿汉式 public class IdGenerator &amp;#123;    private AtomicLong id &#x3D; new AtomicLong(0);   private static final IdGenerator instance &#x3D; new IdGenerator();   private IdGenerator() &amp;#123;&amp;#1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="creator patterns">
+<meta property="og:url" content="http://soda1.github.io/2022/12/12/design%20pattern/creator%20patterns/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="单例模式只允许类创建一个实例 创建方式 饿汉式 public class IdGenerator &amp;#123;    private AtomicLong id &#x3D; new AtomicLong(0);   private static final IdGenerator instance &#x3D; new IdGenerator();   private IdGenerator() &amp;#123;&amp;#1">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-12-12T22:54:54.000Z">
+<meta property="article:modified_time" content="2023-01-03T23:11:11.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">72</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">11</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">单例模式</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E6%96%B9%E5%BC%8F"><span class="toc-number">1.1.</span> <span class="toc-text">创建方式</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AD%98%E5%9C%A8%E9%97%AE%E9%A2%98"><span class="toc-number">1.2.</span> <span class="toc-text">存在问题</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">工厂模式</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E5%B7%A5%E5%8E%82"><span class="toc-number">2.1.</span> <span class="toc-text">简单工厂</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95"><span class="toc-number">2.2.</span> <span class="toc-text">工厂方法</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%8A%BD%E8%B1%A1%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95"><span class="toc-number">2.3.</span> <span class="toc-text">抽象工厂方法</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BB%BA%E9%80%A0%E8%80%85"><span class="toc-number">3.</span> <span class="toc-text">建造者</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F"><span class="toc-number">4.</span> <span class="toc-text">原型模式</span></a></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2022/12/12/design%20pattern/creator%20patterns/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">creator patterns</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2022-12-12 22:54:54" itemprop="dateCreated datePublished" datetime="2022-12-12T22:54:54+00:00">2022-12-12</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2023-01-03 23:11:11" itemprop="dateModified" datetime="2023-01-03T23:11:11+00:00">2023-01-03</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">1.5k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">7m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/design-pattern/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">design_pattern</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h4 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h4><p>只允许类创建一个实例</p>
+<h5 id="创建方式"><a href="#创建方式" class="headerlink" title="创建方式"></a>创建方式</h5><ul>
+<li><p>饿汉式</p>
+<pre><code class="java">public class IdGenerator &#123; 
+  private AtomicLong id = new AtomicLong(0);
+  private static final IdGenerator instance = new IdGenerator();
+  private IdGenerator() &#123;&#125;
+  public static IdGenerator getInstance() &#123;
+    return instance;
+  &#125;
+  public long getId() &#123; 
+    return id.incrementAndGet();
+  &#125;
+&#125;</code></pre>
+</li>
+<li><p>懒汉式</p>
+<p>双重检测</p>
+<pre><code class="java">public class IdGenerator &#123; 
+  private AtomicLong id = new AtomicLong(0);
+  private static IdGenerator instance;
+  private IdGenerator() &#123;&#125;
+  public static IdGenerator getInstance() &#123;
+    if (instance == null) &#123;
+      synchronized(IdGenerator.class) &#123; // 此处为类级别的锁
+        if (instance == null) &#123;
+          instance = new IdGenerator();
+        &#125;
+      &#125;
+    &#125;
+    return instance;
+  &#125;
+  public long getId() &#123; 
+    return id.incrementAndGet();
+  &#125;
+&#125;</code></pre>
+<p>静态内部类</p>
+<pre><code class="java">public class IdGenerator &#123; 
+  private AtomicLong id = new AtomicLong(0);
+  private IdGenerator() &#123;&#125;
+  private static class SingletonHolder&#123;
+    private static final IdGenerator instance = new IdGenerator();
+  &#125;
+
+  public static IdGenerator getInstance() &#123;
+    return SingletonHolder.instance;
+  &#125;
+
+  public long getId() &#123; 
+    return id.incrementAndGet();
+  &#125;
+&#125;</code></pre>
+</li>
+</ul>
+<h5 id="存在问题"><a href="#存在问题" class="headerlink" title="存在问题"></a>存在问题</h5><ol>
+<li>单例对OOP特性的支持不友好，通过类的直接使用违反了基于接口而非实现的原则，比如ID生成器，如果未来每个业务需要不同的ID生成器算法，就需要进行重构来支持这个需求变化，所有用到之前静态类的地方都需要更改</li>
+<li>单例会隐藏类之间的依赖关系，需要通过阅读代码才能发现</li>
+<li>对代码扩展性不友好</li>
+<li>对代码可测性不友好 无法mock</li>
+</ol>
+<p>如果单例并没有后续扩展需求，并且不依赖外部系统，那么设计成单例类是没有问题的，否则尽量不要使用单例类</p>
+<h4 id="工厂模式"><a href="#工厂模式" class="headerlink" title="工厂模式"></a>工厂模式</h4><h5 id="简单工厂"><a href="#简单工厂" class="headerlink" title="简单工厂"></a>简单工厂</h5><pre><code class="java">public class RuleConfigParserFactory &#123;
+  public static IRuleConfigParser createParser(String configFormat) &#123;
+    IRuleConfigParser parser = null;
+    if (&quot;json&quot;.equalsIgnoreCase(configFormat)) &#123;
+      parser = new JsonRuleConfigParser();
+    &#125; else if (&quot;xml&quot;.equalsIgnoreCase(configFormat)) &#123;
+      parser = new XmlRuleConfigParser();
+    &#125; else if (&quot;yaml&quot;.equalsIgnoreCase(configFormat)) &#123;
+      parser = new YamlRuleConfigParser();
+    &#125; else if (&quot;properties&quot;.equalsIgnoreCase(configFormat)) &#123;
+      parser = new PropertiesRuleConfigParser();
+    &#125;
+    return parser;
+  &#125;
+&#125;</code></pre>
+<p>通过传入简单参数来返回对象，如果对象是可以复用的，还可以事先使用map缓存起来</p>
+<h5 id="工厂方法"><a href="#工厂方法" class="headerlink" title="工厂方法"></a>工厂方法</h5><pre><code class="java">public interface IRuleConfigParserFactory &#123;
+  IRuleConfigParser createParser();
+&#125;
+public class JsonRuleConfigParserFactory implements IRuleConfigParserFactory &#123;
+  @Override
+  public IRuleConfigParser createParser() &#123;
+    return new JsonRuleConfigParser();
+  &#125;
+&#125;
+public class XmlRuleConfigParserFactory implements IRuleConfigParserFactory &#123;
+  @Override
+  public IRuleConfigParser createParser() &#123;
+    return new XmlRuleConfigParser();
+  &#125;
+&#125;</code></pre>
+<pre><code class="java">public class RuleConfigSource &#123;
+  public RuleConfig load(String ruleConfigFilePath) &#123;
+    String ruleConfigFileExtension = getFileExtension(ruleConfigFilePath);
+    IRuleConfigParserFactory parserFactory = null;
+    if (&quot;json&quot;.equalsIgnoreCase(ruleConfigFileExtension)) &#123;
+      parserFactory = new JsonRuleConfigParserFactory();
+    &#125; else if (&quot;xml&quot;.equalsIgnoreCase(ruleConfigFileExtension)) &#123;
+      parserFactory = new XmlRuleConfigParserFactory();
+    &#125; else if (&quot;yaml&quot;.equalsIgnoreCase(ruleConfigFileExtension)) &#123;
+      parserFactory = new YamlRuleConfigParserFactory();
+    &#125; else if (&quot;properties&quot;.equalsIgnoreCase(ruleConfigFileExtension)) &#123;
+      parserFactory = new PropertiesRuleConfigParserFactory();
+    &#125; else &#123;
+      throw new InvalidRuleConfigException(&quot;Rule config file format is not supported: &quot; + ruleConfigFilePath);
+    &#125;
+    IRuleConfigParser parser = parserFactory.createParser();
+    String configText = &quot;&quot;;
+    //从ruleConfigFilePath文件中读取配置文本到configText中
+    RuleConfig ruleConfig = parser.parse(configText);
+    return ruleConfig;
+  &#125;</code></pre>
+<p>通过使用多态的方式来实现工厂方法，但是工厂对象的创建逻辑又耦合进load函数中了，需要再创建一个简单工厂</p>
+<pre><code class="java">public class RuleConfigParserFactoryMap &#123; //工厂的工厂
+  private static final Map&lt;String, IRuleConfigParserFactory&gt; cachedFactories = new HashMap&lt;&gt;();
+  static &#123;
+    cachedFactories.put(&quot;json&quot;, new JsonRuleConfigParserFactory());
+    cachedFactories.put(&quot;xml&quot;, new XmlRuleConfigParserFactory());
+    cachedFactories.put(&quot;yaml&quot;, new YamlRuleConfigParserFactory());
+    cachedFactories.put(&quot;properties&quot;, new PropertiesRuleConfigParserFactory());
+  &#125;
+  public static IRuleConfigParserFactory getParserFactory(String type) &#123;
+    if (type == null || type.isEmpty()) &#123;
+      return null;
+    &#125;
+    IRuleConfigParserFactory parserFactory = cachedFactories.get(type.toLowerCase());
+    return parserFactory;
+  &#125;
+&#125;</code></pre>
+<pre><code class="java">public class RuleConfigSource &#123;
+  public RuleConfig load(String ruleConfigFilePath) &#123;
+    String ruleConfigFileExtension = getFileExtension(ruleConfigFilePath);
+    IRuleConfigParserFactory parserFactory = RuleConfigParserFactoryMap.getParserFactory(ruleConfigFileExtension);
+    if (parserFactory == null) &#123;
+      throw new InvalidRuleConfigException(&quot;Rule config file format is not supported: &quot; + ruleConfigFilePath);
+    &#125;
+    IRuleConfigParser parser = parserFactory.createParser();
+    String configText = &quot;&quot;;
+    //从ruleConfigFilePath文件中读取配置文本到configText中
+    RuleConfig ruleConfig = parser.parse(configText);
+    return ruleConfig;
+  &#125;
+  private String getFileExtension(String filePath) &#123;
+    //...解析文件名获取扩展名，比如rule.json，返回json
+    return &quot;json&quot;;
+  &#125;
+&#125;</code></pre>
+<p>当创建逻辑比较复杂的时候才推荐使用工厂方法。</p>
+<h5 id="抽象工厂方法"><a href="#抽象工厂方法" class="headerlink" title="抽象工厂方法"></a>抽象工厂方法</h5><p>当类有多个类别时就需要使用到，比如配置类分为基于Rule配置和系统配置。场景比较特殊，不常用</p>
+<pre><code class="java">针对规则配置的解析器：基于接口IRuleConfigParser
+JsonRuleConfigParser
+XmlRuleConfigParser
+YamlRuleConfigParser
+PropertiesRuleConfigParser
+针对系统配置的解析器：基于接口ISystemConfigParser
+JsonSystemConfigParser
+XmlSystemConfigParser
+YamlSystemConfigParser
+PropertiesSystemConfigParser</code></pre>
+<p>工厂类接口</p>
+<pre><code class="java">public interface IConfigParserFactory &#123;
+  IRuleConfigParser createRuleParser();
+  ISystemConfigParser createSystemParser();
+  //此处可以扩展新的parser类型，比如IBizConfigParser
+&#125;
+</code></pre>
+<h4 id="建造者"><a href="#建造者" class="headerlink" title="建造者"></a>建造者</h4><p>当创建一个对象需要配置比较多的属性时，且这些属性可能会存在着一定的关系。</p>
+<pre><code class="java">public class ResourcePoolConfig &#123;
+  private String name;
+  private int maxTotal;
+  private int maxIdle;
+  private int minIdle;
+  private ResourcePoolConfig(Builder builder) &#123;
+    this.name = builder.name;
+    this.maxTotal = builder.maxTotal;
+    this.maxIdle = builder.maxIdle;
+    this.minIdle = builder.minIdle;
+  &#125;
+  //...省略getter方法...
+  //我们将Builder类设计成了ResourcePoolConfig的内部类。
+  //我们也可以将Builder类设计成独立的非内部类ResourcePoolConfigBuilder。
+  public static class Builder &#123;
+    private static final int DEFAULT_MAX_TOTAL = 8;
+    private static final int DEFAULT_MAX_IDLE = 8;
+    private static final int DEFAULT_MIN_IDLE = 0;
+    private String name;
+    private int maxTotal = DEFAULT_MAX_TOTAL;
+    private int maxIdle = DEFAULT_MAX_IDLE;
+    private int minIdle = DEFAULT_MIN_IDLE;
+    public ResourcePoolConfig build() &#123;
+      // 校验逻辑放到这里来做，包括必填项校验、依赖关系校验、约束条件校验等
+      if (StringUtils.isBlank(name)) &#123;
+        throw new IllegalArgumentException(&quot;...&quot;);
+      &#125;
+      if (maxIdle &gt; maxTotal) &#123;
+        throw new IllegalArgumentException(&quot;...&quot;);
+      &#125;
+      if (minIdle &gt; maxTotal || minIdle &gt; maxIdle) &#123;
+        throw new IllegalArgumentException(&quot;...&quot;);
+      &#125;
+      return new ResourcePoolConfig(this);
+    &#125;
+    public Builder setName(String name) &#123;
+      if (StringUtils.isBlank(name)) &#123;
+        throw new IllegalArgumentException(&quot;...&quot;);
+      &#125;
+      this.name = name;
+      return this;
+    &#125;
+    public Builder setMaxTotal(int maxTotal) &#123;
+      if (maxTotal &lt;= 0) &#123;
+        throw new IllegalArgumentException(&quot;...&quot;);
+      &#125;
+      this.maxTotal = maxTotal;
+      return this;
+    &#125;
+    public Builder setMaxIdle(int maxIdle) &#123;
+      if (maxIdle &lt; 0) &#123;
+        throw new IllegalArgumentException(&quot;...&quot;);
+      &#125;
+      this.maxIdle = maxIdle;
+      return this;
+    &#125;
+    public Builder setMinIdle(int minIdle) &#123;
+      if (minIdle &lt; 0) &#123;
+        throw new IllegalArgumentException(&quot;...&quot;);
+      &#125;
+      this.minIdle = minIdle;
+      return this;
+    &#125;
+  &#125;
+&#125;
+// 这段代码会抛出IllegalArgumentException，因为minIdle&gt;maxIdle
+ResourcePoolConfig config = new ResourcePoolConfig.Builder()
+        .setName(&quot;dbconnectionpool&quot;)
+        .setMaxTotal(16)
+        .setMaxIdle(10)
+        .setMinIdle(12)
+        .build();</code></pre>
+<h4 id="原型模式"><a href="#原型模式" class="headerlink" title="原型模式"></a>原型模式</h4><p>如果对象的创建成本比较大，而同一个类的不同对象之间差别不大（大部分字段都相同），在这种情况下，我们可以利用对已有对象（原型）进行复制（或者叫拷贝）的方式，来创建新对象，以达到节省创建时间的目的。这种基于原型来创建对象的方式就叫作原型设计模式，简称原型模式。</p>
+<p>原型模式有两种实现方法，深拷贝和浅拷贝。浅拷贝只会复制对象中基本数据类型数据和引用对象的内存地址，不会递归地复制引用对象，以及引用对象的引用对象……而深拷贝得到的是一份完完全全独立的对象。</p>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2022/12/12/design%20pattern/creator%20patterns/" title="creator patterns">http://soda1.github.io/2022/12/12/design%20pattern/creator%20patterns/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/01/03/design%20pattern/structural%20patterns/" rel="prev" title="structural patterns"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">structural patterns</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2022/12/12/design%20pattern/checkList/" rel="next" title="code quality checkList"><span class="post-nav-text">code quality checkList</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

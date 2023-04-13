@@ -1,0 +1,331 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>mysql权限操作 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="一、MySQL用户认证MySQL的用户认证形式是: 用户名+主机。比如&amp;#x74;&amp;#101;&amp;#115;&amp;#x74;&amp;#x40;&amp;#x31;&amp;#50;&amp;#x37;&amp;#x2e;&amp;#48;&amp;#x2e;&amp;#x30;&amp;#x2e;&amp;#x31;和test@192.168.10.10是不一样的用户。就好比现实中的牛家村的张三和马家村的张三是分别两个人一样。MySQL中的权限分配都是分配到用户+主机的实体上。M">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql权限操作">
+<meta property="og:url" content="http://soda1.github.io/2021/05/25/mysql/%E9%AB%98%E7%BA%A7/2021_05_25-mysql%E6%9D%83%E9%99%90/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="一、MySQL用户认证MySQL的用户认证形式是: 用户名+主机。比如&amp;#x74;&amp;#101;&amp;#115;&amp;#x74;&amp;#x40;&amp;#x31;&amp;#50;&amp;#x37;&amp;#x2e;&amp;#48;&amp;#x2e;&amp;#x30;&amp;#x2e;&amp;#x31;和test@192.168.10.10是不一样的用户。就好比现实中的牛家村的张三和马家村的张三是分别两个人一样。MySQL中的权限分配都是分配到用户+主机的实体上。M">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-4cbe51f1e13be60df6450ac0c0e7c7cb_720w.jpg">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-c728eac606a79231f2d7681b24a03d73_720w.jpg">
+<meta property="og:image" content="https://pic1.zhimg.com/80/v2-022167c990b41d56219b99ee93df77b8_720w.jpg">
+<meta property="og:image" content="https://pic2.zhimg.com/80/v2-d0a02a81c598b640a2c0e8020b5d3675_720w.jpg">
+<meta property="og:image" content="https://pic2.zhimg.com/80/v2-4b97a4573ff306575b3e5f8d07d22949_720w.jpg">
+<meta property="og:image" content="https://pic1.zhimg.com/80/v2-babb1c33a8a3d64b0b7dfa01635302ac_720w.jpg">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-cf3a2f275c3f680ce89ed21432926eef_720w.jpg">
+<meta property="article:published_time" content="2021-05-25T20:48:24.000Z">
+<meta property="article:modified_time" content="2021-05-25T23:57:28.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic4.zhimg.com/80/v2-4cbe51f1e13be60df6450ac0c0e7c7cb_720w.jpg"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">72</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">11</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81MySQL%E7%94%A8%E6%88%B7%E8%AE%A4%E8%AF%81"><span class="toc-number">1.</span> <span class="toc-text">一、MySQL用户认证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81MySQL%E7%9A%84%E6%9D%83%E9%99%90%E5%88%86%E7%B1%BB%E5%8F%8A%E5%AD%98%E5%82%A8"><span class="toc-number">2.</span> <span class="toc-text">二、MySQL的权限分类及存储</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81-MySQL%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6"><span class="toc-number">3.</span> <span class="toc-text">三、 MySQL访问控制</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1%E3%80%81%E7%94%A8%E6%88%B7%E8%BF%9E%E6%8E%A5%E6%97%B6%E7%9A%84%E6%A3%80%E6%9F%A5"><span class="toc-number">3.1.</span> <span class="toc-text">1、用户连接时的检查</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2%E3%80%81%E6%89%A7%E8%A1%8CSQL%E8%AF%AD%E5%8F%A5%E6%97%B6%E7%9A%84%E6%A3%80%E6%9F%A5"><span class="toc-number">3.2.</span> <span class="toc-text">2、执行SQL语句时的检查</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%9D%83%E9%99%90%E8%A1%A8%E5%AD%97%E6%AE%B5%E8%AF%A6%E8%A7%A3"><span class="toc-number">4.</span> <span class="toc-text">四、权限表字段详解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86%E5%AE%9E%E8%B7%B5"><span class="toc-number">5.</span> <span class="toc-text">五、用户管理实践</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AD%E3%80%81MySQL%E7%AE%A1%E7%90%86%E5%91%98%E5%AF%86%E7%A0%81%E6%89%BE%E5%9B%9E"><span class="toc-number">6.</span> <span class="toc-text">六、MySQL管理员密码找回</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%83%E3%80%81-MySQL-%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86%E5%AE%9E%E8%B7%B5"><span class="toc-number">7.</span> <span class="toc-text">七、 MySQL 权限管理实践</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AB%E3%80%81MySQL-%E7%94%A8%E6%88%B7%E5%92%8C%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86%E7%BB%8F%E9%AA%8C"><span class="toc-number">8.</span> <span class="toc-text">八、MySQL 用户和权限管理经验</span></a></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2021/05/25/mysql/%E9%AB%98%E7%BA%A7/2021_05_25-mysql%E6%9D%83%E9%99%90/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">mysql权限操作</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2021-05-25 20:48:24" itemprop="dateCreated datePublished" datetime="2021-05-25T20:48:24+00:00">2021-05-25</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">3.7k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">16m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/mysql/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">mysql</span></a></span> > <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/mysql/adv/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">adv</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h3 id="一、MySQL用户认证"><a href="#一、MySQL用户认证" class="headerlink" title="一、MySQL用户认证"></a><strong>一、MySQL用户认证</strong></h3><p>MySQL的用户认证形式是: 用户名+主机。比如<a href="mailto:&#x74;&#101;&#115;&#x74;&#x40;&#x31;&#50;&#x37;&#x2e;&#48;&#x2e;&#x30;&#x2e;&#x31;">&#x74;&#101;&#115;&#x74;&#x40;&#x31;&#50;&#x37;&#x2e;&#48;&#x2e;&#x30;&#x2e;&#x31;</a>和test@192.168.10.10是不一样的用户。就好比现实中的牛家村的张三和马家村的张三是分别两个人一样。MySQL中的权限分配都是分配到用户+主机的实体上。MySQL的主机信息可以是本地(localhost)，某个IP，某个IP段，以及任何地方等，即用户的地址可以限制到某个具体的IP，或者某个IP范围，或者任意地方。MySQL用户分为普通用户和root用户。root用户是超级管理员，拥有所有权限，普通用户只拥有被授予的各种权限。</p>
+<h3 id="二、MySQL的权限分类及存储"><a href="#二、MySQL的权限分类及存储" class="headerlink" title="二、MySQL的权限分类及存储"></a><strong>二、MySQL的权限分类及存储</strong></h3><p><strong>1.MySQL用户权限层级</strong></p>
+<ul>
+<li>全局层级：全局权限适用于一个给定MySQL Server中的所有数据库，这些权限存储在mysql.user表中。</li>
+</ul>
+<pre><code class="text">GRANT ALL ON *.* TO &#39;user&#39;@&#39;host&#39;;  # *.* 表示数据库库的所有库和表，对应权限存储在mysql.user表中</code></pre>
+<ul>
+<li>数据库层级：数据库权限适用于一个给定数据库中的所有目标，这些权限存储在mysql.db表中。</li>
+</ul>
+<pre><code class="text">GRANT ALL ON mydb.* TO &#39;user&#39;@&#39;host&#39;;  #mydb.* 表示mysql数据库下的所有表，对应权限存储在mysql.db表中</code></pre>
+<ul>
+<li>表层级：表权限适用于一个给定表中的所有列，这些权限存储在mysql.tables_priv表中。</li>
+</ul>
+<pre><code class="text">GRANT ALL ON mydb.mytable TO &#39;user&#39;@&#39;host&#39;;  #mydb.mytable 表示mysql数据库下的mytable表，对应权限存储在mysql.tables_priv表</code></pre>
+<ul>
+<li>列层级：列权限使用于一个给定表中的单一列，这些权限存储在mysql.columns_priv表中。</li>
+</ul>
+<pre><code class="text">GRANT ALL (col1， col2， col3)  ON mydb.mytable TO &#39;user&#39;@&#39;host&#39;; #mydb.mytable 表示mysql数据库下的mytable表， col1, col2,  col3表示mytable表中的列名</code></pre>
+<ul>
+<li>子程序层级：CREATE ROUTINE、ALTER ROUTINE、EXECUTE和GRANT权限适用于已存储的子程序。这些权限可以被授予为全局层级和数据库层级。而且，除了CREATE ROUTINE外，这些权限可以被授予子程序层级，并存储在mysql.procs_priv表中。</li>
+</ul>
+<pre><code class="text">GRANT EXECUTE ON PROCEDURE mydb.myproc TO &#39;user&#39;@&#39;host&#39;; #mydb.mytable 表示mysql数据库下的mytable表，PROCEDUR表示存储过程</code></pre>
+<p><strong>2. MySQL权限简单分类</strong></p>
+<ul>
+<li><strong>数据权限</strong>分为：库、表和字段三种级别</li>
+<li><strong>管理权限</strong>主要是管理员要使用到的权限，包括：数据库创建，临时表创建、主从部署、进程管理等</li>
+<li><strong>程序权限</strong>主要是触发器、存储过程、函数等权限。</li>
+</ul>
+<p><img src="https://pic4.zhimg.com/80/v2-4cbe51f1e13be60df6450ac0c0e7c7cb_720w.jpg" alt="img" loading="lazy"></p>
+<p><strong>2. MySQL权限详情</strong></p>
+<p><img src="https://pic4.zhimg.com/80/v2-c728eac606a79231f2d7681b24a03d73_720w.jpg" alt="img" loading="lazy"></p>
+<blockquote>
+<p>第一列表示可以在grant命令中制定的权限第二列对应着几张权限表(user,db,tables_priv, columns_priv, procs_priv)中的列第三列表示权限的作用范围，其中Global（Server administration）对应 mysql.user 表，Database 对应 mysql.db 表，Tables 对应 mysql.tables_priv 表，Columns 对应 mysql.columns_priv 表，Stored routines 对应 mysql.procs_priv 表。</p>
+</blockquote>
+<p>MYSQL的权限如何分布，就是针对表可以设置什么权限，针对列可以设置什么权限等等，这个可以从官方文档中的一个表来说明：</p>
+<p><strong>权限分布可能设置的权限</strong>表权限Select, Insert, Update, Delete, Create, Drop, Grant, References, Index, Alter列权限Select, Insert, Update, References程序权限Execute, Alter Routine, Grant</p>
+<h3 id="三、-MySQL访问控制"><a href="#三、-MySQL访问控制" class="headerlink" title="三、 MySQL访问控制"></a><strong>三、 MySQL访问控制</strong></h3><p>MySQL访问控制分为两个阶段:</p>
+<ol>
+<li>用户连接检查阶段</li>
+<li>执行SQL语句时检查阶段</li>
+</ol>
+<h4 id="1、用户连接时的检查"><a href="#1、用户连接时的检查" class="headerlink" title="1、用户连接时的检查"></a><strong>1、用户连接时的检查</strong></h4><p>1）当用户连接时，MySQL服务器首先从user表里匹配host, user, password，匹配不到则拒绝该连接2）接着检查user表的max_connections和max_user_connections，如果超过上限则拒绝连接3）检查user表的SSL安全连接，如果有配置SSL，则需确认用户提供的证书是否合法只有上面3个检查都通过后，服务器才建立连接，连接建立后，当用户执行SQL语句时，需要做SQL语句执行检查。</p>
+<h4 id="2、执行SQL语句时的检查"><a href="#2、执行SQL语句时的检查" class="headerlink" title="2、执行SQL语句时的检查"></a><strong>2、执行SQL语句时的检查</strong></h4><p>1）从user表里检查max_questions和max_updates，如果超过上限则拒绝执行SQL下面几步是进行权限检查：2）首先检查user表，看是否具有相应的全局性权限，如果有，则执行，没有则继续下一步检查3）接着到db表，看是否具有数据库级别的权限，如果有，则执行，没有则继续下一步检查4）最后到tables_priv, columns_priv, procs_priv表里查看是否具有相应对象的权限从以上的过程我们可以知道，MySQL检查权限是一个比较复杂的过程，所以为了提高性能，MySQL的启动时就会把这5张权限表加载到内存。</p>
+<h3 id="四、权限表字段详解"><a href="#四、权限表字段详解" class="headerlink" title="四、权限表字段详解"></a><strong>四、权限表字段详解</strong></h3><p><strong>1.user表</strong>user表的权限是基于服务器范围的所有权限，比如用户拥有服务器中所有数据库的select权限那么在user表中的Select_priv列为Y,如果用户单单只拥有某个一数据库的select权限那么user表中的Select_priv为N,会在DB表中记录一条信息在DB表中的select_priv为Y。</p>
+<pre><code class="text">desc mysql.user;</code></pre>
+<p><img src="https://pic1.zhimg.com/80/v2-022167c990b41d56219b99ee93df77b8_720w.jpg" alt="img" loading="lazy"></p>
+<p><strong>2.db表</strong>如果授予一个用户单独某个数据库的权限，就会在db表中记录一条相关信息。</p>
+<pre><code class="text">desc mysql.db;</code></pre>
+<p><img src="https://pic2.zhimg.com/80/v2-d0a02a81c598b640a2c0e8020b5d3675_720w.jpg" alt="img" loading="lazy"></p>
+<p><strong>3.tables_priv表</strong></p>
+<pre><code class="text">desc mysql.tables_priv;</code></pre>
+<p><img src="https://pic2.zhimg.com/80/v2-4b97a4573ff306575b3e5f8d07d22949_720w.jpg" alt="img" loading="lazy"></p>
+<blockquote>
+<p>上面的Column_priv比较奇怪，因为照理说tables_priv只显示表级别的权限，列级别的权限应该在columns_priv里显示才对。后来查了资料才知道，原来这是为了提高权限检查时的性能，试想一下，权限检查时，如果发现tables_priv.Column_priv为空，就不需要再检查columns_priv表了，这种情况在现实中往往占大多数。</p>
+</blockquote>
+<p><strong>4. columns_priv表</strong></p>
+<pre><code class="text">desc mysql.columns_priv;</code></pre>
+<p><img src="https://pic1.zhimg.com/80/v2-babb1c33a8a3d64b0b7dfa01635302ac_720w.jpg" alt="img" loading="lazy"></p>
+<p><strong>5. procs_priv表</strong></p>
+<pre><code class="text">desc mysql.procs_priv;</code></pre>
+<p><img src="https://pic4.zhimg.com/80/v2-cf3a2f275c3f680ce89ed21432926eef_720w.jpg" alt="img" loading="lazy"></p>
+<h3 id="五、用户管理实践"><a href="#五、用户管理实践" class="headerlink" title="五、用户管理实践"></a><strong>五、用户管理实践</strong></h3><p><strong>1.用户创建</strong></p>
+<ul>
+<li>通过create user语句创建用户</li>
+</ul>
+<p>在执行CREATE USER或CRANT语句后，MySQL服务器会修改相应的用户权限表，添加或修改用户及权限。</p>
+<pre><code class="text">create user &#39;USERNAME&#39;@&#39;HOST&#39; identified by &#39;PASSWORD&#39;;</code></pre>
+<blockquote>
+<p>HOST的形式：1. IP地址，如172.16.16.1；2. 主机名，如localhost；3. 网络地址，如172.16.0.04. 通配符，如%：匹配任意字符<em>：匹配任意单个字符如172.16.16.</em>(允许172.16.16.1-172.16.16.9)</p>
+</blockquote>
+<p>eg:</p>
+<pre><code class="text">mysql&gt; CREATE USER &#39;jeffrey&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;mypass&#39;;
+Query OK, 0 rows affected (0.00 sec)</code></pre>
+<ul>
+<li>通过grant语句创建新用户</li>
+</ul>
+<p>GRANT语句是添加新用户并授权它们访问MySQL对象的首选方法，其语法格式为：</p>
+<pre><code class="text">grant all on DB_NAME.TABLE_NAME to &#39;USERNAME&#39;@&#39;HOST&#39; identified by &#39;PASSWORD&#39;;</code></pre>
+<blockquote>
+<p>HOST的表现形式和create user一样</p>
+</blockquote>
+<p>eg：</p>
+<pre><code class="text"># 用户 testUser对所有的数据有查询和更新权限，并授于对所有数据表的SELECT和UPDATE权限
+mysql&gt; GRANT SELECT,UPDATE  ON *.* TO &#39;testUser&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;testpwd&#39;;
+Query OK, 0 rows affected (0.00 sec)</code></pre>
+<ol>
+<li>创建root用户</li>
+</ol>
+<pre><code class="text">mysql&gt; GRANT ALL PRIVILEGES ON *.* TO &#39;root&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;root&#39; WITH GRANT OPTION;
+mysql&gt; flush privileges;</code></pre>
+<p>2). 创建一个基本的增删改查用户</p>
+<pre><code class="text">mysql&gt; GRANT UPDATE, DELETE, INSERT, SELECT ON *.* TO &#39;test&#39;@&#39;%&#39; identified by &#39;test&#39; WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0; 
+mysql&gt; flush privileges;
+# MAX_QUERIES_PER_HOUR，MAX_CONNECTIONS_PER_HOUR，MAX_UPDATES_PER_HOUR设置为0表示不限制</code></pre>
+<p>3). 创建数据库基本的增删改查用户</p>
+<pre><code class="text">mysql&gt; GRANT SELECT, INSERT, UPDATE, DELETE, SHOW VIEW, EXECUTE ON `db_name`.* TO &#39;test&#39;@&#39;%&#39; identified by  &#39;test&#39;;
+mysql&gt; flush privileges;</code></pre>
+<p>4). 授予数据库名以db开头的数据库的权限</p>
+<pre><code class="text">mysql&gt; GRANT SELECT, INSERT, UPDATE, DELETE, SHOW VIEW, EXECUTE ON `db%`.* TO &#39;perform&#39;@&#39;%&#39;;
+mysql&gt; flush privileges;</code></pre>
+<p>5). 创建备份用户权限</p>
+<pre><code class="text">mysql&gt; GRANT SELECT,EVENT,SHOW DATABASES,LOCK TABLES,SUPER,REPLICATION CLIENT ON *.* TO &#39;backup&#39;@&#39;localhost&#39; identified by &#39;backup&#39;;
+mysql&gt; flush privileges;</code></pre>
+<p>6). 备份恢复用户权限</p>
+<pre><code class="text">mysql&gt; GRANT INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER,CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, EVENT, TRIGGER ON *.* TO &#39;restore&#39;@&#39;localhost&#39; identified by &#39;123456&#39;;
+mysql&gt; flush privileges;</code></pre>
+<p>7). 复制用户权限</p>
+<pre><code class="text">mysql&gt; GRANT PROCESS, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO &#39;repl&#39;@&#39;%&#39; IDENTIFIED BY &#39;123456&#39;;
+mysql&gt; flush privileges;</code></pre>
+<p><strong>2.用户删除</strong></p>
+<pre><code class="text">mysql&gt; drop user &#39;USERNAME&#39;@&#39;HOST&#39;;
+# 删除MySQL默认的无用账户;
+mysql&gt; drop user &#39;root&#39;@&#39;localhost.localdomain&#39;;
+
+# 删除MySQL默认的无用账户;
+mysql&gt; drop user &#39;root&#39;@&#39;127.0.0.1&#39;;</code></pre>
+<p><strong>3. 更改用户名</strong></p>
+<pre><code class="text">mysql&gt; rename user OLD_NAME to NEW_NAME; </code></pre>
+<p><strong>4. 修改用户密码</strong></p>
+<ul>
+<li>通过mysqladmin工具</li>
+</ul>
+<pre><code class="text"># 给root@localhost用户登录mysql设置密码为&quot;redhat&quot;;
+$ mysqladmin -u root -h localhost password &quot;redhat&quot; 
+
+# 修改root@localhost用户登录mysql数据库的密码;
+$ mysqladmin -u root -h localhost password &quot;new passwd&quot; -p &quot;old passwd&quot;</code></pre>
+<ul>
+<li>通过直接修改mysql.user表的用户记录</li>
+</ul>
+<pre><code class="text"># MySQL 5.6
+mysql&gt; update mysql.user set password=PASSWORD(&#39;redhat&#39;) where user=&#39;root&#39;;
+mysql&gt; flush privileges;
+
+# MySQL 5.7
+mysql&gt; update mysql.user set authentication_string=PASSWORD(&#39;redhat&#39;) where user=&#39;root&#39;;
+mysql&gt; flush privileges;</code></pre>
+<ul>
+<li>set password语句</li>
+</ul>
+<pre><code class="text">mysql&gt; set password for &#39;root&#39;@&#39;localhost&#39;=PASSWORD(&#39;redhat&#39;);
+mysql&gt; flush privileges;</code></pre>
+<ul>
+<li>ALTER USER语句(MYSQL5.7版本)</li>
+</ul>
+<pre><code class="text">mysql&gt; use mysql
+mysql&gt; alter user root@&#39;localhost&#39; identified by &#39;123456&#39;;
+mysql&gt; flush privileges;</code></pre>
+<h3 id="六、MySQL管理员密码找回"><a href="#六、MySQL管理员密码找回" class="headerlink" title="六、MySQL管理员密码找回"></a><strong>六、MySQL管理员密码找回</strong></h3><p><strong>1.修改配置文件，跳过授权表</strong>在配置文件中[mysqld]字段添加skip-grant-tables指令</p>
+<pre><code class="text">$ cat /etc/my.cnf 
+[mysqld]
+skip-grant-tables</code></pre>
+<p><strong>2. 重启MySQL Server</strong></p>
+<pre><code class="text">service mysqld restart</code></pre>
+<p><strong>3. 给root用户登录mysql设置密码为helloWORD并以加密方式</strong></p>
+<pre><code class="text">mysql&gt; use mysql;
+# MySQL5.6
+mysql&gt; update user set password=PASSWORD(&#39;helloWORD&#39;) where user=&#39;root&#39;;
+# MySQL5.7
+mysql&gt;  update mysql.user set authentication_string=PASSWORD(&#39;helloWORD&#39;) where user=&#39;root&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>4.修改配置文件，注释刚才添加的配置项</strong></p>
+<pre><code class="text">$ cat /etc/my.cnf 
+[mysqld]
+#skip-grant-tables</code></pre>
+<p><strong>5.重启MySQL Server</strong></p>
+<pre><code class="text">service mysqld restart</code></pre>
+<h3 id="七、-MySQL-权限管理实践"><a href="#七、-MySQL-权限管理实践" class="headerlink" title="七、 MySQL 权限管理实践"></a><strong>七、 MySQL 权限管理实践</strong></h3><p>账户权限信息被存储在MySQL数据库的几张权限表中，在MySQL启动时，服务器将这些数据库表中权限信息的内容读入内存。其中GRANT和REVOKE语句所涉及的常用权限大致如下这些：CREATE、DROP、SELECT、INSERT、UPDATE、DELETE、INDEX、ALTER、CREATE、ROUTINE、FILE等，还有一个特殊的proxy权限，是用来赋予某个用户具有给他人赋予权限的权限。<strong>1. grant 所有权限</strong></p>
+<pre><code class="text">mysql&gt; grant all privileges on *.* to &#39;USERNAME&#39;@&#39;HOST&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>2. grant super权限在*.*上(super权限可以对全局变量更改)；</strong></p>
+<pre><code class="text">mysql&gt; grant super on *.* to &#39;USERNAME&#39;@&#39;HOST&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>3. grant某个库下所有表的所有权限</strong></p>
+<pre><code class="text">mysql&gt; grant all privileges on DB_NAME.* to &#39;USERNAME&#39;@&#39;HOST&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>4. grant某个库下所有表的select权限</strong></p>
+<pre><code class="text">mysql&gt;grant select on DB_NAME.* to &#39;USERNAME&#39;@&#39;HOST&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>5. grant某个库下某个表的insert权限</strong></p>
+<pre><code class="text">mysql&gt; grant insert on  DB_NAME.TABLE_NAME to &#39;USERNAME&#39;@&#39;HOST&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>6. grant某个库下某个表的update权限</strong></p>
+<pre><code class="text">mysql&gt;grant update on DB_NAME.TABLE_NAME to &#39;USERNAME&#39;@&#39;HOST&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>7. grant某个库下某个表的某个字段update权限</strong></p>
+<pre><code class="text">mysql&gt; grant update(COLUMN_NAME)  on DB_NAME.TABLE_NAME to &#39;USERNAME&#39;@&#39;HOST&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>8.通过GRANT语句中的USAGE权限，可以创建账户而不授予任何权限</strong></p>
+<pre><code class="text">mysql&gt; grant usage on *.* to &#39;USERNAME&#39;@&#39;HOST&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>9. grant创建、修改、删除MySQL数据表结构权限</strong></p>
+<pre><code class="text">mysql&gt; grant create on testdb.* to developer@&#39;192.168.0.%&#39;;
+mysql&gt; grant alter on testdb.* to developer@&#39;192.168.0.%&#39;;
+mysql&gt; grant drop on testdb.* to developer@&#39;192.168.0.%&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>10. grant操作MySQL外键权限</strong></p>
+<pre><code class="text">mysql&gt; grant references on testdb.* to developer@&#39;192.168.0.%&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>11. grant操作MySQL临时表权限</strong></p>
+<pre><code class="text">mysql&gt; grant create temporary tables on testdb.* to developer@&#39;192.168.0.%&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>12. grant操作MySQL索引权限</strong></p>
+<pre><code class="text">mysql&gt; grant index on testdb.* to developer@&#39;192.168.0.%&#39;;
+mysql&gt;  flush privileges;</code></pre>
+<p><strong>13.grant操作MySQL视图、查看视图源代码权限</strong></p>
+<pre><code class="text">mysql&gt; grant create view on testdb.* to developer@&#39;192.168.0.%&#39;;
+mysql&gt; grant show view on testdb.* to developer@&#39;192.168.0.%&#39;;
+mysql&gt; flush privileges;</code></pre>
+<p><strong>14. grant操作MySQL存储过程、存储函数权限</strong></p>
+<pre><code class="text">mysql&gt; grant create routine on testdb.* to developer@&#39;192.168.0.%&#39;;
+mysql&gt; grant alter routine on testdb.* to developer@&#39;192.168.0.%&#39;;
+mysql&gt; grant execute on testdb.* to developer@&#39;192.168.0.%&#39;;
+mysql&gt; flush privileges;</code></pre>
+<p><strong>15.PROXY特殊权限</strong>如果想让某个用户具有给他人赋予权限的能力，那么就需要proxy权限了。当你给一个用户赋予all权限之后，你查看mysql.user表会发现Grant_priv字段还是为N，表示其没有给他人赋予权限的权限。</p>
+<p>我们可以查看一下系统默认的超级管理员权限：</p>
+<pre><code class="text">mysql&gt; show grants for &#39;root&#39;@&#39;localhost&#39;;
++---------------------------------------------------------------------+
+| Grants for root@localhost                                           |
++---------------------------------------------------------------------+
+| GRANT ALL PRIVILEGES ON *.* TO &#39;root&#39;@&#39;localhost&#39; WITH GRANT OPTION |
+| GRANT PROXY ON &#39;&#39;@&#39;&#39; TO &#39;root&#39;@&#39;localhost&#39; WITH GRANT OPTION        |
++---------------------------------------------------------------------+
+2 rows in set (0.00 sec)</code></pre>
+<p>可以看到其本身有PROXY权限，并且这个语句跟一般授权语句还不太一样。所以如果想让一个远程用户有给他人赋予权限的能力，就需要给此用户PROXY权限，如下：</p>
+<pre><code class="text">mysql&gt; grant all on *.* to &#39;test&#39;@&#39;%&#39; identified by &#39;helloWORD&#39;;
+mysql&gt; GRANT PROXY ON &#39;&#39;@&#39;&#39; TO &#39;test&#39;@&#39;%&#39; WITH GRANT OPTION;
+mysql&gt; flush privileges;</code></pre>
+<p><strong>16. 查看用户的权限</strong></p>
+<pre><code class="text">Mysql&gt; show grants for &#39;USERNAME&#39;@&#39;HOST&#39;;</code></pre>
+<p><strong>17. 移除用户权限</strong></p>
+<pre><code class="text"># 移除tom用户对于db.xsb的权限;
+Mysql&gt; revoke all on db.xsb from &#39;tom&#39;@&#39;localhost&#39;;
+# 刷新授权表;
+Mysql&gt; flush privileges;</code></pre>
+<blockquote>
+<p>使用REVOKE收回权限之后，用户帐户的记录将从db、host、tables_priv、columns_priv表中删除，但是用户帐号依然在user表中保存。</p>
+</blockquote>
+<h3 id="八、MySQL-用户和权限管理经验"><a href="#八、MySQL-用户和权限管理经验" class="headerlink" title="八、MySQL 用户和权限管理经验"></a><strong>八、MySQL 用户和权限管理经验</strong></h3><p><strong>1. 用户管理经验</strong></p>
+<ul>
+<li>1)、尽量使用create user, grant等语句，而不要直接修改权限表。</li>
+</ul>
+<p>虽然create user, grant等语句底层也是修改权限表，和直接修改权限表的效果是一样的，但是，对于非高手来说，采用封装好的语句肯定不会出错，而如果直接修改权限表，难免会漏掉某些表。而且，修改完权限表之后，还需要执行flush privileges重新加载到内存，否则不会生效。</p>
+<ul>
+<li>2). 把匿名用户删除掉。</li>
+</ul>
+<p>匿名用户没有密码，不但不安全，还会产生一些莫名其妙的问题，强烈建议删除。</p>
+<p><strong>2. 权限管理经验</strong></p>
+<ul>
+<li>1)、只授予能满足需要的最小权限，防止用户干坏事。比如用户只是需要查询，那就只给select权限就可以了，不要给用户赋予update、insert或者delete权限。</li>
+<li>2)、创建用户的时候限制用户的登录主机，一般是限制成指定IP或者内网IP段。</li>
+<li>3)、初始化数据库的时候删除没有密码的用户。安装完数据库的时候会自动创建一些用户，这些用户默认没有密码。</li>
+<li>4)、为每个用户设置满足密码复杂度的密码。</li>
+<li>5)、定期清理不需要的用户，回收权限或者删除用户。</li>
+</ul>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2021/05/25/mysql/%E9%AB%98%E7%BA%A7/2021_05_25-mysql%E6%9D%83%E9%99%90/" title="mysql权限操作">http://soda1.github.io/2021/05/25/mysql/%E9%AB%98%E7%BA%A7/2021_05_25-mysql%E6%9D%83%E9%99%90/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2021/07/05/java/2021_07_05-java-encode/" rel="prev" title="java encode"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">java encode</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2021/05/15/linux/2021_05_15-%E7%A3%81%E7%9B%98%E6%89%A9%E5%AE%B9/" rel="next" title="磁盘扩容"><span class="post-nav-text">磁盘扩容</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

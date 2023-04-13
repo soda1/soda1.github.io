@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>内部类 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="为何使用内部类  It is a way of logically grouping classes that are only used in one place: If a class is useful to only one other class, then it is logical to embed it in that class and keep the two together">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内部类">
+<meta property="og:url" content="http://soda1.github.io/2021/03/11/java/2021_03_11-%E5%86%85%E9%83%A8%E7%B1%BB/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="为何使用内部类  It is a way of logically grouping classes that are only used in one place: If a class is useful to only one other class, then it is logical to embed it in that class and keep the two together">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20210311191819.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20210311192133.png">
+<meta property="article:published_time" content="2021-03-11T18:36:43.000Z">
+<meta property="article:modified_time" content="2022-05-28T20:34:11.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/20210311191819.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">72</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">11</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BD%95%E4%BD%BF%E7%94%A8%E5%86%85%E9%83%A8%E7%B1%BB"><span class="toc-number">1.</span> <span class="toc-text">为何使用内部类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%9E%E9%9D%99%E6%80%81%E5%86%85%E9%83%A8%E7%B1%BB"><span class="toc-number">2.</span> <span class="toc-text">非静态内部类</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%89%B9%E7%82%B9"><span class="toc-number">2.1.</span> <span class="toc-text">特点</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#demo"><span class="toc-number">2.2.</span> <span class="toc-text">demo</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%97%AE%E9%A2%98"><span class="toc-number">2.3.</span> <span class="toc-text">作用域问题</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%A4%E4%B8%AA%E7%89%B9%E6%80%A7%E9%9D%9E%E9%9D%99%E6%80%81%E5%86%85%E9%83%A8%E7%B1%BB"><span class="toc-number">2.4.</span> <span class="toc-text">两个特性非静态内部类</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2021/03/11/java/2021_03_11-%E5%86%85%E9%83%A8%E7%B1%BB/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">内部类</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2021-03-11 18:36:43" itemprop="dateCreated datePublished" datetime="2021-03-11T18:36:43+00:00">2021-03-11</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2022-05-28 20:34:11" itemprop="dateModified" datetime="2022-05-28T20:34:11+00:00">2022-05-28</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">1.2k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">6m</span></span></span><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h4 id="为何使用内部类"><a href="#为何使用内部类" class="headerlink" title="为何使用内部类"></a>为何使用内部类</h4><blockquote>
+<ul>
+<li><strong>It is a way of logically grouping classes that are only used in one place</strong>: If a class is useful to only one other class, then it is logical to embed it in that class and keep the two together. Nesting such “helper classes” makes their package more streamlined.</li>
+<li><strong>It increases encapsulation</strong>: Consider two top-level classes, A and B, where B needs access to members of A that would otherwise be declared <code>private</code>. By hiding class B within class A, A’s members can be declared private and B can access them. In addition, B itself can be hidden from the outside world.</li>
+<li><strong>It can lead to more readable and maintainable code</strong>: Nesting small classes within top-level classes places the code closer to where it is used.</li>
+</ul>
+</blockquote>
+<h4 id="非静态内部类"><a href="#非静态内部类" class="headerlink" title="非静态内部类"></a>非静态内部类</h4><h5 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h5><ol>
+<li>可以直接访问外部类的所有作用域，使用private修饰符的变量、方法也可以访问。</li>
+<li>可以使用<code>private</code>, <code>public</code>, <code>protected</code>修饰非静态内部类</li>
+<li>不能声明静态变量及静态方法，可以声明常量（final）</li>
+<li>非静态内部类只能存活在外部类实例之内（没有外部类实例就没有非静态内部类实例）</li>
+</ol>
+<h5 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h5><pre><code class="java">public class InnerClassTest &#123;
+
+    private int i = 5;
+    private final String string = &quot;hello&quot;;
+
+    public class MyInnerClass&#123;
+
+        final static int Constant = 8;
+
+
+        public void getOutClassVar() &#123;
+            System.out.println(i);
+            System.out.println(string);
+
+        &#125;
+
+        public void getOuterClassPrivateMethod() &#123;
+            priMethod();
+        &#125;
+    &#125;
+
+    //私有方法
+    private void priMethod() &#123;
+        System.out.println(&quot;i am private&quot;);
+    &#125;
+
+
+    public static void main(String[] args) &#123;
+        //创建方式
+        InnerClassTest innerClassTest = new InnerClassTest();
+        MyInnerClass myInnerClass = innerClassTest.new MyInnerClass();
+        //调用
+        myInnerClass.getOutClassVar();
+        myInnerClass.getOuterClassPrivateMethod();
+    &#125;
+
+
+&#125;</code></pre>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20210311191819.png" alt="image-20210311191819422" loading="lazy"></p>
+<h5 id="作用域问题"><a href="#作用域问题" class="headerlink" title="作用域问题"></a>作用域问题</h5><p>不同作用域存在相同变量名，访问顺序为：方法参数&gt;内部类&gt;外部类</p>
+<pre><code class="java">public class InnerClassTest &#123;
+
+    private int x = 0;
+
+    public class MyInnerClass&#123;
+
+        private int x = 1;
+
+        /**
+         * scope test
+         * @return
+         */
+        public void  ScopeTest(int x) &#123;
+            System.out.println(x);
+            System.out.println(this.x);
+            System.out.println(InnerClassTest.this.x);
+        &#125;
+
+    &#125;
+
+
+    public static void main(String[] args) &#123;
+        InnerClassTest innerClassTest = new InnerClassTest();
+        MyInnerClass myInnerClass = innerClassTest.new MyInnerClass();
+
+        myInnerClass.ScopeTest(23);
+
+    &#125;
+&#125;</code></pre>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20210311192133.png" loading="lazy"></p>
+<h5 id="两个特性非静态内部类"><a href="#两个特性非静态内部类" class="headerlink" title="两个特性非静态内部类"></a>两个特性非静态内部类</h5><ul>
+<li><p>局部内部类</p>
+<p>可以定义在任何代码块中，外部类实例无法调用局部内部类进行实例化。</p>
+<p>可以直接访问外部类</p>
+<p>可以访问方法参数、final / <em>effectively</em> final的局部变量</p>
+<pre><code class="java">public class NonStaticInnerClassTest &#123;
+
+    private int x = 0;
+    public  void localInnerClass(Integer i) &#123;
+
+        int d = 3;
+        class LocalClass&#123;
+
+            public void getLocalvar() &#123;
+                System.out.println(i);
+                System.out.println(d);
+                System.out.println(x);
+            &#125;
+        &#125;
+        LocalClass localClass = new LocalClass();
+        localClass.getLocalvar();
+    &#125;
+
+    public static void main(String[] args) &#123;
+
+        NonStaticInnerClassTest nonStaticInnerClassTest = new NonStaticInnerClassTest();
+        //局部内部类
+        nonStaticInnerClassTest.localInnerClass(5);
+
+    &#125;
+
+</code></pre>
+</li>
+</ul>
+<p>  }</p>
+<pre><code>
+&gt; ## Local Classes Are Similar To Inner Classes
+&gt;
+&gt; Local classes are similar to inner classes because they cannot define or declare any static members. Local classes in static methods, such as the class `PhoneNumber`, which is defined in the static method `validatePhoneNumber`, can only refer to static members of the enclosing class. For example, if you do not define the member variable `regularExpression` as static, then the Java compiler generates an error similar to &quot;non-static variable `regularExpression` cannot be referenced from a static context.&quot;
+&gt;
+&gt; Local classes are non-static because they have access to instance members of the enclosing block. Consequently, they cannot contain most kinds of static declarations.
+
+- 匿名内部类
+
+1. 通过new操作直接实现**接口**/**类扩展**(对类方法进行重写）
+2. 初始化只能使用默认构造器（空参数构造器）
+3. 可以使用`final` or `effectively final`局部变量
+4. 可以访问外部类
+5. 不能声明静态成员、方法，可以声明常量
+
+&gt; The anonymous class expression consists of the following:
+&gt;
+&gt; - The `new` operator
+&gt; - The name of an interface to implement or a class to extend. In this example, the anonymous class is implementing the interface `HelloWorld`.
+&gt; - Parentheses that contain the arguments to a constructor, just like a normal class instance creation expression. **Note**: When you implement an interface, there is no constructor, so you use an empty pair of parentheses, as in this example.
+&gt; - A body, which is a class declaration body. More specifically, in the body, method declarations are allowed but statements are not.
+&gt;
+&gt; Because an anonymous class definition is an expression, it must be part of a statement. In this example, the anonymous class expression is part of the statement that instantiates the `frenchGreeting` object. (This explains why there is a semicolon after the closing brace.)
+&gt;
+&gt; ## Accessing Local Variables of the Enclosing Scope, and Declaring and Accessing Members of the Anonymous Class
+&gt;
+&gt; Like local classes, anonymous classes can [capture variables](https://docs.oracle.com/javase/tutorial/java/javaOO/localclasses.html#accessing-members-of-an-enclosing-class); they have the same access to local variables of the enclosing scope:
+&gt;
+&gt; - An anonymous class has access to the members of its enclosing class.
+&gt; - An anonymous class cannot access local variables in its enclosing scope that are not declared as `final` or effectively final.
+&gt; - Like a nested class, a declaration of a type (such as a variable) in an anonymous class shadows any other declarations in the enclosing scope that have the same name. See [Shadowing](https://docs.oracle.com/javase/tutorial/java/javaOO/nested.html#shadowing) for more information.
+&gt;
+&gt; Anonymous classes also have the same restrictions as local classes with respect to their members:
+&gt;
+&gt; - You cannot declare static initializers or member interfaces in an anonymous class.
+&gt; - An anonymous class can have static members provided that they are constant variables.
+&gt;
+&gt; Note that you can declare the following in anonymous classes:
+&gt;
+&gt; - Fields
+&gt; - Extra methods (even if they do not implement any methods of the supertype)
+&gt; - Instance initializers
+&gt; - Local classes
+&gt;
+&gt; However, you cannot declare constructors in an anonymous class.
+
+#### 静态内部类
+
+##### 特点
+
+1. 不能直接访问外部类，只能通过对象引用来访问
+2. 可以使用`private`, `public`, `protected`修饰类
+3. 和正常类基本一致
+</code></pre>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2021/03/11/java/2021_03_11-%E5%86%85%E9%83%A8%E7%B1%BB/" title="内部类">http://soda1.github.io/2021/03/11/java/2021_03_11-%E5%86%85%E9%83%A8%E7%B1%BB/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2021/03/12/spring/spring-boot/2021_03_12-%E6%8B%A6%E6%88%AA%E5%99%A8/" rel="prev" title="spring boot自定义拦截器"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">spring boot自定义拦截器</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2021/03/11/java/lambda/2021_03_11-method%20reference/" rel="next" title="lambda method reference"><span class="post-nav-text">lambda method reference</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

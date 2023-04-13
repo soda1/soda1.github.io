@@ -1,0 +1,298 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>Config(Hoxton.SR8) | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="随着项目的迭代，微服务的数量不断增多，我们需要高效的管理配置，spring cloud config可以帮我们解决此问题 spring cloud config分为config server和config client两部分，具有以下特点  集中管理配置。一个使用微服务架构的应用系统可能会包含成百上千个微服务，因此集中管理配置是非常有必要的； 不同环境，不同配置。例如，数据源配置在不同的环境（开发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Config(Hoxton.SR8)">
+<meta property="og:url" content="http://soda1.github.io/2023/04/04/spring/spring%20cloud/Config/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="随着项目的迭代，微服务的数量不断增多，我们需要高效的管理配置，spring cloud config可以帮我们解决此问题 spring cloud config分为config server和config client两部分，具有以下特点  集中管理配置。一个使用微服务架构的应用系统可能会包含成百上千个微服务，因此集中管理配置是非常有必要的； 不同环境，不同配置。例如，数据源配置在不同的环境（开发">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230404144705.png">
+<meta property="article:published_time" content="2023-04-04T13:56:16.000Z">
+<meta property="article:modified_time" content="2023-04-13T11:54:18.700Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/20230404144705.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">72</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">11</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#config-server"><span class="toc-number">1.</span> <span class="toc-text">config server</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8"><span class="toc-number">1.1.</span> <span class="toc-text">使用</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AE%BF%E9%97%AE"><span class="toc-number">1.2.</span> <span class="toc-text">访问</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E7%9A%84%E7%BB%A7%E6%89%BF%E4%B8%8E%E7%BB%84%E5%90%88"><span class="toc-number">1.3.</span> <span class="toc-text">配置的继承与组合</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#git%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE"><span class="toc-number">1.4.</span> <span class="toc-text">git仓库配置</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E5%B1%9E%E6%80%A7%E5%8A%A0%E5%AF%86"><span class="toc-number">1.5.</span> <span class="toc-text">配置属性加密</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#config-client"><span class="toc-number">2.</span> <span class="toc-text">config client</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BC%95%E5%85%A5"><span class="toc-number">2.1.</span> <span class="toc-text">引入</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0"><span class="toc-number">2.2.</span> <span class="toc-text">配置动态刷新</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2023/04/04/spring/spring%20cloud/Config/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Config(Hoxton.SR8)</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2023-04-04 13:56:16" itemprop="dateCreated datePublished" datetime="2023-04-04T13:56:16+00:00">2023-04-04</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2023-04-13 11:54:18" itemprop="dateModified" datetime="2023-04-13T11:54:18+00:00">2023-04-13</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">1.5k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">6m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/spring-cloud/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">spring cloud</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><p>随着项目的迭代，微服务的数量不断增多，我们需要高效的管理配置，spring cloud config可以帮我们解决此问题</p>
+<p>spring cloud config分为config server和config client两部分，具有以下特点</p>
+<ol>
+<li>集中管理配置。一个使用微服务架构的应用系统可能会包含成百上千个微服务，因此集中管理配置是非常有必要的；</li>
+<li>不同环境，不同配置。例如，数据源配置在不同的环境（开发、测试、预发布、生产等）中是不同的；</li>
+<li>运行期间可动态调整。例如，我们可根据各个微服务的负载情况，动态调整数据源连接池大小或熔断阈值，并且在调整配置时不停止微服务；</li>
+<li>配置修改后可自动更新。如配置内容发生变化，微服务能够自动更新配置。</li>
+</ol>
+<h4 id="config-server"><a href="#config-server" class="headerlink" title="config server"></a>config server</h4><p>config server是一个可横向扩展、集中式的配置服务器，它用于集中管理应用程序在不同环境下的配置，默认使用git存储配置内容</p>
+<h5 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h5><ol>
+<li><p>加依赖</p>
+<pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-config-server&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+</li>
+<li><p>加注解</p>
+<pre><code class="java">@SpringBootApplication
+@EnableConfigServer
+public class ConfigServerApplication &#123;
+
+    public static void main(String[] args) &#123;
+    SpringApplication.run(ConfigServerApplication.class, args);
+    &#125;
+
+&#125;</code></pre>
+</li>
+<li><p>写配置</p>
+<pre><code class="java">server:
+  port: 8094
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: file://F:\Java\Code\SpringCloud/config-repo # 具体仓库地址</code></pre>
+<p>这里配置的是本地仓库，方便测试。如果要配置线上的，需要账户密码</p>
+<pre><code class="yml">server:
+  port: 8094
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri:  https://git.xxx/repo.git # 具体仓库地址
+          # Git仓库账号
+          username:
+          # Git仓库密码
+          password:    </code></pre>
+</li>
+</ol>
+<h5 id="访问"><a href="#访问" class="headerlink" title="访问"></a>访问</h5><p>config server提供了api，可以用来访问git仓库中的配置文件</p>
+<pre><code>/&#123;application&#125;/&#123;profile&#125;[/&#123;label&#125;]
+/&#123;application&#125;-&#123;profile&#125;.yml
+/&#123;label&#125;/&#123;application&#125;-&#123;profile&#125;.yml
+/&#123;application&#125;-&#123;profile&#125;.properties
+/&#123;label&#125;/&#123;application&#125;-&#123;profile&#125;.properties
+</code></pre>
+<p>其中的占位符表示如下</p>
+<ul>
+<li>application: 表示微服务名称，即配置的<code>spring.application.name</code></li>
+<li>profile: 表示当前的环境，local、feature、dev、test、prod</li>
+<li>label: 表示git仓库分支，feature、develop、test、master，当然默认的话是master</li>
+</ul>
+<h5 id="配置的继承与组合"><a href="#配置的继承与组合" class="headerlink" title="配置的继承与组合"></a>配置的继承与组合</h5><p>假设有一个应用：<code>config-client</code> ，其profile是dev，那么其实Spring Cloud Config会查找如下几个文件：</p>
+<ul>
+<li><code>config-client-dev.yml</code></li>
+<li><code>config-client.yml</code></li>
+<li><code>application-dev.yml</code></li>
+<li><code>application.yml</code></li>
+</ul>
+<p>对于相同属性的配置，从上至下优先级逐渐递减；最终获得的配置属性是四个文件的组合。由此，不难分析，可如下规划几个配置文件：</p>
+<ul>
+<li><code>config-client-dev.yml</code> 作为指定应用在指定profile下的配置文件</li>
+<li><code>config-client.yml</code> 作为制定应用在任何profile下都通用的配置文件</li>
+<li><code>application-dev.yml</code> 作为所有应用在指定profile下的配置文件</li>
+<li><code>application.yml</code> 作为所有应用在任何profile下都通用的配置文件</li>
+</ul>
+<pre><code class="yml"># config-client-dev.yml
+mysql:
+  username: eric-dev345
+  password: 123-dev
+  url: http://localhost:8090-dev</code></pre>
+<pre><code class="yml">#config-client.yml
+mysql:
+  username: eric
+  password: 123
+  url: http://localhost:8090
+  signature: &#39;fafafafa&#39;</code></pre>
+<p>访问<code>http://localhost:8094/config-client-dev.yml</code>可以看到<code>config-client-dev.yml</code>并组合<code>config-client.yml</code></p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230404144705.png" alt="image-20230404144658518" loading="lazy"></p>
+<h5 id="git仓库配置"><a href="#git仓库配置" class="headerlink" title="git仓库配置"></a>git仓库配置</h5><ul>
+<li><p>占位符配置</p>
+<pre><code class="yml">server:
+  port: 8094
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: file://F:\Java\Code\SpringCloud/&#123;application&#125; # 具体仓库地址</code></pre>
+<p>如我们从<a target="_blank" rel="noopener" href="http://localhost:8094/config-client/dev%E5%8E%BB%E8%8E%B7%E5%8F%96%E7%9A%84%E8%AF%9D%EF%BC%8C%E9%82%A3%E4%B9%88%E4%BC%9A%E5%B0%86application%E8%87%AA%E5%8A%A8%E5%8D%A0%E4%BD%8D%E4%B8%BAconfig-client%EF%BC%8C%E5%8D%B3%E5%8E%BB%60file://F:/Java/Code/SpringCloud/config-client%60%E8%BF%99%E4%B8%AA%E4%BB%93%E5%BA%93%E7%9A%84%E6%A0%B9%E7%9B%AE%E5%BD%95%E4%B8%8B%E6%89%BE%60config-client-dev.yml%60%E8%B5%84%E6%BA%90">http://localhost:8094/config-client/dev去获取的话，那么会将application自动占位为config-client，即去`file://F:\Java\Code\SpringCloud/config-client`这个仓库的根目录下找`config-client-dev.yml`资源</a></p>
+</li>
+<li><p>模式匹配</p>
+<pre><code class="yml">server:
+  port: 8094
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: file://F:\Java\Code\SpringCloud/config-repo # 具体仓库地址
+          repos:
+            config-client:
+              pattern: config-client/*
+              uri: file://F:\Java\Code\SpringCloud/config-client
+</code></pre>
+<p> 模式匹配指的是带有通配符的{application}/{profile}名称的列表。比如config-client仓库，它只匹配<a target="_blank" rel="noopener" href="http://localhost:8094/config-client/*%E7%9A%84%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%82">http://localhost:8094/config-client/*的应用程序配置文件。</a></p>
+<p>如果不匹配任何模式，则使用<code>spring.cloud.config.server.git.uri</code>定义的URL</p>
+</li>
+<li><p>搜索目录</p>
+<pre><code class="yml">server:
+  port: 8094
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: file://F:\Java\Code\SpringCloud/config-repo # 具体仓库地址
+          search-path: config-client, foo*</code></pre>
+<p>Config Server就会在Git仓库根目录、config-client子目录、以及所有以foo开始的子目录中查找配置文件。</p>
+</li>
+</ul>
+<h5 id="配置属性加密"><a href="#配置属性加密" class="headerlink" title="配置属性加密"></a>配置属性加密</h5><p>对于配置文件中账户密码一般都需要加密存储，config server为配置内容提供了加解密支持</p>
+<p><strong>安装JCE</strong></p>
+<p>Java 8 JCE的地址：<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html</a> 。</p>
+<p><strong>加解密端点</strong></p>
+<ul>
+<li>加密：<code>curl $CONFIG_URL/encrypt -d 想要加密的内容</code></li>
+<li>解密：<code>curl $CONFIG_URL/decrypt -d 想要解密的密文</code></li>
+</ul>
+<p><strong>配置</strong></p>
+<p>在config server的<code>bootstrap.yml</code>中添加加密配置</p>
+<ul>
+<li><p>对称加密</p>
+<pre><code class="yml">encrypt:
+  key: foo  # 设置对称密钥</code></pre>
+<p>启动后输入命令</p>
+<pre><code class="bash">curl http://localhost:8094/encrypt -d mysecret</code></pre>
+<p>返回<code>7c5fab34141a8b743242f176cf913d56656e99e49db4065f6d2d7534b5a99307</code>加密串</p>
+<pre><code class="bash">curl http://localhost:8094/decrypt -d 7c5fab34141a8b743242f176cf913d56656e99e49db4065f6d2d7534b5a99307</code></pre>
+<p>返回<code>mysecret</code> ，说明能够正常解密</p>
+</li>
+</ul>
+<h4 id="config-client"><a href="#config-client" class="headerlink" title="config client"></a>config client</h4><h5 id="引入"><a href="#引入" class="headerlink" title="引入"></a>引入</h5><ol>
+<li><p>加依赖</p>
+<pre><code class="xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-cloud-starter-config&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+</li>
+<li><p>加配置</p>
+<pre><code class="yml"># application.yml
+server:
+  port: 8095</code></pre>
+<pre><code class="yml"># bootstrap.yml
+spring:
+  application:
+    name: config-client    # 对应config server所获取的配置文件的&#123;application&#125;
+  cloud:
+    config:
+      uri: http://localhost:8094/
+      profile: dev            # profile对应config server所获取的配置文件中的&#123;profile&#125; 
+      label: master           # 指定Git仓库的分支，对应config server所获取的配置文件的&#123;label&#125;
+</code></pre>
+</li>
+<li><p>测试</p>
+<pre><code class="java">@RestController
+@RequestMapping(&quot;/properties&quot;)
+public class PropertiesController &#123;
+  @Value(&quot;$&#123;mysql.username&#125;&quot;)
+  private String username;
+  @GetMapping(&quot;/username&quot;)
+  public String getUsername()&#123;
+    return this.username;
+  &#125;
+  ...
+ &#125;</code></pre>
+<p>访问<code>http://localhost:8095/properties/username</code>可返回git仓库中的配置属性</p>
+</li>
+</ol>
+<h5 id="配置动态刷新"><a href="#配置动态刷新" class="headerlink" title="配置动态刷新"></a>配置动态刷新</h5><ul>
+<li><p>加依赖</p>
+<pre><code class="xml">        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+        &lt;/dependency&gt;</code></pre>
+</li>
+<li><p>配置暴露端点</p>
+<pre><code class="yml">management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh</code></pre>
+</li>
+<li><p>在待刷新属性所在类上添加<code>@RefreshScope</code></p>
+<pre><code class="java">@RestController
+@RefreshScope  //配置动态刷新
+@RequestMapping(&quot;/properties&quot;)
+public class PropertiesController &#123;
+  @Value(&quot;$&#123;mysql.username&#125;&quot;)
+  private String username;
+    ...
+&#125;</code></pre>
+</li>
+</ul>
+<p>在修改username属性后，只需执行如下请求即可刷新该属性</p>
+<pre><code class="bash">curl -X POST http://localhost:8095/actuator/refresh</code></pre>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2023/04/04/spring/spring%20cloud/Config/" title="Config(Hoxton.SR8)">http://soda1.github.io/2023/04/04/spring/spring%20cloud/Config/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/04/03/spring/spring%20cloud/Zuul/" rel="next" title="Zuul(Hoxton.SR8)"><span class="post-nav-text">Zuul(Hoxton.SR8)</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

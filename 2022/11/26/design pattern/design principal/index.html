@@ -1,0 +1,168 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>design principal | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="SOLID原则SOLID原则是由5个原则的首字母组成的原则，由Robert C.Martin提出来的五大原则。 SOLID is a mnemonic acronym for five design principles intended to make object-oriented designs more understandable, flexible, and maintainable.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="design principal">
+<meta property="og:url" content="http://soda1.github.io/2022/11/26/design%20pattern/design%20principal/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="SOLID原则SOLID原则是由5个原则的首字母组成的原则，由Robert C.Martin提出来的五大原则。 SOLID is a mnemonic acronym for five design principles intended to make object-oriented designs more understandable, flexible, and maintainable.">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-11-26T20:32:33.000Z">
+<meta property="article:modified_time" content="2022-12-11T23:08:50.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">72</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">11</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#SOLID%E5%8E%9F%E5%88%99"><span class="toc-number">1.</span> <span class="toc-text">SOLID原则</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#KISS"><span class="toc-number">2.</span> <span class="toc-text">KISS</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#YAGNI"><span class="toc-number">3.</span> <span class="toc-text">YAGNI</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DRY"><span class="toc-number">4.</span> <span class="toc-text">DRY</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LOD"><span class="toc-number">5.</span> <span class="toc-text">LOD</span></a></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2022/11/26/design%20pattern/design%20principal/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">design principal</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2022-11-26 20:32:33" itemprop="dateCreated datePublished" datetime="2022-11-26T20:32:33+00:00">2022-11-26</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2022-12-11 23:08:50" itemprop="dateModified" datetime="2022-12-11T23:08:50+00:00">2022-12-11</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">1.3k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">5m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/design-pattern/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">design_pattern</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h4 id="SOLID原则"><a href="#SOLID原则" class="headerlink" title="SOLID原则"></a>SOLID原则</h4><p>SOLID原则是由5个原则的首字母组成的原则，由Robert C.Martin提出来的五大原则。 <strong>SOLID</strong> is a <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Mnemonic">mnemonic</a> <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Acronym">acronym</a> for five design principles intended to make <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Object-oriented">object-oriented</a> designs more understandable, flexible, and <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Software_maintenance">maintainable</a>. </p>
+<ol>
+<li><p>The <strong>S</strong>ingle Responsibility Principle  SRP单一职责原则</p>
+<blockquote>
+<p>A module should be responsible to one, and only one, actor</p>
+</blockquote>
+<p>一个类只负责完成一个职责或者功能。不要设计大而全的类，要设计粒度小、功能单一的 类。单一职责原则是为了实现代码高内聚、低耦合，提高代码的复用性、可读性、可维护 性。</p>
+<p>一个类是否单一要看具体的业务需求，随着业务的发展当类变得臃肿的就要考虑进行拆分，设计更小粒度的类。</p>
+<p>下列情况可能会说明类职责不够单一</p>
+<ul>
+<li>类中的代码行数、函数或者属性过多；</li>
+<li> 类依赖的其他类过多，或者依赖类的其他类过多；</li>
+<li> 私有方法过多； 比较难给类起一个合适的名字； </li>
+<li>类中大量的方法都是集中操作类中的某几个属性。</li>
+</ul>
+</li>
+<li><p>The <strong>O</strong>pen-Closed Principle  OCP开闭原则</p>
+<blockquote>
+<p>Software entities … should be open for extension, but closed for modification</p>
+</blockquote>
+<blockquote>
+<p>A module will be said to be open if it is still available for extension. For example, it should be possible to add fields to the data structures it contains, or new elements to the set of functions it performs.</p>
+<p>A module will be said to be closed if [it] is available for use by other modules. This assumes that the module has been given a well-defined, stable description (the interface in the sense of information hiding).</p>
+</blockquote>
+<p>只要新增的功能涉及修改的地方没有破坏原有的代码的功能运行、功能测试，那它就是符合OCP的</p>
+<blockquote>
+<p>对拓展开放是为了应对变化(需求)，对修改关闭是为了保证已有代码的稳定性；最终结果是 为了让系统更有弹性！</p>
+</blockquote>
+</li>
+<li><p>The <strong>L</strong>iskov Substitution Principle LSP里氏替换原则</p>
+<blockquote>
+<p>Functions that use pointers or references to base classes must be able to use objects of derived classes without knowing it.</p>
+</blockquote>
+<p>LSP和多态有点像，但侧重点不一样。多态着重的是父类引用可以使用子类对象，LSP也是通过多态这一特性来使用子对象。但它强调的是功能上的一致，比如父类的function中没有定义要抛出的异常，子类实现此function时如果抛出了未定义的异常，那就是违背LSP</p>
+<p>违背LSP的一些例子</p>
+<ul>
+<li>子类违背父类声明要实现的功能</li>
+<li>子类违背父类对输入、输出、异常的约定</li>
+<li>子类违背父类注释中所罗列的任何特殊说明</li>
+</ul>
+</li>
+<li><p>The <strong>I</strong>nterface Segregation Principle ISP接口隔离原则</p>
+<blockquote>
+<p>Clients should not be forced to depend upon interfaces that they do not use.</p>
+</blockquote>
+<blockquote>
+<p>ISP can be seen as similar to SRP for interfaces; but it is more than that. ISP generalizes into: “Don’t depend on more than you need.” SRP generalizes to “Gather together things that change for the same reasons and at the same times.”</p>
+<p>Imagine a stack class with both push and pop. Imagine a client that only pushes. If that client depends upon the stack interface, it depends upon pop, which it does not need. SRP would not separate push from pop; ISP would.</p>
+</blockquote>
+<p>ISP和RSP有点像，SRP侧重于module，职责是否保持单一化。ISP侧重调用者是否需要接口所有功能。SRP可以说是ISP的冗余。</p>
+</li>
+<li><p>The <strong>D</strong>ependency Inversion Principle  DIP依赖倒置原则</p>
+<blockquote>
+<ol>
+<li>High-level modules should not import anything from low-level modules. Both should depend on abstractions (e.g., interfaces).</li>
+<li>Abstractions should not depend on details. Details (concrete implementations) should depend on abstractions.</li>
+</ol>
+</blockquote>
+<p>上层服务应该依赖于底层接口，且底层接口不应该依赖于具体的实现（即通过构造器之类的方式注入到上层服务中）</p>
+</li>
+</ol>
+<h4 id="KISS"><a href="#KISS" class="headerlink" title="KISS"></a>KISS</h4><blockquote>
+<p>keep it simple and stupid</p>
+</blockquote>
+<p>写的功能代码尽可能的简单，不要用一些增加理解困难度的trick</p>
+<ul>
+<li>不要使用同事可能不懂的技术来实现代码。比如前面例子中的正则表达式，还有一些编程语言中过于高级的语法等。</li>
+<li>不要重复造轮子，要善于使用已经有的工具类库。经验证明，自己去实现这些类库，出 bug 的概率会更高，维护的成本也比较高。</li>
+<li>不要过度优化。不要过度使用一些奇技淫巧（比如，位运算代替算术运算、复杂的条件语句代替 if-else、使用一些过于底层的函数等）来优化代码，牺牲代码的可读性。</li>
+</ul>
+<h4 id="YAGNI"><a href="#YAGNI" class="headerlink" title="YAGNI"></a>YAGNI</h4><blockquote>
+<p>You aren’t gonna need it</p>
+</blockquote>
+<p>不要过度设计，当然接口扩展这些是可以做的</p>
+<h4 id="DRY"><a href="#DRY" class="headerlink" title="DRY"></a>DRY</h4><blockquote>
+<p>Don’t repeat yourself</p>
+</blockquote>
+<p>不要写重复代码</p>
+<p>有三种典型情况</p>
+<ul>
+<li><p>逻辑重复</p>
+<p>若语义不重复不违反DRY</p>
+</li>
+<li><p>功能语义重复</p>
+<p>违反DRY</p>
+</li>
+<li><p>代码执行重复</p>
+<p>在执行中多次执行相同代码（函数）违反DRY</p>
+</li>
+</ul>
+<p>是否违法DRY，主要看语义</p>
+<h4 id="LOD"><a href="#LOD" class="headerlink" title="LOD"></a>LOD</h4><blockquote>
+<p><strong>Law of Demeter</strong> or <strong>principle of least knowledge</strong></p>
+<ul>
+<li>Each unit should have only limited knowledge about other units: only units “closely” related to the current unit.</li>
+<li>Each unit should only talk to its friends; don’t talk to strangers.</li>
+<li>Only talk to your immediate friends.</li>
+</ul>
+</blockquote>
+<p>不该有直接依赖关系的类之间，不要有依赖；有依赖关系的类之间，尽量只依赖必要的接口。迪米特法则是希望减少类之间的耦合，让类越独立越好。每个类都应该少了解系统的其他部分。一旦发生变化，需要了解这一变化的类就会比较少。</p>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2022/11/26/design%20pattern/design%20principal/" title="design principal">http://soda1.github.io/2022/11/26/design%20pattern/design%20principal/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2022/12/11/design%20pattern/refactoring/" rel="prev" title="refactoring"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">refactoring</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2022/09/24/mysql/%E9%AB%98%E7%BA%A7/2022_09_24-join/" rel="next" title="join相关算法"><span class="post-nav-text">join相关算法</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

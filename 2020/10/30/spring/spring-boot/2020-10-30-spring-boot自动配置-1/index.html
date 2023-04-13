@@ -1,0 +1,270 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>SpringBoot自动配置原理 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="基本SpringBoot主程序代码如下： @SpringBootApplication public class HelloWorldMainApplication &amp;#123;      public static void main(String[] args) &amp;#123;          &#x2F;&#x2F; Spring应用启动起来         SpringApplication.run(Hell">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot自动配置原理">
+<meta property="og:url" content="http://soda1.github.io/2020/10/30/spring/spring-boot/2020-10-30-spring-boot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE-1/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="基本SpringBoot主程序代码如下： @SpringBootApplication public class HelloWorldMainApplication &amp;#123;      public static void main(String[] args) &amp;#123;          &#x2F;&#x2F; Spring应用启动起来         SpringApplication.run(Hell">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201030141547014.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201031122305778.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201031142651690.png">
+<meta property="article:published_time" content="2020-10-30T15:11:15.000Z">
+<meta property="article:modified_time" content="2022-05-28T20:34:11.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201030141547014.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">72</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">11</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#SpringBootApplication"><span class="toc-number">1.</span> <span class="toc-text">@SpringBootApplication</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ComponentScan"><span class="toc-number">1.1.</span> <span class="toc-text">@ComponentScan</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SpringBootConfiguration"><span class="toc-number">1.2.</span> <span class="toc-text">@SpringBootConfiguration</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#EnableAutoConfiguration"><span class="toc-number">1.3.</span> <span class="toc-text">@EnableAutoConfiguration</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2020/10/30/spring/spring-boot/2020-10-30-spring-boot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE-1/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">SpringBoot自动配置原理</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2020-10-30 15:11:15" itemprop="dateCreated datePublished" datetime="2020-10-30T15:11:15+00:00">2020-10-30</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2022-05-28 20:34:11" itemprop="dateModified" datetime="2022-05-28T20:34:11+00:00">2022-05-28</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">1.5k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">7m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/spring-boot/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">spring boot</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><p>基本SpringBoot主程序代码如下：</p>
+<pre><code>@SpringBootApplication
+public class HelloWorldMainApplication &#123;
+
+    public static void main(String[] args) &#123;
+
+        // Spring应用启动起来
+        SpringApplication.run(HelloWorldMainApplication.class,args);
+    &#125;
+&#125;</code></pre>
+<p>主程序中只有@<strong>SpringBootApplication</strong>一个注解，直接从此注解入手</p>
+<h3 id="SpringBootApplication"><a href="#SpringBootApplication" class="headerlink" title="@SpringBootApplication"></a>@SpringBootApplication</h3><pre><code class="java">@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan(excludeFilters = &#123;
+      @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
+      @Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) &#125;)
+public @interface SpringBootApplication &#123;</code></pre>
+<p>进入此注解类可以看到有三个比较重要的注解，一一来了解这三个注解分别起到了什么作用</p>
+<pre><code class="java">@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan(excludeFilters = &#123; @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
+        @Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) &#125;)</code></pre>
+<h4 id="ComponentScan"><a href="#ComponentScan" class="headerlink" title="@ComponentScan"></a>@ComponentScan</h4><p>这个注解在Spring中我们是经常用到的，它默认扫描当前类下的包，用于扫描@Controller、@Service、@Component等注解。</p>
+<h4 id="SpringBootConfiguration"><a href="#SpringBootConfiguration" class="headerlink" title="@SpringBootConfiguration"></a>@<strong>SpringBootConfiguration</strong></h4><p>标注在某个类上，表示这是一个Spring Boot的配置类；</p>
+<pre><code>@Target(&#123;ElementType.TYPE&#125;)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Configuration
+public @interface SpringBootConfiguration &#123;    </code></pre>
+<p>进入此类可以看到有个@<strong>Configuration</strong>，此注解是用于配置类上的，表明这个类是一个配置类。</p>
+<p>配置类也是容器中的一个组件；@Component</p>
+<h4 id="EnableAutoConfiguration"><a href="#EnableAutoConfiguration" class="headerlink" title="@EnableAutoConfiguration"></a>@<strong>EnableAutoConfiguration</strong></h4><p>@<strong>EnableAutoConfiguration</strong>告诉SpringBoot开启自动配置功能,帮我们配置需要配置的东西。</p>
+<pre><code class="java">@AutoConfigurationPackage
+@Import(EnableAutoConfigurationImportSelector.class) //导入资源
+public @interface EnableAutoConfiguration &#123;</code></pre>
+<p>进入此类可以看到有2个注解</p>
+<ul>
+<li><p>@<strong>AutoConfigurationPackage</strong>：</p>
+<pre><code class="java">@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@Import(AutoConfigurationPackages.Registrar.class)
+public @interface AutoConfigurationPackage &#123;
+
+&#125;</code></pre>
+<p>可以看到有个import注解，导入AutoConfigurationPackages.Registrar.class，进入Registrar可以看到有这个一个方法</p>
+<pre><code class="java">        @Override
+        public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) &#123;
+            register(registry, new PackageImport(metadata).getPackageName());
+        &#125;</code></pre>
+<p>设置断点后可以看到它也是扫描主配置类下的包，这和ComponentScan好像有点重叠了。SpringBoot给出的解释是</p>
+<blockquote>
+<p>it will be used when scanning for code @Entity classes.<br>It is generally recommended that you place EnableAutoConfiguration (if you’re<br>not using @SpringBootApplication) in a root package so that all sub-packages<br>and classes can be searched.</p>
+</blockquote>
+<p>因此可以得出这个是用来扫描@Entitiy注解的类。</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201030141547014.png" alt="image-20201030141547014" loading="lazy"></p>
+</li>
+<li><p>@<strong>Import</strong>(EnableAutoConfigurationImportSelector.class)</p>
+<p><strong>EnableAutoConfigurationImportSelector</strong>的作用就是将所有需要导入的组件以全类名的方式返回；这些组件就会被添加到容器中</p>
+<p>在SpringBoot 1.x版本中 是通过selectImports()来获取组件的全类名并返回</p>
+<pre><code class="java">public String[] selectImports(AnnotationMetadata annotationMetadata) &#123;
+        if (!this.isEnabled(annotationMetadata)) &#123;
+            return NO_IMPORTS;
+        &#125; else &#123;
+            try &#123;
+                AutoConfigurationMetadata autoConfigurationMetadata = AutoConfigurationMetadataLoader.loadMetadata(this.beanClassLoader);
+                AnnotationAttributes attributes = this.getAttributes(annotationMetadata);
+                List&lt;String&gt; configurations = this.getCandidateConfigurations(annotationMetadata, attributes);
+                configurations = this.removeDuplicates(configurations);
+                configurations = this.sort(configurations, autoConfigurationMetadata);
+                Set&lt;String&gt; exclusions = this.getExclusions(annotationMetadata, attributes);
+                this.checkExcludedClasses(configurations, exclusions);
+                configurations.removeAll(exclusions);
+                configurations = this.filter(configurations, autoConfigurationMetadata);
+                this.fireAutoConfigurationImportEvents(configurations, exclusions);
+                return (String[])configurations.toArray(new String[configurations.size()]);
+            &#125; catch (IOException var6) &#123;
+                throw new IllegalStateException(var6);
+            &#125;
+        &#125;
+    &#125;</code></pre>
+<p><code>List&lt;String&gt; configurations = this.getCandidateConfigurations(annotationMetadata, attributes);</code>这条语句就是获取组件的全类名</p>
+<p>2.x版本对代码进行了重构，它是通过EnableAutoConfigurationImportSelector类下的静态类AutoConfigurationGroup的process来获取组件全类名的</p>
+<pre><code class="java">public void process(AnnotationMetadata annotationMetadata, DeferredImportSelector deferredImportSelector) &#123;
+   Assert.state(deferredImportSelector instanceof AutoConfigurationImportSelector,
+         () -&gt; String.format(&quot;Only %s implementations are supported, got %s&quot;,
+               AutoConfigurationImportSelector.class.getSimpleName(),
+               deferredImportSelector.getClass().getName()));
+   AutoConfigurationEntry autoConfigurationEntry = ((AutoConfigurationImportSelector) deferredImportSelector)
+         .getAutoConfigurationEntry(getAutoConfigurationMetadata(), annotationMetadata);
+   this.autoConfigurationEntries.add(autoConfigurationEntry);
+   for (String importClassName : autoConfigurationEntry.getConfigurations()) &#123;
+      this.entries.putIfAbsent(importClassName, annotationMetadata);
+   &#125;
+&#125;</code></pre>
+<p>`AutoConfigurationEntry autoConfigurationEntry = ((AutoConfigurationImportSelector) deferredImportSelector)</p>
+<pre><code>     .getAutoConfigurationEntry(getAutoConfigurationMetadata(), annotationMetadata);`这条语句是用来获取全类名的</code></pre>
+<pre><code class="java">protected AutoConfigurationEntry getAutoConfigurationEntry(AutoConfigurationMetadata autoConfigurationMetadata,
+      AnnotationMetadata annotationMetadata) &#123;
+   if (!isEnabled(annotationMetadata)) &#123;
+      return EMPTY_ENTRY;
+   &#125;
+   AnnotationAttributes attributes = getAttributes(annotationMetadata);
+   List&lt;String&gt; configurations = getCandidateConfigurations(annotationMetadata, attributes); //获取可能需要加载的组件全类名
+   configurations = removeDuplicates(configurations);
+   Set&lt;String&gt; exclusions = getExclusions(annotationMetadata, attributes);
+   checkExcludedClasses(configurations, exclusions);
+   configurations.removeAll(exclusions);
+   configurations = filter(configurations, autoConfigurationMetadata);//过滤得到需要加载的组件全类名
+   fireAutoConfigurationImportEvents(configurations, exclusions);
+   return new AutoConfigurationEntry(configurations, exclusions);
+&#125;</code></pre>
+<p>进入<code>getAutoConfigurationEntry()</code>方法后可以看得出来和selectImport代码是差不多，都是获取需要加载的组件全类名然后进行返回。</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201031122305778.png" alt="image-20201031122305778" loading="lazy"></p>
+<p><code>configurations </code>获取的元素都是以XXXAutoConfiguration形式的类名</p>
+<p>进入<code> getCandidateConfigurations(annotationMetadata, attributes)</code>继续往下看它是如何找到组件的全类名的</p>
+<pre><code class="java">protected List&lt;String&gt; getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) &#123;
+   List&lt;String&gt; configurations = SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(),
+         getBeanClassLoader());
+   Assert.notEmpty(configurations, &quot;No auto configuration classes found in META-INF/spring.factories. If you &quot;
+         + &quot;are using a custom packaging, make sure that file is correct.&quot;);
+   return configurations;
+&#125;</code></pre>
+<p>继续进入<code>loadFactoryNames()</code>方法</p>
+<pre><code class="java">public static List&lt;String&gt; loadFactoryNames(Class&lt;?&gt; factoryClass, @Nullable ClassLoader classLoader) &#123;
+    String factoryClassName = factoryClass.getName(); //org.springframework.boot.autoconfigure.EnableAutoConfiguration
+    return (List)loadSpringFactories(classLoader).getOrDefault(factoryClassName, Collections.emptyList());
+    //以List形式返回key为org.springframework.boot.autoconfigure.EnableAutoConfiguration的值
+&#125;</code></pre>
+<p>进入<code>loadSpringFactories(classLoader)</code></p>
+<pre><code class="java">private static Map&lt;String, List&lt;String&gt;&gt; loadSpringFactories(@Nullable ClassLoader classLoader) &#123;
+    MultiValueMap&lt;String, String&gt; result = (MultiValueMap)cache.get(classLoader);
+    if (result != null) &#123;
+        return result;
+    &#125; else &#123;
+        try &#123;
+            Enumeration&lt;URL&gt; urls = classLoader != null ? classLoader.getResources(&quot;META-INF/spring.factories&quot;) : ClassLoader.getSystemResources(&quot;META-INF/spring.factories&quot;); 
+            LinkedMultiValueMap result = new LinkedMultiValueMap();
+
+            while(urls.hasMoreElements()) &#123;
+                URL url = (URL)urls.nextElement();
+                UrlResource resource = new UrlResource(url);
+                Properties properties = PropertiesLoaderUtils.loadProperties(resource);
+                Iterator var6 = properties.entrySet().iterator();
+
+                while(var6.hasNext()) &#123;
+                    Entry&lt;?, ?&gt; entry = (Entry)var6.next();
+                    String factoryClassName = ((String)entry.getKey()).trim();
+                    String[] var9 = StringUtils.commaDelimitedListToStringArray((String)entry.getValue());
+                    int var10 = var9.length;
+
+                    for(int var11 = 0; var11 &lt; var10; ++var11) &#123;
+                        String factoryName = var9[var11];
+                        result.add(factoryClassName, factoryName.trim());
+                    &#125;
+                &#125;
+            &#125;
+
+            cache.put(classLoader, result);
+            return result;
+        &#125; catch (IOException var13) &#123;
+            throw new IllegalArgumentException(&quot;Unable to load factories from location [META-INF/spring.factories]&quot;, var13);
+        &#125;
+    &#125;</code></pre>
+<ol>
+<li><p><code>loadSpringFactories</code>通过<code>getResources</code>来扫描整个Java的类包、获取含有<strong>META-INF/spring.factories</strong>的jar路径</p>
+<pre><code class="java">public Enumeration&lt;URL&gt; getResources(String name) throws IOException &#123;
+    @SuppressWarnings(&quot;unchecked&quot;)
+    Enumeration&lt;URL&gt;[] tmp = (Enumeration&lt;URL&gt;[]) new Enumeration&lt;?&gt;[2];su
+    if (parent != null) &#123;
+        tmp[0] = parent.getResources(name);  //搜索ExtendsionClassLoader加载的包
+    &#125; else &#123;
+        tmp[0] = getBootstrapResources(name); //搜索BootStrapClassLoader加载的包
+    &#125;
+    tmp[1] = findResources(name);          //搜索AppClassLoader加载的包
+
+    return new CompoundEnumeration&lt;&gt;(tmp);
+&#125;
+/*
+这个方法类似于双亲加载机制，先让父加载器去搜索包下的文件，但是它并不是说父加载器搜索到了文件子加载器就不搜索了
+这个方法会搜索类加载器及其父类下的所有文件
+*/</code></pre>
+</li>
+<li><p>以Properties的形式读取urls下<strong>spring.factories</strong>，然后转换成Map结构的数据</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201031142651690.png" alt="image-20201031142651690" loading="lazy"></p>
+<center>spring.factories文件内容
+
+</li>
+</ol>
+</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>由此可以知道大致流程就是：SpringBoot是通过<code>SpringFactoriesLoader.loadFactoryNames()</code>读取所有类包的META-INF/spring.factories文件，然后以List的形式返回key为org.springframework.boot.autoconfigure.EnableAutoConfiguration的值给<code>getAutoConfigurationEntry()</code>，最后过滤得到需要加载的组件全类名以Entry形式返回。</p>
+<p>有了这些自动配置类组件后，我们才不用自己去手动编写配置</p>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2020/10/30/spring/spring-boot/2020-10-30-spring-boot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE-1/" title="SpringBoot自动配置原理">http://soda1.github.io/2020/10/30/spring/spring-boot/2020-10-30-spring-boot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE-1/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2020/10/31/spring/spring-boot/2020-10-31-spring-boot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE-2/" rel="prev" title="SpringBoot自动配置例子"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">SpringBoot自动配置例子</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2020/10/22/java/%E5%A4%9A%E7%BA%BF%E7%A8%8B/ThreadLocal/" rel="next" title="understand ThreadLocal"><span class="post-nav-text">understand ThreadLocal</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

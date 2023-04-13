@@ -1,0 +1,549 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>Kafka进阶 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="分区机制分区的作用主要是为了提高负载均衡的能力，数据的读写都是在分区这个粒度上进行的，从而实现了系统的可伸缩性 分区策略分区策略决定者生产者将消息发送至哪个区，如果生产者要定义一个分区策略，要在客户端实现org.apache.kafka.clients.producer.Partitioner接口，常见分区策略如下：  轮询策略（ Round-robin） Kafka默认策略，顺序分配，就是取余操">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka进阶">
+<meta property="og:url" content="http://soda1.github.io/2023/03/01/kafka/02.%E8%BF%9B%E9%98%B6/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="分区机制分区的作用主要是为了提高负载均衡的能力，数据的读写都是在分区这个粒度上进行的，从而实现了系统的可伸缩性 分区策略分区策略决定者生产者将消息发送至哪个区，如果生产者要定义一个分区策略，要在客户端实现org.apache.kafka.clients.producer.Partitioner接口，常见分区策略如下：  轮询策略（ Round-robin） Kafka默认策略，顺序分配，就是取余操">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230303190703.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230303190823.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230303192421.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230303192537.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230303160430.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230305165243.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230305165811.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230305172705.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230305235446.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230306010801.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230306151424.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230303184103.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230304145246.png">
+<meta property="article:published_time" content="2023-03-01T15:15:20.000Z">
+<meta property="article:modified_time" content="2023-03-06T19:56:48.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/20230303190703.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">72</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">11</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E5%8C%BA%E6%9C%BA%E5%88%B6"><span class="toc-number">1.</span> <span class="toc-text">分区机制</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%86%E5%8C%BA%E7%AD%96%E7%95%A5"><span class="toc-number">1.1.</span> <span class="toc-text">分区策略</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E8%A7%A3%E5%8E%8B%E7%BC%A9"><span class="toc-number">2.</span> <span class="toc-text">消息解压缩</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%97%A0%E6%B6%88%E6%81%AF%E4%B8%A2%E5%A4%B1%E9%85%8D%E7%BD%AE"><span class="toc-number">3.</span> <span class="toc-text">无消息丢失配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="toc-number">4.</span> <span class="toc-text">拦截器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Producer%E4%B8%80%E6%AC%A1%E5%8F%91%E9%80%81%E6%B5%81%E7%A8%8B"><span class="toc-number">5.</span> <span class="toc-text">Producer一次发送流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Message-Delivery-Semantics"><span class="toc-number">6.</span> <span class="toc-text">Message Delivery Semantics</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Kafka%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81exactly-once"><span class="toc-number">6.1.</span> <span class="toc-text">Kafka如何保证exactly once</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%B9%82%E7%AD%89%E6%80%A7"><span class="toc-number">6.1.1.</span> <span class="toc-text">幂等性</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1"><span class="toc-number">6.1.2.</span> <span class="toc-text">事务</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E6%9C%BA%E5%88%B6"><span class="toc-number">7.</span> <span class="toc-text">消费机制</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Consumer-Group"><span class="toc-number">7.1.</span> <span class="toc-text">Consumer Group</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E4%B8%A4%E5%A4%A7%E6%A8%A1%E5%9E%8B"><span class="toc-number">7.1.1.</span> <span class="toc-text">实现两大模型</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Standalone-Consumer"><span class="toc-number">7.2.</span> <span class="toc-text">Standalone Consumer</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#consumer-offsets"><span class="toc-number">7.3.</span> <span class="toc-text">_consumer_offsets</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Coordinator%E7%BB%84%E4%BB%B6"><span class="toc-number">7.4.</span> <span class="toc-text">Coordinator组件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Rebalance"><span class="toc-number">7.5.</span> <span class="toc-text">Rebalance</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#Rebalance%E8%A6%81%E7%82%B9"><span class="toc-number">7.5.1.</span> <span class="toc-text">Rebalance要点</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#Consumer%E9%87%8D%E5%B9%B3%E8%A1%A1%E6%AD%A5%E9%AA%A4"><span class="toc-number">7.5.2.</span> <span class="toc-text">Consumer重平衡步骤</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BD%8D%E7%A7%BB%E6%8F%90%E4%BA%A4"><span class="toc-number">7.6.</span> <span class="toc-text">位移提交</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Consumer%E5%BB%BA%E7%AB%8BTCP%E8%BF%9E%E6%8E%A5%E7%A7%8D%E7%B1%BB"><span class="toc-number">7.7.</span> <span class="toc-text">Consumer建立TCP连接种类</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B6%88%E8%B4%B9%E8%BF%9B%E5%BA%A6%E7%9B%91%E6%8E%A7"><span class="toc-number">7.8.</span> <span class="toc-text">消费进度监控</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%89%AF%E6%9C%AC%E6%9C%BA%E5%88%B6"><span class="toc-number">8.</span> <span class="toc-text">副本机制</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#In-sync-Replicas%EF%BC%88ISR%EF%BC%89"><span class="toc-number">8.1.</span> <span class="toc-text">In-sync Replicas（ISR）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Unclean-Leader-Election"><span class="toc-number">8.2.</span> <span class="toc-text">Unclean Leader Election</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#High-Watermark-HW"><span class="toc-number">8.3.</span> <span class="toc-text">High Watermark(HW)</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E6%9C%BA%E5%88%B6"><span class="toc-number">8.3.1.</span> <span class="toc-text">更新机制</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Broker"><span class="toc-number">9.</span> <span class="toc-text">Broker</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Broker%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B"><span class="toc-number">9.1.</span> <span class="toc-text">Broker网络模型</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Controller"><span class="toc-number">10.</span> <span class="toc-text">Controller</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8"><span class="toc-number">10.1.</span> <span class="toc-text">作用</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E9%80%89%E4%B8%BE"><span class="toc-number">10.2.</span> <span class="toc-text">如何选举</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A4%B1%E6%95%88%E5%A4%84%E7%90%86"><span class="toc-number">10.3.</span> <span class="toc-text">失效处理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E8%AE%BE%E8%AE%A1%E7%BB%93%E6%9E%84"><span class="toc-number">10.4.</span> <span class="toc-text">内部设计结构</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%A8%E6%80%81Broker%E5%8F%82%E6%95%B0"><span class="toc-number">11.</span> <span class="toc-text">动态Broker参数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%87%8D%E8%AE%BE%E6%B6%88%E8%B4%B9%E7%BB%84%E4%BD%8D%E7%A7%BB"><span class="toc-number">12.</span> <span class="toc-text">重设消费组位移</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%84%9A%E6%9C%AC%E5%B7%A5%E5%85%B7"><span class="toc-number">13.</span> <span class="toc-text">脚本工具</span></a></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2023/03/01/kafka/02.%E8%BF%9B%E9%98%B6/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Kafka进阶</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2023-03-01 15:15:20" itemprop="dateCreated datePublished" datetime="2023-03-01T15:15:20+00:00">2023-03-01</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2023-03-06 19:56:48" itemprop="dateModified" datetime="2023-03-06T19:56:48+00:00">2023-03-06</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">5.8k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">22m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/Kafka/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">Kafka</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h4 id="分区机制"><a href="#分区机制" class="headerlink" title="分区机制"></a>分区机制</h4><p>分区的作用主要是为了提高负载均衡的能力，数据的读写都是在分区这个粒度上进行的，从而实现了系统的可伸缩性</p>
+<h5 id="分区策略"><a href="#分区策略" class="headerlink" title="分区策略"></a>分区策略</h5><p>分区策略决定者生产者将消息发送至哪个区，如果生产者要定义一个分区策略，要在客户端实现<code>org.apache.kafka.clients.producer.Partitioner</code>接口，常见分区策略如下：</p>
+<ul>
+<li><p>轮询策略（ Round-robin）</p>
+<p>Kafka默认策略，顺序分配，就是取余操作，$ partition_index = n % partition_num $，n表示第n条消息。轮询策略有着很好的负载均衡表现。</p>
+</li>
+<li><p>随机策略（Randomness）</p>
+<p>随机返回一个partition</p>
+</li>
+<li><p>按消息键保序策略</p>
+<p>Kafka允许为每条消息都定义一个消息键，可以通过对键进行hash从而保存到特定的partition中。这也是Kafka的默认策略之一，假设客户端没有自定义策略，如果是消息中带着Key，那么就会执行这个策略，否则就使用轮询策略</p>
+</li>
+</ul>
+<p>spring boot实现例子</p>
+<pre><code class="java">public class MyPartitioner implements Partitioner &#123;
+    @Override
+    public int partition(String s, Object o, byte[] bytes, Object o1, byte[] bytes1, Cluster cluster) &#123;
+        List&lt;PartitionInfo&gt; partitionInfos = cluster.availablePartitionsForTopic(s);
+        int num = ThreadLocalRandom.current().nextInt(partitionInfos.size());
+        System.out.println(num);
+        return num;
+    &#125;
+    .........
+&#125;</code></pre>
+<p>配置partitioner路径，这个在yml中没有找到属性，用代码来配置</p>
+<pre><code class="java">    @Bean
+    public Map&lt;String, Object&gt; producerConfigs() &#123;
+        Map&lt;String, Object&gt; props = new HashMap&lt;&gt;();
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, &quot;192.168.3.100:9092&quot;);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, MyPartitioner.class);
+        // See https://kafka.apache.org/documentation/#producerconfigs for more properties
+        return props;
+    &#125;
+    @Bean
+    public ProducerFactory&lt;Integer, String&gt; producerFactory() &#123;
+        return new DefaultKafkaProducerFactory&lt;&gt;(producerConfigs());
+    &#125;
+    @Bean
+    public KafkaTemplate&lt;Integer, String&gt; kafkaTemplate() &#123;
+        return new KafkaTemplate&lt;Integer, String&gt;(producerFactory());
+    &#125;</code></pre>
+<h4 id="消息解压缩"><a href="#消息解压缩" class="headerlink" title="消息解压缩"></a>消息解压缩</h4><ul>
+<li><p>Producer端压缩</p>
+<p>Producer客户端开启压缩算法只要在<code>compression.type</code>配置指定的类型算法即可，在Producer端配置好处在于有利于网络传输</p>
+</li>
+<li><p>Broker端压缩</p>
+<p>Broker也有可能会对消息进行压缩，有如下情况</p>
+<p>情况1：Broker端和Producer端压缩算法不一致产生</p>
+<p>情况2：因消息版本不同原因发生的兼容格式转换产生</p>
+</li>
+<li><p>Broker端解压</p>
+<p>Broker端需要对接收到的消息进行验证，比如CRC校验，因此会解压消息</p>
+</li>
+<li><p>Consumer端解压</p>
+<p>Consumer消费消息需要先解压还原消息</p>
+</li>
+</ul>
+<p>消息解压缩整个流程可以概况为一句话：Producer 端压缩、Broker 端保持、Consumer 端解压。</p>
+<p>压缩算法比较</p>
+<p>吞吐量：LZ4 &gt; Snappy &gt; zstd 和 GZIP</p>
+<p>压缩比：zstd &gt; LZ4 &gt; GZIP &gt; Snappy</p>
+<h4 id="无消息丢失配置"><a href="#无消息丢失配置" class="headerlink" title="无消息丢失配置"></a>无消息丢失配置</h4><p>Producer</p>
+<ul>
+<li>Producer发送消息要使用带回调的send(msg, callback)</li>
+<li>Producer设置acks=all，表示所有in-sync replicas都已经接收到消息了，消息才算发送成功</li>
+<li>Producers设置retries，消息发送失败时应当重试多次，还不行再另作处理</li>
+</ul>
+<p>Broker端</p>
+<ul>
+<li><p>unclean.leader.election.enable = false，落后太多的副本不应当竞选leader</p>
+</li>
+<li><p>replication.factor &gt;= 3，将副本多保存几份</p>
+</li>
+<li><p>min.insync.replicas &gt; 1，这个配置是保证当Producer的ack=all时，Broker端至少存在多少个in-sync replicas才能进行写入。可参考<a target="_blank" rel="noopener" href="https://accu.org/journals/overload/28/159/kozlovski/" title="Kafka Acks Explained">文章</a>。</p>
+<p>要配置replication.factor &gt; min.insync.replicas，否则一个副本挂了分区就不可用了。推荐成replication.factor = min.insync.replicas + 1</p>
+</li>
+</ul>
+<p>Consumer</p>
+<ul>
+<li>enable.auto.commit设置为false，改为手动提交，并采用手动提交位移</li>
+</ul>
+<h4 id="拦截器"><a href="#拦截器" class="headerlink" title="拦截器"></a>拦截器</h4><p>todo</p>
+<h4 id="Producer一次发送流程"><a href="#Producer一次发送流程" class="headerlink" title="Producer一次发送流程"></a>Producer一次发送流程</h4><p>步骤如下：</p>
+<ol>
+<li>构造生产者对象所需的参数对象</li>
+<li>根据参数创建KafkaProducer对象实例</li>
+<li>调用send方法发送消息</li>
+<li>调用close方法释放资源</li>
+</ol>
+<p>深入：</p>
+<ol>
+<li>在创建KafkaProducer对象时后台会创建一个名为Seeder的线程，该线程会与 bootstrap.servers配置的所有Broker进行Tcp连接，用于获取集群元数据信息。</li>
+<li>Producer会通过metadata.max.age.ms 参数来定期地去更新元数据信息，默认时5分钟。</li>
+<li>在发送消息时，Producer会从元数据缓存中找到需要发送的Broker信息，建立Tcp连接来发送信息</li>
+</ol>
+<h4 id="Message-Delivery-Semantics"><a href="#Message-Delivery-Semantics" class="headerlink" title="Message Delivery Semantics"></a>Message Delivery Semantics</h4><p>有如下三种语义保证：</p>
+<ul>
+<li><p>最多一次（at most once）：消息可能会丢失，但绝不会被重复发送</p>
+</li>
+<li><p>至少一次（at least once）：消息不会丢失，但有可能被重复发送</p>
+</li>
+<li><p>精确一次（exactly once）：消息不会丢失，也不会被重复发送</p>
+</li>
+</ul>
+<p>Kafka默认提供at least once的可靠性保证，提供了重试的机制。</p>
+<h5 id="Kafka如何保证exactly-once"><a href="#Kafka如何保证exactly-once" class="headerlink" title="Kafka如何保证exactly once"></a>Kafka如何保证exactly once</h5><h6 id="幂等性"><a href="#幂等性" class="headerlink" title="幂等性"></a>幂等性</h6><p>在0.11版本开始支持，Broker给每个Producer分配一个ID，且Producer的每条信息都会有一个序列号用来去重信息。可以通过指定<code>enable.idempotence=true</code>来配置幂等Producer</p>
+<p>Kafka只能保证单分区上的幂等性，即一个幂等性 Producer 能够保证某个主题的一个分区 上不出现重复消息，它无法实现多个分区的幂等性。其次，它只能实现单会话上的幂等性，不 能实现跨会话的幂等性。这里的会话，你可以理解为 Producer 进程的一次运行。当你重启了 Producer 进程之后，这种幂等性保证就丧失了。</p>
+<h6 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h6><p>从0.11版本开始支持，通过<code>置 isolation.level</code>来设置事务级别，有以下参数</p>
+<ul>
+<li>read_uncommitted：默认值，表明Consumer可以读取事务型Producer写入的任何消息</li>
+<li>read_committed：表明 Consumer 只会读取事务型 Producer 成功提交事务写入的消 息</li>
+</ul>
+<p>事务型Producer通过流程代码控制，类似mysql那样(begin, commit)</p>
+<p>事务可以保证跨分区，跨会话的幂等。</p>
+<h4 id="消费机制"><a href="#消费机制" class="headerlink" title="消费机制"></a>消费机制</h4><h5 id="Consumer-Group"><a href="#Consumer-Group" class="headerlink" title="Consumer Group"></a>Consumer Group</h5><p>Consumer Group 是 Kafka 提供的可扩展且具 有容错性的消费者机制。每个组都有一个Group ID， 组内存在多个消费实例共同消费Topic所有的Partition，<strong>一个Partition只能被分配给组内一个Consumer消费</strong>。</p>
+<h6 id="实现两大模型"><a href="#实现两大模型" class="headerlink" title="实现两大模型"></a>实现两大模型</h6><p>Consumer Group是Kafka实现两个模型的机制</p>
+<ul>
+<li>只有一个组进行消费Topic，那么就是队列模型</li>
+<li>多个组消费Topic，那么就是发布/订阅模型</li>
+</ul>
+<h5 id="Standalone-Consumer"><a href="#Standalone-Consumer" class="headerlink" title="Standalone Consumer"></a>Standalone Consumer</h5><p>相当于只有一个Consumer的消费组，也需要Group ID标识</p>
+<h5 id="consumer-offsets"><a href="#consumer-offsets" class="headerlink" title="_consumer_offsets"></a>_consumer_offsets</h5><p>_consumer_offsets是Kafka内部Topic，它的主要作用就是为了保持Consumer消费的位移信息，它是一个普通的Topic，可以对它进行操作，但请不要这么做</p>
+<ol>
+<li><p>创建时机</p>
+<p>当 Kafka 集群中的第一个 Consumer 程序启动时，Kafka 会自动创建位移主题，默认分区数是50，副本数3。可以通过<code>offsets.topic.num.partitions</code>、<code>offsets.topic.replication.factor</code>配置，但不建议</p>
+</li>
+<li><p>消息格式</p>
+<ul>
+<li><p>位移信息格式</p>
+<p>保存的消息格式是KV对，Key用&lt;Group ID, Topic, Partition&gt;来标识， Value保存位移值</p>
+</li>
+<li><p>保存 Consumer Group 信息的消息</p>
+<p>用于注册Consumer Group</p>
+</li>
+<li><p>tombstone消息</p>
+<p>删除 Group 过期位移甚至是删除 Group 的消息</p>
+</li>
+</ul>
+</li>
+<li><p>Group数据保存在哪个区？</p>
+<p>$$partitionId=Math.abs(groupId.hashCode() % offsetsTopicPartitionCount)$$</p>
+</li>
+<li><p>Compact 策略</p>
+<p>Kafka 使用Compact 策略来删除位移主题中的过期消息，避免该主题无限期 膨胀。过期定义：对于同一个 Key 的两条消息 M1 和 M2，如果 M1 的发送时间早于 M2，那么 M1 就是过期消息。Compact 的过程就是扫描日志 的所有消息，剔除那些过期的消息，然后把剩下的消息整理在一起。</p>
+<p>Kafka 提供了专门的后台线程（ Log Cleaner）定期地巡检待 Compact 的主题，看看是否存在满足条件的可删 除数据</p>
+</li>
+</ol>
+<h5 id="Coordinator组件"><a href="#Coordinator组件" class="headerlink" title="Coordinator组件"></a>Coordinator组件</h5><p>每个Broker都有各自的Coordinator组件，它是专门为Consumer Group服务的，负责为 Group 执行 Rebalance 以及提供位移管理和组成员管理</p>
+<p>如何知道Group被哪个Coordinator管理？</p>
+<ol>
+<li>确定由的哪个_consumer_offsets分区来保存该 Group 数据（_consumer_offsets保存算法）</li>
+<li>找出该分区 Leader 副本所在的 Broker，该 Broker 即为对应的 Coordinator。</li>
+</ol>
+<h5 id="Rebalance"><a href="#Rebalance" class="headerlink" title="Rebalance"></a>Rebalance</h5><p>Kafka对Consumer Group重新分配Partition的过程称为Rebalance。Rebalance 发生时，Group 下所有的 Consumer 实例都会协调在一起共同参与，在协调者组件的帮助下，完成订阅主题分区的分配</p>
+<ol>
+<li><p>何时触发？</p>
+<ul>
+<li>组成员数改变</li>
+<li>订阅主题数改变</li>
+<li>订阅主题分区数改变</li>
+</ul>
+</li>
+<li><p>产生影响</p>
+<p>在Rebalance过程中，所有的Consumer都会停止消费，如果有Consumer正在消费消息的话，将会导致消息重复消费问题</p>
+</li>
+<li><p>Coordinator如何判断Consumer实例退组</p>
+<p>心跳机制，每个Consumer都会定期的向Coordinator发送心跳，如果不能及时发送心跳，那么Coordinator就会认为该Consumer退组，进而开始Rebalance。</p>
+<p>Consumer端相关参数</p>
+<ul>
+<li><code>heartbeat.interval.ms</code>：心跳请求频率参数</li>
+<li><code>max.poll.interval.ms</code>： 两次调 用 poll 方法的最大时间间隔。它的默认值是 5 分钟。在两次调用poll的间隔间，业务逻辑处理时间过长，超出配置值，那么Consumer就会自动退组</li>
+<li><code>session.timout.ms</code>：存活时间间隔，默认10s。表明如果10s内没有任何心跳请求，Coordinator就判断Consumer已经退出</li>
+</ul>
+<p>推荐配置：</p>
+<p><code>session.timeout.ms = 6s</code></p>
+<p><code> heartbeat.interval.ms = 2s</code></p>
+<p><code>max.poll.interval.ms</code>设置为业务逻辑处理最长时间</p>
+</li>
+</ol>
+<h6 id="Rebalance要点"><a href="#Rebalance要点" class="headerlink" title="Rebalance要点"></a>Rebalance要点</h6><ul>
+<li><p>通知机制</p>
+<p>当发生Rebalance时，Coordinator将”REBALANCE_IN_PROGRESS“封装进心跳请求响应里面，Consumer也因此知道了重平衡马上就要开始了</p>
+</li>
+<li><p>Consumer Group状态机</p>
+<p>Kafka为消费组定义了5种状态</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230303190703.png" loading="lazy"></p>
+<p>状态机流转如下</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230303190823.png" loading="lazy"></p>
+<p>一个消费者组最开始是 Empty 状态，当重平衡过程开启后，它会被置于 PreparingRebalance 状态等待成员加入，之后变更到 CompletingRebalance 状态等待分配方案，最后流转到 Stable 状态完成重平衡</p>
+<p>如果组在Empty状态下的存在很长时间（整个组停掉长时间不在消费），位移数据可能会被删除</p>
+</li>
+</ul>
+<h6 id="Consumer重平衡步骤"><a href="#Consumer重平衡步骤" class="headerlink" title="Consumer重平衡步骤"></a>Consumer重平衡步骤</h6><ol>
+<li><p>加入组（JoinGroup请求）</p>
+<p>每个组员都会将自己订阅信息上报，Coordinator会从组员中选出Leader Consumer，一般的第一个请求者。选举完后会将所有的订阅信息发送的Leaders Consumer，由其制定分配</p>
+</li>
+<li><p>等待Leader Consumers分配方案（SyncGroup请求）</p>
+<p>Leaders Consumer完成分配方案后向Coordinate发送SyncGroup请求，同时其他组员也会发送SyncGroup请求，但没有实际内容。最后统一以响应的方式分发给所有组员</p>
+</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230303192421.png" loading="lazy"></p>
+<center>JoinGroup请求</center>
+
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230303192537.png" loading="lazy"></p>
+<center>SyncGroup请求</center>
+
+
+
+<h5 id="位移提交"><a href="#位移提交" class="headerlink" title="位移提交"></a>位移提交</h5><p><strong>Consumer需要为分配给它的每个分区提交各自的位移数据</strong>，用来表示消费进度。比如提交位移进度X表示X以下都已经被消费</p>
+<p>提交方式：</p>
+<ol>
+<li><p>自动提交</p>
+<p>自动提交保证at least one，这就意味着可能存在消息重复消费，比如Consumer 正在消费时宕机了，产生了Rebalance，分配完后其他Consumer会从它消费的所有Partition的最近一次提交位移处开始消费，从而导致重复消费</p>
+<blockquote>
+<p>By default, the consumer is configured to auto-commit offsets. Using auto-commit gives you “at least once” delivery: Kafka guarantees that no messages will be missed, but duplicates are possible. Auto-commit basically works as a cron with a period set through the <code>auto.commit.interval.ms</code> configuration property. If the consumer crashes, then after a restart or a rebalance, the position of all partitions owned by the crashed consumer will be reset to the last committed offset. When this happens, the last committed position may be as old as the auto-commit interval itself. Any messages which have arrived since the last commit will have to be read again. <a target="_blank" rel="noopener" href="https://docs.confluent.io/platform/current/clients/consumer.html#ak-consumer-configuration">consumer doc</a></p>
+</blockquote>
+<p>通过<code> enable.auto.commit</code>设置是否开启，默认是开启的</p>
+<p><code>auto.commit.interval.ms</code>表示自动提交间隔，默认值为5s</p>
+<p>自动提交逻辑是在poll方法里面执行的，每次poll的时候都会判断是否需要自动提交，大概逻辑如下</p>
+<pre><code>第一次poll        设置提交时间为5s后
+    +10s 
+第二次poll        两次poll间隔为10s，比5s大就自动提交，然后设置下次提交时间为15s</code></pre>
+</li>
+<li><p>手动提交</p>
+<p>将<code>enable.auto.commit</code>设置为false即可，Kafka提供同步和异步提交两种方式</p>
+<ul>
+<li><p>同步提交</p>
+<p>使用KafkaConsumer#commitSync方法，提供重试机制，同步提交会影响TPS</p>
+</li>
+<li><p>异步提交</p>
+<p>使用 KafkaConsumer#commitAsync()方法，没有重试机制，异步方式重试机制是没有意义的</p>
+<p>异步提交可能会导致消息丢失，Kafka提供回调函数，可以通过回调函数时进行失败逻辑处理</p>
+</li>
+</ul>
+<p>将同步提交和异步提交结合</p>
+<pre><code class="java">try&#123;
+    while (true) &#123;
+        ConsumerRecords&lt;String, String&gt; records = 
+        consumer.poll(Duration.ofSeconds(1));
+         process(records); // 处理消息
+         commitAysnc(); // 使用异步提交规避阻塞
+     &#125;
+&#125; catch (Exception e) &#123;
+     handle(e); // 处理异常
+&#125; finally &#123;
+     try &#123;
+         consumer.commitSync(); // 最后一次提交使用同步阻塞式提交
+    &#125; finally &#123;
+         consumer.close();
+    &#125;
+&#125;</code></pre>
+<p>也可以使用<code>commitSync(final Map&lt;TopicPartition, OffsetAndMetadata&gt; offsets)</code>及<code>commitAsync(final Map&lt;TopicPartition, OffsetAndMetadata&gt; offsets, OffsetCommitCallback callback)</code>进行小批量提交，比如每消费一百条提交一次</p>
+<pre><code class="java">
+private Map&lt;TopicPartition, OffsetAndMetadata&gt; offsets = new HashMap&lt;&gt;();
+int count = 0;
+……
+while (true) &#123;
+     ConsumerRecords&lt;String, String&gt; records = consumer.poll(Duration.ofSeconds(1));
+     for (ConsumerRecord&lt;String, String&gt; record: records) &#123;
+         process(record); // 处理消息
+         offsets.put(new TopicPartition(record.topic(), record.partition()),
+         new OffsetAndMetadata(record.offset() + 1)；
+         if（count % 100 == 0）
+             consumer.commitAsync(offsets, null); // 回调处理逻辑是 n
+         count++;
+    &#125;
+&#125;</code></pre>
+</li>
+</ol>
+<p>自动提交和手动提交都无法避免消息重复消息问题，需要在业务上做去重</p>
+<h5 id="Consumer建立TCP连接种类"><a href="#Consumer建立TCP连接种类" class="headerlink" title="Consumer建立TCP连接种类"></a>Consumer建立TCP连接种类</h5><p>有3类TCP连接</p>
+<ol>
+<li><p>发起 FindCoordinator 请求时（第一类）</p>
+<p>创建TCP连接，发送FindCoordinator请求到<code>bootstrap.servers</code>的任意服务器，得到管理它的Broker元数据</p>
+</li>
+<li><p>连接Coordinator（第二类）</p>
+<p>创建与Coordinator的TCP连接，这样才能开启组协调操作</p>
+</li>
+<li><p>消费消息时（第三类）</p>
+<p>Consumer为每个要消费的分区创建于该分区领导者副本所在的Broker连接的TCP</p>
+</li>
+</ol>
+<p>当第三类连接建立时，Consumer会kill掉第一类TCP连接</p>
+<h5 id="消费进度监控"><a href="#消费进度监控" class="headerlink" title="消费进度监控"></a>消费进度监控</h5><ul>
+<li>Lag：表示消费消息落后生产消息程度，比如产生了100万条消息，当前消费了80万条，那么消息滞后了20万条，即Lag=20w</li>
+<li>Lead：表示最新消费消息的位移和分区第一条位移的差值，比如当前消费位移为5，第一条位移为0，那么Lead=5</li>
+</ul>
+<p>使用JMX监控</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230303160430.png" alt="image-20230303160423390" loading="lazy"></p>
+<h4 id="副本机制"><a href="#副本机制" class="headerlink" title="副本机制"></a>副本机制</h4><p> Kafka采用了基于领导者的（Leader-based）的副本机制。</p>
+<ol>
+<li>副本分为Leader和Follower副本，Follower会自动追随Leader</li>
+<li>只有Leader对外提供服务，Follower从Leader异步拉取消息</li>
+<li>如果Leader挂了，Kafka会进行重新选举</li>
+</ol>
+<h5 id="In-sync-Replicas（ISR）"><a href="#In-sync-Replicas（ISR）" class="headerlink" title="In-sync Replicas（ISR）"></a>In-sync Replicas（ISR）</h5><p>与Leader保持同步的副本称为ISR，是否保持同步的标准就是Broker 端参数 <code>replica.lag.time.max.ms </code>参数值，默认10s。它表示的是Follower能够落后Leader的最长时间</p>
+<p>Kafka在启动时会开启两个任务，一是定期检查是否需要缩减或扩大ISR集合，周期是<code>是replica.lag.time.max.ms</code>一半；二是定期检查isrChangeSet（缓存ISR变更记录集合），如果Set有变更记录，那么会在zk中持久化一个节点 。controller节点注册的watcher能感知到ISR的变化然后向它所管理的Broker节点发送更新元数据请求，最后删除处理过的节点</p>
+<ul>
+<li><p>踢出ISR</p>
+<p>如果Follower在超出了<code>replica.lag.time.max.ms</code>时间后还出于落后状态，那就会被踢出ISR。</p>
+</li>
+<li><p>进入ISR</p>
+<p>当检查到Follower的High Watermark追赶上Leader时就扩充ISR</p>
+</li>
+</ul>
+<h5 id="Unclean-Leader-Election"><a href="#Unclean-Leader-Election" class="headerlink" title="Unclean Leader Election"></a>Unclean Leader Election</h5><p>Unclean Leader Election指的是当ISR为空（Leader也不在了）时，是否允许Kafka在非同步副本中选举新的Leader，如果不允许，那么分区就失效了。</p>
+<p>通过Broker 端参数 <code>unclean.leader.election.enable</code>控制是否开启</p>
+<p>开启选项可能会造成数据丢夫，好处在于提高了可用性</p>
+<h5 id="High-Watermark-HW"><a href="#High-Watermark-HW" class="headerlink" title="High Watermark(HW)"></a>High Watermark(HW)</h5><p>Kafka用High Watermark来表征消息位移，有以下作用</p>
+<ul>
+<li>定义消息可见性，即分区哪些消息可被消费</li>
+<li>帮助Kafka完成副本同步</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230305165243.png" loading="lazy"></p>
+<p>同一个副本对象，其高 水位值不会大于 LEO（Log End Offset) 值</p>
+<h6 id="更新机制"><a href="#更新机制" class="headerlink" title="更新机制"></a>更新机制</h6><p><img src="https://raw.githubusercontent.com/soda1/img/main/20230305165811.png" loading="lazy"></p>
+<p>每个副本都会保存HW和LEO两个属性，而Leader所在的Broker也会保存所有Follower的副本，用于帮助Leader确定其HW。</p>
+<p><strong>Leader下更新逻辑</strong></p>
+<p>处理Producer消息</p>
+<ol>
+<li>消息写入磁盘</li>
+<li>更新分区HW<ol>
+<li>获取Leader所在Broker保存的Followers的LEO值{LEO-1，LEO-2…}</li>
+<li>更新HW=min(leader-LEO, LEO-1, LEO-2…..)</li>
+</ol>
+</li>
+</ol>
+<p>处理Follower拉取消息</p>
+<ol>
+<li>根据Follower发送来的LEO读取消息数据</li>
+<li>将Follower发送来的LEO更新到Broker保存的对应副本中</li>
+<li>更新分区HW（同上）</li>
+</ol>
+<p><strong>Follower下更新逻辑</strong></p>
+<p>从Leader处拉取消息：</p>
+<ol>
+<li>将消息写入磁盘</li>
+<li>更新LEO</li>
+<li>更新HW<ol>
+<li>获取Leader发送来的leader-LEO</li>
+<li>获取更新过的currentLEO</li>
+<li>更新高水位为min(leader-LEO, currentLEO)</li>
+</ol>
+</li>
+</ol>
+<p><strong>更新存在问题</strong></p>
+<p>HW的更新通常需要额外一轮的拉取请求才能完成，容易引发以下问题</p>
+<ul>
+<li><p>备份数据丢失</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230305172705.png" loading="lazy"></p>
+<p>如图所示，当A更新完HW后，B还未来得及更新就宕机了，重启后HW还是为1，此时向A发送Fetch请求，如果A恰好又宕机了，那么B就会成为Leader，后面A重启后向B发送Fetch请求，HW将更新为1，从而丢失数据</p>
+</li>
+<li><p>备份数据不一致</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230305235446.png" loading="lazy"></p>
+<p>如图所示，当A的HW=2 和B的HW=1时同时发生了宕机，B重启后成为了Leader，此时Producer发送了消息给B，B就会覆盖消息2且HW也会更新为2，后面A重启回来会执行日志截断，但发现分区的HW和自己的HW都是2，故不作任何调整，从而引起数据不一致</p>
+<p><strong>leader epoch</strong></p>
+<p>Kafka从0.11引入leader epoch，从而规避以上问题。leader epoch实际是一对值（epoch， offset），epoch表示版本号，从0开始，每当leader角色发生变更就+1，offset表示写入该epoch的第一条消息位移。</p>
+<p>Kafka Broker 会在内存中为每个分区都缓存  epoch 数据，同时它还将这些 信息持久化到一个 checkpoint 文件中。如果Leader 是首次写入消息，那么Broker会向缓存中增加一个 epoch 条目，否则就不做更新。</p>
+<p>解决数据丢失</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230306010801.png" loading="lazy"></p>
+<p>副本B重启后向A发送LeaderEpochRequest获取A的LEO值，发现A的LEO不比自己的小，且epoch中的offset也没有比2大，因此无需执行任何日志截断</p>
+<p>当B成为Leader时,[epoch = 1, offset = 3],A重启后会向B发送LeaderEpochRequest去获取Leader的LEO值，发现其LEO比B的小且epoch中的offset也没有比3大，因此也无需截断</p>
+<p>注意只有Follower才会执行日志截断，Leader是不会执行日志截断的</p>
+</li>
+</ul>
+<h4 id="Broker"><a href="#Broker" class="headerlink" title="Broker"></a>Broker</h4><p><img src="https://raw.githubusercontent.com/soda1/img/main/20230306151424.png" loading="lazy"></p>
+<p>todo：外网暂未找到相关资料</p>
+<h5 id="Broker网络模型"><a href="#Broker网络模型" class="headerlink" title="Broker网络模型"></a>Broker网络模型</h5><p>Broker网络层采用了Reactor模式，有个核心组件SocketServer，线程模型如下：</p>
+<ul>
+<li>一个Acceptor线程接收请求</li>
+<li>N个Processor线程,每个Processor都有自己的selector,从每个连接中读取请求</li>
+<li>M个Handler线程处理请求,并将产生的请求返回给Processor线程用于写回客户端</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230303184103.png" loading="lazy"></p>
+<h4 id="Controller"><a href="#Controller" class="headerlink" title="Controller"></a>Controller</h4><p>控制器组件（Controller）是 Apache Kafka 的核心组件。它的主要作用是在 Apache ZooKeeper 的帮助下管理和协调整个 Kafka 集群。Kafka集群通过选举选出Controller。JMX指标为<code>activeController</code></p>
+<h5 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h5><ol>
+<li><p>主题管理（创建、删除、增加分区）</p>
+</li>
+<li><p>分区重分配</p>
+</li>
+<li><p>.Preferred 领导者选举</p>
+<p>Preferred选举是Kafka为了避免部分Broker负载过重而提供的一种换Leader方案</p>
+</li>
+<li><p>集群成员管理（新增 Broker、Broker 主动关闭、Broker 宕机）</p>
+</li>
+<li><p>数据服务（集群元数据信息）</p>
+<p>Controller会有整个集群最完整的元数据信息，Zookeeper也会保存一份，Controller的初始化元数据信息由Zookeeper提供</p>
+</li>
+</ol>
+<h5 id="如何选举"><a href="#如何选举" class="headerlink" title="如何选举"></a>如何选举</h5><p>当Broker启动时，会尝试在Zookeeper中/controller节点，第一个创建成功的Broker会被选举为Controller</p>
+<h5 id="失效处理"><a href="#失效处理" class="headerlink" title="失效处理"></a>失效处理</h5><p>当Controller所在的Broker出现异常退出了集群，Zookeeper通过Watch机制感应并将/controller节点删除，之后存活的Broker会开始进行选举，选举成功的Broker会从Zookeeper中读取元数据信息，进行初始化。</p>
+<h5 id="内部设计结构"><a href="#内部设计结构" class="headerlink" title="内部设计结构"></a>内部设计结构</h5><p><img src="https://raw.githubusercontent.com/soda1/img/main/20230304145246.png" loading="lazy"></p>
+<h4 id="动态Broker参数"><a href="#动态Broker参数" class="headerlink" title="动态Broker参数"></a>动态Broker参数</h4><p>从1.1版本开始， Brokers Configs增加Update Model列，有三类值</p>
+<ul>
+<li>read-olny：表示修改只能重启Broker后才能生效</li>
+<li>per-broker: 属于动态参数，修改后只在对应Broker上生效</li>
+<li>cluster-wide：属于动态参数，修改后整个集群生效</li>
+</ul>
+<p><del>优先级别： per-broker &gt; cluster-wide &gt; read-only&gt; Kafka默认值</del></p>
+<p><strong>使用场景</strong></p>
+<ul>
+<li>动态调整 Broker 端各种线程池大小，实时应对突发流量</li>
+<li> 动态调整 Broker 端连接信息或安全配置信息</li>
+<li> 动态更新 SSL Keystore 有效期</li>
+<li> 动态调整 Broker 端 Compact 操作性能</li>
+<li> 实时变更 JMX 指标收集器 (JMX Metrics Reporter)</li>
+</ul>
+<p><strong>如何配置</strong></p>
+<p>使用kafka-config.sh</p>
+<h4 id="重设消费组位移"><a href="#重设消费组位移" class="headerlink" title="重设消费组位移"></a>重设消费组位移</h4><p><strong>策略</strong></p>
+<ul>
+<li>Earliest：把位移调整到当前最早位移处</li>
+<li>Latest：把位移调整到当前最新位移处</li>
+<li>Current：把位移调整到当前最新提交位移处</li>
+<li>Specified-Offset：把位移调整到指定位移处</li>
+<li>Shift-By-N：把位移调整到当前位移 +N处（N可为负值）</li>
+<li>DateTime：把位移调整到大于给定时间的最小位移处</li>
+<li>Duration：把位移调整到距离当前时间指定间隔位移处</li>
+</ul>
+<p><strong>方法</strong></p>
+<ul>
+<li>通过Java API重设位移：调用KafkaConsumer的seek方法，或者它的变种方法seekToBeginning和seekToEnd</li>
+<li>用脚本kafka-consumer-groups脚本</li>
+</ul>
+<h4 id="脚本工具"><a href="#脚本工具" class="headerlink" title="脚本工具"></a>脚本工具</h4><ul>
+<li><p>kafka-acls：设置Kafka权限</p>
+</li>
+<li><p>kafka-broker-api-versions：验证不同Kafka版本直接服务器与客户端的适配性</p>
+</li>
+<li><p>kafka-config：动态参数配置</p>
+</li>
+<li><p>kafka-console-consumer：消费组脚本</p>
+<pre><code class="bash">bin/kafka-console-consumer.sh --bootstrap-server kafka-host:port --topic test-topic --group test-group --from-beginning --consumer-property enable.auto.commit=false 
+#指定了 group 信息。如果没有指定的话，每次运行 Console Consumer，它都会自动生成一个新的消费者组来消费</code></pre>
+</li>
+<li><p>kafka-console-producer：生产者脚本</p>
+<pre><code class="bash">bin/kafka-console-producer.sh --broker-list kafka-host:port --topic test-topic --request-required-acks -1 --producer-property compression.type=lz4
+&gt;
+#指定生产者参数 acks 为 -1，同时启用了 LZ4 的压缩算法。这个脚本可以很方便地让我们使用控制台来向 Kafka 的指定主题发送消息  </code></pre>
+</li>
+<li><p>kafka-producer-perf-test：生产者测试工具</p>
+<pre><code class="bash">bin/kafka-producer-perf-test.sh --topic test-topic --num-records 10000000 --throughput -1 --record-size 1024 --producer-props bootstrap.servers=kafka-host:port acks=-1 linger.ms=2000 compression.type=lz4
+#向指定主题发送了 1 千万条消息，每条消息大小是 1KB。</code></pre>
+</li>
+<li><p>kafka-consumer-perf-test：消费者测试工具</p>
+<pre><code class="bash">bin/kafka-consumer-perf-test.sh --broker-list kafka-host:port --messages 10000000 --topic test-topic</code></pre>
+</li>
+<li><p>kafka-consumer-groups：查看消费组位移</p>
+<pre><code class="bash">bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group test-group</code></pre>
+</li>
+<li><p>kafka-dump-log：查看kafka消息文件内容，包含各自元数据信息</p>
+<pre><code class="bash">$ bin/kafka-dump-log.sh --files ../data_dir/kafka_1/test-topic-1/00000000000000000000.log </code></pre>
+</li>
+<li><p>kafka-log-dirs：查询各个Broker上日志路线下的磁盘占用情况</p>
+</li>
+<li><p>kafka-mirror-maker：实现集群消息同步</p>
+</li>
+<li><p>kafka-preferred-replica-election：执行 Preferred Leader 选举的</p>
+</li>
+<li><p>kafka-reassign-partitions：执行分区副本迁移及副本文件路径迁移</p>
+</li>
+<li><p>kafka-topics：主题管理</p>
+</li>
+</ul>
+<p>所有的脚本都可以用 –help来查看选项，比如<code>./kafka-console-consumer.sh --help</code></p>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2023/03/01/kafka/02.%E8%BF%9B%E9%98%B6/" title="Kafka进阶">http://soda1.github.io/2023/03/01/kafka/02.%E8%BF%9B%E9%98%B6/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/03/09/mysql/%E9%AB%98%E7%BA%A7/mysql%E6%89%A9%E5%AE%B9/" rel="prev" title="mysql扩容"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">mysql扩容</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/02/28/kafka/01.kafka%E5%85%A5%E9%97%A8/" rel="next" title="Kafka入门"><span class="post-nav-text">Kafka入门</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

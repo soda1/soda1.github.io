@@ -1,0 +1,565 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>DQL数据库查询语言 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="1、基础查询一、语法select 查询列表  from 表名; 二、特点 查询列表可以是字段、常量、表达式、函数，也可以是多个 查询结果是一个虚拟表  三、示例查询单个字段 select 字段名 from 表名;  查询多个字段 select 字段名，字段名 from 表名;  查询所有字段 select * from 表名;  查询常量 select 常量值;  注意：字符型和日期型的常量值必须">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DQL数据库查询语言">
+<meta property="og:url" content="http://soda1.github.io/2020/11/09/mysql/%E5%9F%BA%E7%A1%80/2020_11_9-DQL/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="1、基础查询一、语法select 查询列表  from 表名; 二、特点 查询列表可以是字段、常量、表达式、函数，也可以是多个 查询结果是一个虚拟表  三、示例查询单个字段 select 字段名 from 表名;  查询多个字段 select 字段名，字段名 from 表名;  查询所有字段 select * from 表名;  查询常量 select 常量值;  注意：字符型和日期型的常量值必须">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20201128124742.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20201128124711.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20201127201858.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20201127235151.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20201128002222.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20201128005638.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20201124162833.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20201128010926.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20201128013244.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20201128160223.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/image-20201111230359278.png">
+<meta property="article:published_time" content="2020-11-09T17:36:30.000Z">
+<meta property="article:modified_time" content="2022-03-28T20:36:16.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/20201128124742.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">72</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">11</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2"><span class="toc-number">1.</span> <span class="toc-text">1、基础查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%AF%AD%E6%B3%95"><span class="toc-number">1.1.</span> <span class="toc-text">一、语法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%89%B9%E7%82%B9"><span class="toc-number">1.2.</span> <span class="toc-text">二、特点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.3.</span> <span class="toc-text">三、示例</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E5%8D%95%E4%B8%AA%E5%AD%97%E6%AE%B5"><span class="toc-number">1.3.1.</span> <span class="toc-text">查询单个字段</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E5%A4%9A%E4%B8%AA%E5%AD%97%E6%AE%B5"><span class="toc-number">1.3.2.</span> <span class="toc-text">查询多个字段</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E6%89%80%E6%9C%89%E5%AD%97%E6%AE%B5"><span class="toc-number">1.3.3.</span> <span class="toc-text">查询所有字段</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E5%B8%B8%E9%87%8F"><span class="toc-number">1.3.4.</span> <span class="toc-text">查询常量</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E5%87%BD%E6%95%B0"><span class="toc-number">1.3.5.</span> <span class="toc-text">查询函数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-number">1.3.6.</span> <span class="toc-text">查询表达式</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%B5%B7%E5%88%AB%E5%90%8D"><span class="toc-number">1.3.7.</span> <span class="toc-text">起别名</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8E%BB%E9%87%8D"><span class="toc-number">1.3.8.</span> <span class="toc-text">去重</span></a></li><li class="toc-item toc-level-5"><a class="toc-link"><span class="toc-number">1.3.9.</span> <span class="toc-text">+</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E3%80%90%E8%A1%A5%E5%85%85%E3%80%91concat%E5%87%BD%E6%95%B0"><span class="toc-number">1.3.10.</span> <span class="toc-text">【补充】concat函数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E3%80%90%E8%A1%A5%E5%85%85%E3%80%91ifnull%E5%87%BD%E6%95%B0"><span class="toc-number">1.3.11.</span> <span class="toc-text">【补充】ifnull函数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E3%80%90%E8%A1%A5%E5%85%85%E3%80%91isnull%E5%87%BD%E6%95%B0"><span class="toc-number">1.3.12.</span> <span class="toc-text">【补充】isnull函数</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%E3%80%81%E6%9D%A1%E4%BB%B6%E6%9F%A5%E8%AF%A2"><span class="toc-number">2.</span> <span class="toc-text">2、条件查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%AF%AD%E6%B3%95-1"><span class="toc-number">2.1.</span> <span class="toc-text">一、语法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%AD%9B%E9%80%89%E6%9D%A1%E4%BB%B6%E7%9A%84%E5%88%86%E7%B1%BB"><span class="toc-number">2.2.</span> <span class="toc-text">二、筛选条件的分类</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E7%AE%80%E5%8D%95%E6%9D%A1%E4%BB%B6%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">2.2.1.</span> <span class="toc-text">1、简单条件运算符</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">2.2.2.</span> <span class="toc-text">2、逻辑运算符</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81%E6%A8%A1%E7%B3%8A%E6%9F%A5%E8%AF%A2"><span class="toc-number">2.2.3.</span> <span class="toc-text">3、模糊查询</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3%E3%80%81%E6%8E%92%E5%BA%8F%E6%9F%A5%E8%AF%A2"><span class="toc-number">3.</span> <span class="toc-text">3、排序查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%AF%AD%E6%B3%95-2"><span class="toc-number">3.1.</span> <span class="toc-text">一、语法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%89%B9%E7%82%B9-1"><span class="toc-number">3.2.</span> <span class="toc-text">二、特点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4%E3%80%81%E5%B8%B8%E8%A7%81%E5%87%BD%E6%95%B0"><span class="toc-number">4.</span> <span class="toc-text">4、常见函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="toc-number">4.1.</span> <span class="toc-text">一、概述</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%8D%95%E8%A1%8C%E5%87%BD%E6%95%B0"><span class="toc-number">4.2.</span> <span class="toc-text">二、单行函数</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E5%AD%97%E7%AC%A6%E5%87%BD%E6%95%B0"><span class="toc-number">4.2.1.</span> <span class="toc-text">1、字符函数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81%E6%95%B0%E5%AD%A6%E5%87%BD%E6%95%B0"><span class="toc-number">4.2.2.</span> <span class="toc-text">2、数学函数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81%E6%97%A5%E6%9C%9F%E5%87%BD%E6%95%B0"><span class="toc-number">4.2.3.</span> <span class="toc-text">3、日期函数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4%E3%80%81%E5%85%B6%E4%BB%96%E5%87%BD%E6%95%B0"><span class="toc-number">4.2.4.</span> <span class="toc-text">4、其他函数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5%E3%80%81%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6%E5%87%BD%E6%95%B0"><span class="toc-number">4.2.5.</span> <span class="toc-text">5、流程控制函数</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%88%86%E7%BB%84%E5%87%BD%E6%95%B0"><span class="toc-number">4.3.</span> <span class="toc-text">三、分组函数</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E5%88%86%E7%B1%BB"><span class="toc-number">4.3.1.</span> <span class="toc-text">1、分类</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81%E7%89%B9%E7%82%B9"><span class="toc-number">4.3.2.</span> <span class="toc-text">2、特点</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5%E3%80%81%E5%88%86%E7%BB%84%E6%9F%A5%E8%AF%A2"><span class="toc-number">5.</span> <span class="toc-text">5、分组查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%AF%AD%E6%B3%95-3"><span class="toc-number">5.1.</span> <span class="toc-text">一、语法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81group-by%EF%BC%8Chaving%E7%90%86%E8%A7%A3"><span class="toc-number">5.2.</span> <span class="toc-text">二、group by，having理解</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%89%B9%E6%80%A7"><span class="toc-number">5.3.</span> <span class="toc-text">三、特性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6%E3%80%81%E8%BF%9E%E6%8E%A5%E6%9F%A5%E8%AF%A2"><span class="toc-number">6.</span> <span class="toc-text">6、连接查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%90%AB%E4%B9%89"><span class="toc-number">6.1.</span> <span class="toc-text">一、含义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%88%86%E7%B1%BB"><span class="toc-number">6.2.</span> <span class="toc-text">二、分类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81SQL92%E8%AF%AD%E6%B3%95"><span class="toc-number">6.3.</span> <span class="toc-text">三、SQL92语法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E3%80%81SQL99%E8%AF%AD%E6%B3%95"><span class="toc-number">6.4.</span> <span class="toc-text">四、SQL99语法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%90%E6%9F%A5%E8%AF%A2"><span class="toc-number">7.</span> <span class="toc-text">子查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%90%AB%E4%B9%89-1"><span class="toc-number">7.1.</span> <span class="toc-text">一、含义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%88%86%E7%B1%BB-1"><span class="toc-number">7.2.</span> <span class="toc-text">二、分类</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E6%8C%89%E5%87%BA%E7%8E%B0%E4%BD%8D%E7%BD%AE"><span class="toc-number">7.2.1.</span> <span class="toc-text">1、按出现位置</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81%E6%8C%89%E7%BB%93%E6%9E%9C%E9%9B%86%E7%9A%84%E8%A1%8C%E5%88%97"><span class="toc-number">7.2.2.</span> <span class="toc-text">2、按结果集的行列</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%A4%BA%E4%BE%8B-1"><span class="toc-number">7.3.</span> <span class="toc-text">三、示例</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#where%E6%88%96having%E5%90%8E%E9%9D%A2"><span class="toc-number">7.3.1.</span> <span class="toc-text">where或having后面</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7%E3%80%81%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2"><span class="toc-number">8.</span> <span class="toc-text">7、分页查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">8.1.</span> <span class="toc-text">一、应用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E8%AF%AD%E6%B3%95"><span class="toc-number">8.1.1.</span> <span class="toc-text">二、语法</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9%E3%80%81%E8%81%94%E5%90%88%E6%9F%A5%E8%AF%A2"><span class="toc-number">9.</span> <span class="toc-text">9、联合查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%90%AB%E4%B9%89-2"><span class="toc-number">9.1.</span> <span class="toc-text">一、含义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E8%AF%AD%E6%B3%95-1"><span class="toc-number">9.2.</span> <span class="toc-text">二、语法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%84%8F%E4%B9%89"><span class="toc-number">9.3.</span> <span class="toc-text">三、意义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E7%89%B9%E7%82%B9"><span class="toc-number">9.4.</span> <span class="toc-text">四、特点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10%E3%80%81%E6%80%BB%E7%BB%93"><span class="toc-number">10.</span> <span class="toc-text">10、总结</span></a></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2020/11/09/mysql/%E5%9F%BA%E7%A1%80/2020_11_9-DQL/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">DQL数据库查询语言</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2020-11-09 17:36:30" itemprop="dateCreated datePublished" datetime="2020-11-09T17:36:30+00:00">2020-11-09</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2022-03-28 20:36:16" itemprop="dateModified" datetime="2022-03-28T20:36:16+00:00">2022-03-28</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">3.3k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">12m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/mysql/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">mysql</span></a></span> > <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/mysql/base/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">base</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h3 id="1、基础查询"><a href="#1、基础查询" class="headerlink" title="1、基础查询"></a>1、基础查询</h3><h4 id="一、语法"><a href="#一、语法" class="headerlink" title="一、语法"></a>一、语法</h4><p>select 查询列表  from 表名;</p>
+<h4 id="二、特点"><a href="#二、特点" class="headerlink" title="二、特点"></a>二、特点</h4><ul>
+<li>查询列表可以是字段、常量、表达式、函数，也可以是多个</li>
+<li>查询结果是一个虚拟表</li>
+</ul>
+<h4 id="三、示例"><a href="#三、示例" class="headerlink" title="三、示例"></a>三、示例</h4><h5 id="查询单个字段"><a href="#查询单个字段" class="headerlink" title="查询单个字段"></a>查询单个字段</h5><ul>
+<li>select 字段名 from 表名;</li>
+</ul>
+<h5 id="查询多个字段"><a href="#查询多个字段" class="headerlink" title="查询多个字段"></a>查询多个字段</h5><ul>
+<li>select 字段名，字段名 from 表名;</li>
+</ul>
+<h5 id="查询所有字段"><a href="#查询所有字段" class="headerlink" title="查询所有字段"></a>查询所有字段</h5><ul>
+<li>select * from 表名;</li>
+</ul>
+<h5 id="查询常量"><a href="#查询常量" class="headerlink" title="查询常量"></a>查询常量</h5><ul>
+<li><p>select 常量值;</p>
+</li>
+<li><p>注意：字符型和日期型的常量值必须用单引号引起来，数值型不需要</p>
+</li>
+</ul>
+<h5 id="查询函数"><a href="#查询函数" class="headerlink" title="查询函数"></a>查询函数</h5><ul>
+<li>select 函数名(实参列表);</li>
+</ul>
+<h5 id="查询表达式"><a href="#查询表达式" class="headerlink" title="查询表达式"></a>查询表达式</h5><ul>
+<li>select 100/1234;</li>
+</ul>
+<h5 id="起别名"><a href="#起别名" class="headerlink" title="起别名"></a>起别名</h5><ul>
+<li><p>①as</p>
+</li>
+<li><p>②空格</p>
+</li>
+</ul>
+<h5 id="去重"><a href="#去重" class="headerlink" title="去重"></a>去重</h5><ul>
+<li>select distinct 字段名 from 表名;</li>
+</ul>
+<h5 id=""><a href="#" class="headerlink" title="+"></a>+</h5><ul>
+<li><p>作用：做加法运算</p>
+</li>
+<li><p>select 数值+数值; 直接运算</p>
+</li>
+<li><p>select 字符+数值;先试图将字符转换成数值，如果转换成功，则继续运算；否则转换成0，再做运算</p>
+</li>
+<li><p>select null+值;结果都为null</p>
+</li>
+</ul>
+<h5 id="【补充】concat函数"><a href="#【补充】concat函数" class="headerlink" title="【补充】concat函数"></a>【补充】concat函数</h5><ul>
+<li><p>功能：拼接字符</p>
+</li>
+<li><p>select concat(字符1，字符2，字符3,…);</p>
+</li>
+</ul>
+<h5 id="【补充】ifnull函数"><a href="#【补充】ifnull函数" class="headerlink" title="【补充】ifnull函数"></a>【补充】ifnull函数</h5><ul>
+<li><p>功能：判断某字段或表达式是否为null，如果为null 返回指定的值，否则返回原本的值</p>
+</li>
+<li><p>select ifnull(commission_pct,0) from employees;</p>
+</li>
+</ul>
+<h5 id="【补充】isnull函数"><a href="#【补充】isnull函数" class="headerlink" title="【补充】isnull函数"></a>【补充】isnull函数</h5><ul>
+<li>功能s：判断某字段或表达式是否为null，如果是，则返回1，否则返回0</li>
+</ul>
+<h3 id="2、条件查询"><a href="#2、条件查询" class="headerlink" title="2、条件查询"></a>2、条件查询</h3><h4 id="一、语法-1"><a href="#一、语法-1" class="headerlink" title="一、语法"></a>一、语法</h4><ul>
+<li>select 查询列表 from 表名 where 筛选条件</li>
+</ul>
+<h4 id="二、筛选条件的分类"><a href="#二、筛选条件的分类" class="headerlink" title="二、筛选条件的分类"></a>二、筛选条件的分类</h4><h5 id="1、简单条件运算符"><a href="#1、简单条件运算符" class="headerlink" title="1、简单条件运算符"></a>1、简单条件运算符</h5><ul>
+<li>&lt; 、 &gt;、=  、&lt;&gt;   != 、&gt;= 、&lt;= 、 &lt;=&gt;安全等于</li>
+</ul>
+<h5 id="2、逻辑运算符"><a href="#2、逻辑运算符" class="headerlink" title="2、逻辑运算符"></a>2、逻辑运算符</h5><p>&amp;&amp;、 and 、||、 or、  !、  not</p>
+<h5 id="3、模糊查询"><a href="#3、模糊查询" class="headerlink" title="3、模糊查询"></a>3、模糊查询</h5><ul>
+<li><p>like:一般搭配通配符使用，可以判断字符型或数值型  </p>
+</li>
+<li><p>通配符：%任意多个字符，_任意单个字符</p>
+</li>
+<li><p>between and</p>
+</li>
+<li><p>in</p>
+</li>
+<li><p>is null /is not null：用于判断null值</p>
+</li>
+<li><p>is null PK &lt;=&gt;</p>
+<p>|         | 普通类型的数值 | null值 | 可读性 |<br>| :—–: | :————: | :—-: | :-updated: 2022-05-28 20:34:11<br>date: 2020-11-09 19:36:30<br>updated: 2022-05-28 20:34:11</p>
+</li>
+<li><p>–: |<br> | is null |       x        |   √    |   √    |<br> |   &lt;=&gt;   |       √        |   √    |   x    |</p>
+</li>
+</ul>
+<h3 id="3、排序查询"><a href="#3、排序查询" class="headerlink" title="3、排序查询"></a>3、排序查询</h3><h4 id="一、语法-2"><a href="#一、语法-2" class="headerlink" title="一、语法"></a>一、语法</h4><ul>
+<li>select 查询列表 from 表 where 筛选条件  order by 排序列表 【asc/desc】</li>
+</ul>
+<h4 id="二、特点-1"><a href="#二、特点-1" class="headerlink" title="二、特点"></a>二、特点</h4><ul>
+<li><p>1、asc ：升序，如果不写默认升序<br>   desc：降序</p>
+</li>
+<li><p>2、排序列表 支持 单个字段、多个字段、函数、表达式、别名</p>
+</li>
+<li><p>3、order by的位置一般放在查询语句的最后（除limit语句之外）</p>
+</li>
+</ul>
+<h3 id="4、常见函数"><a href="#4、常见函数" class="headerlink" title="4、常见函数"></a>4、常见函数</h3><h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><ul>
+<li>功能：类似于java中的方法</li>
+<li>好处：提高重用性和隐藏实现细节</li>
+<li>调用：select 函数名(实参列表);</li>
+</ul>
+<h4 id="二、单行函数"><a href="#二、单行函数" class="headerlink" title="二、单行函数"></a>二、单行函数</h4><h5 id="1、字符函数"><a href="#1、字符函数" class="headerlink" title="1、字符函数"></a>1、字符函数</h5><ul>
+<li>concat:连接</li>
+<li>substr:截取子串</li>
+<li>upper:变大写</li>
+<li>lower：变小写</li>
+<li>replace：替换</li>
+<li>length：获取字节长度</li>
+<li>trim:去前后空格</li>
+<li>lpad：左填充</li>
+<li>rpad：右填充</li>
+<li>instr:获取子串第一次出现的索引</li>
+</ul>
+<h5 id="2、数学函数"><a href="#2、数学函数" class="headerlink" title="2、数学函数"></a>2、数学函数</h5><ul>
+<li>ceil:向上取整</li>
+<li>round：四舍五入</li>
+<li>mod:取模</li>
+<li>floor：向下取整</li>
+<li>truncate:截断</li>
+<li>rand:获取随机数，返回0-1之间的小数</li>
+</ul>
+<h5 id="3、日期函数"><a href="#3、日期函数" class="headerlink" title="3、日期函数"></a>3、日期函数</h5><ul>
+<li>now：返回当前日期+时间</li>
+<li>year:返回年</li>
+<li>month：返回月</li>
+<li>day:返回日</li>
+<li>date_format:将日期转换成字符</li>
+<li>curdate:返回当前日期</li>
+<li>str_to_date:将字符转换成日期</li>
+<li>curtime：返回当前时间</li>
+<li>hour:小时</li>
+<li>minute:分钟</li>
+<li>second：秒</li>
+<li>datediff:返回两个日期相差的天数</li>
+<li>monthname:以英文形式返回月</li>
+</ul>
+<h5 id="4、其他函数"><a href="#4、其他函数" class="headerlink" title="4、其他函数"></a>4、其他函数</h5><ul>
+<li>version 当前数据库服务器的版本</li>
+<li>database 当前打开的数据库</li>
+<li>user当前用户</li>
+<li>password(‘字符’)：返回该字符的密码形式</li>
+<li>md5(‘字符’):返回该字符的md5加密形式</li>
+</ul>
+<h5 id="5、流程控制函数"><a href="#5、流程控制函数" class="headerlink" title="5、流程控制函数"></a>5、流程控制函数</h5><ul>
+<li><p>①if(条件表达式，表达式1，表达式2)：如果条件表达式成立，返回表达式1，否则返回表达式2</p>
+</li>
+<li><p>②case情况1</p>
+<pre><code class="sql">case 变量或表达式或字段
+    when 常量1 then 值1
+    when 常量2 then 值2
+    ...
+else 值n
+end</code></pre>
+</li>
+<li><p>③case情况2</p>
+<pre><code class="sql">case 
+when 条件1 then 值1
+when 条件2 then 值2
+...
+else 值n
+end</code></pre>
+</li>
+</ul>
+<h4 id="三、分组函数"><a href="#三、分组函数" class="headerlink" title="三、分组函数"></a>三、分组函数</h4><h5 id="1、分类"><a href="#1、分类" class="headerlink" title="1、分类"></a>1、分类</h5><ul>
+<li>max 最大值</li>
+<li>min 最小值</li>
+<li>sum 和</li>
+<li>avg 平均值</li>
+<li>count 计算个数</li>
+</ul>
+<h5 id="2、特点"><a href="#2、特点" class="headerlink" title="2、特点"></a>2、特点</h5><ul>
+<li><p>①语法</p>
+</li>
+<li><p>select max(字段) from 表名;</p>
+</li>
+<li><p>②支持的类型</p>
+<ul>
+<li>sum和avg一般用于处理数值型<br>max、min、count可以处理任何数据类型</li>
+</ul>
+</li>
+<li><p>③以上分组函数都忽略null</p>
+</li>
+<li><p>④都可以搭配distinct使用，实现去重的统计</p>
+</li>
+<li><p>select sum(distinct 字段) from 表;</p>
+</li>
+<li><p>⑤count函数</p>
+<ul>
+<li><p>count(字段)：统计该字段非空值的个数</p>
+</li>
+<li><p>count(*):统计结果集的行数</p>
+</li>
+<li><p>效率上：</p>
+<ul>
+<li>MyISAM存储引擎，count(*)最高<br>*</li>
+<li><em>InnoDB存储引擎，count(</em>)和count(1)效率&gt;count(字段)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>⑥ 和分组函数一同查询的字段，要求是group by后出现的字段</p>
+</li>
+<li><p>where 语句中不能出现分组函数</p>
+</li>
+</ul>
+<h3 id="5、分组查询"><a href="#5、分组查询" class="headerlink" title="5、分组查询"></a>5、分组查询</h3><h4 id="一、语法-3"><a href="#一、语法-3" class="headerlink" title="一、语法"></a>一、语法</h4><ul>
+<li>select 分组函数，分组后的字段 from 表<br>【where 筛选条件】group by 分组的字段 【having 分组后的筛选】<br>【order by 排序列表】</li>
+</ul>
+<h4 id="二、group-by，having理解"><a href="#二、group-by，having理解" class="headerlink" title="二、group by，having理解"></a>二、group by，having理解</h4><ul>
+<li><p>group by</p>
+<p><strong>group by 就是对已经查询好的结果集进行分组。</strong>查出了包含<strong>所有字段</strong>的结果集后然后根据group by的分组字段进行分组，因此也要求<strong>select只能包含group by后的字段与聚合函数</strong>。</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20201128124742.png" alt="image-20201128124741947" loading="lazy"></p>
+</li>
+<li><p>having</p>
+<p>having是对分组后的子集进行过滤。跟在后面的可以是<strong>字段</strong>或<strong>分组函数</strong>，字段是需要在select中出现的字段，但是如果使用分组函数就可以不用。</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20201128124711.png" alt="image-20201128124711693" loading="lazy"></p>
+</li>
+</ul>
+<h4 id="三、特性"><a href="#三、特性" class="headerlink" title="三、特性"></a>三、特性</h4><ol>
+<li><p>在5.7以后, mysql启用了<code>ONLY_FULL_GROUP_BY</code>模式，就是在使用分组的时候，<strong>select中出现的字段需要在聚合函数或group by上</strong>。</p>
+<p>但是也会有一些情况是允许的(具有<strong>函数依赖</strong>关系)</p>
+<blockquote>
+<p>SQL:1999 and later permits such nonaggregates per optional feature T301 if they are functionally dependent on <code>GROUP BY</code> columns: If such a relationship exists between <code>name</code> and <code>custid</code>, the query is legal. This would be the case, for example, were <code>custid</code> a primary key of <code>customers</code>.</p>
+</blockquote>
+<p><strong>functionally dependent</strong>：</p>
+<blockquote>
+<p>在关系模式R(U)中，X和Y是属性集U的子集，所有的元组都满足X→ Y，那么X→ Y在关系模式R(U)中成立，这种联系就是函数依赖</p>
+<p>比如在设计学生表时，一个学生的学号能决定学生的姓名，也可称姓名属性依赖于学号，对于现实来说，就是如果知道一个学生的学号，就一定能知道学生的姓名，这种情况就是姓名依赖于学号，这就是函数依赖</p>
+<p>属性之间有三种关系，但并不是每一种关系都存在函数依赖。设R(U)是属性集U上的关系模式，X、Y是U的子集：</p>
+<p>● 如果X和Y之间是1：1关系（一对一关系），如学校和校长之间就是1:1关系，则存在函数依赖X → Y和Y →X。</p>
+<p>● 如果X和Y之间是1：n关系（一对多关系），如年龄和姓名之间就是1:n关系，则存在函数依赖X → Y。</p>
+<p>●如果X和Y之间是m：n关系（多对多关系），如学生和课程之间就是m:n关系，则X和Y之间不存在函数依赖。</p>
+</blockquote>
+<p>这段引用 <a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%87%BD%E6%95%B0%E4%BE%9D%E8%B5%96">百度百科</a>，通过设计学生表的例子可以理解为什么mysql文档中说依赖于group by中的字段</p>
+<ul>
+<li>未分组字段被限制在单值</li>
+</ul>
+</li>
+</ol>
+<p>   <img src="https://raw.githubusercontent.com/soda1/img/main/20201127201858.png" alt="image-20201127201858821" loading="lazy"></p>
+<p>   同样的，多字段也可以，但是必须使用and连接</p>
+<p>   <img src="https://raw.githubusercontent.com/soda1/img/main/20201127235151.png" alt="image-20201127235151206" loading="lazy"></p>
+<ul>
+<li>分组的字段是一个<code>primary key</code>或者具有唯一性的列</li>
+</ul>
+<p>   <img src="https://raw.githubusercontent.com/soda1/img/main/20201128002222.png" alt="image-20201128002222696" loading="lazy"></p>
+<ul>
+<li>使用any_value(col)函数</li>
+</ul>
+<p>   <img src="https://raw.githubusercontent.com/soda1/img/main/20201128005638.png" alt="image-20201128005638432" loading="lazy"></p>
+<ol start="2">
+<li>使用<code>select colum1, 分组函数(colum2) from table-name</code>也会报错，尽管没有使用group by语句，但是如果使用了聚合函数，那么<code>colum1</code>就需要作为group by 的分组字段。</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20201124162833.png" alt="image-20201124162833727" loading="lazy"></p>
+<ol start="3">
+<li><p>标准sql语言不支持在group by中只支持列表达式，同时也不支持别名，但mysql支持<strong>非列表达式</strong>及<strong>别名</strong></p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20201128010926.png" loading="lazy"></p>
+<p>有一个感觉奇怪的地方就是如果group by后面跟的是a，c字段也可以查询，如果不写c字段只是会报c字段是非聚合字段。</p>
+<p>我理解就是因为查询中非列表达式是能够通过c字段来推断出来的，有具体的唯一值，所以查询是合法的。</p>
+</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20201128013244.png" alt="image-20201128013244452" loading="lazy"></p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20201128160223.png" alt="image-20201128160223393" loading="lazy"></p>
+<h3 id="6、连接查询"><a href="#6、连接查询" class="headerlink" title="6、连接查询"></a>6、连接查询</h3><h4 id="一、含义"><a href="#一、含义" class="headerlink" title="一、含义"></a>一、含义</h4><ul>
+<li><p>当查询中涉及到了多个表的字段，需要使用多表连接<br>select 字段1，字段2<br>from 表1，表2,…;</p>
+</li>
+<li><p>笛卡尔乘积：当查询多个表时，没有添加有效的连接条件，导致多个表所有行实现完全连接<br>如何解决：添加有效的连接条件</p>
+</li>
+</ul>
+<h4 id="二、分类"><a href="#二、分类" class="headerlink" title="二、分类"></a>二、分类</h4><ul>
+<li><p>按年代分类：</p>
+<ul>
+<li><p>sql92：</p>
+<pre><code>    等值
+      非等值
+      自连接</code></pre>
+<p>​        也支持一部分外连接（用于oracle、sqlserver，mysql不支持）</p>
+</li>
+<li><p>sql99【推荐使用】</p>
+<p>​        内连接<br>​        等值<br>​        非等值<br>​        自连接<br>​        外连接<br>​        左外<br>​        右外<br>​        全外（mysql不支持）<br>​       交叉连接</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="三、SQL92语法"><a href="#三、SQL92语法" class="headerlink" title="三、SQL92语法"></a>三、SQL92语法</h4><ul>
+<li><p>1、等值连接</p>
+<ul>
+<li><p>语法：    </p>
+<ul>
+<li>select 查询列表<pre><code>from 表1 别名,表2 别名
+  where 表1.key=表2.key
+  【and 筛选条件】
+  【group by 分组字段】
+  【having 分组后的筛选】
+  【order by 排序字段】</code></pre>
+</li>
+</ul>
+</li>
+<li><p>特点：</p>
+<ul>
+<li>① 一般为表起别名</li>
+<li>②多表的顺序可以调换</li>
+<li>③n表连接至少需要n-1个连接条件</li>
+<li>④等值连接的结果是多表的交集部分</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>2、非等值连接</p>
+<ul>
+<li>语法：<ul>
+<li>​    select 查询列表<br>​    from 表1 别名,表2 别名<br>​    where 非等值的连接条件<br>​    【and 筛选条件】<br>​    【group by 分组字段】<br>​    【having 分组后的筛选】<br>​    【order by 排序字段】</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>3、自连接</p>
+<ul>
+<li>语法：<ul>
+<li>select 查询列表<pre><code>from 表 别名1,表 别名2
+  where 等值的连接条件
+  【and 筛选条件】
+  【group by 分组字段】
+  【having 分组后的筛选】
+  【order by 排序字段】</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="四、SQL99语法"><a href="#四、SQL99语法" class="headerlink" title="四、SQL99语法"></a>四、SQL99语法</h4><ul>
+<li><p>1、内连接</p>
+<ul>
+<li><p>语法：</p>
+<ul>
+<li>select 查询列表<br>from 表1 别名<br>【inner】 join 表2 别名 on 连接条件<br>where 筛选条件<br>group by 分组列表<br>having 分组后的筛选<br>order by 排序列表<br>limit 子句;</li>
+</ul>
+</li>
+<li><p>特点：</p>
+<ul>
+<li>①表的顺序可以调换</li>
+<li>②内连接的结果=多表的交集</li>
+<li>③n表连接至少需要n-1个连接条件</li>
+</ul>
+</li>
+<li><p>分类：</p>
+<ul>
+<li>等值连接</li>
+<li>非等值连接</li>
+<li>自连接</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>2、外连接</p>
+<ul>
+<li>语法：<ul>
+<li>select 查询列表<br>from 表1 别名<br>left|right|full【outer】 join 表2 别名 on 连接条件<br>where 筛选条件<br>group by 分组列表<br>having 分组后的筛选<br>order by 排序列表<br>limit 子句;</li>
+</ul>
+</li>
+<li>特点：<ul>
+<li>①查询的结果=主表中所有的行，如果从表和它匹配的将显示匹配行，如果从表没有匹配的则显示null</li>
+<li>②left join 左边的就是主表，right join 右边的就是主表<br>  full join 两边都是主表</li>
+<li>③一般用于查询除了交集部分的剩余的不匹配的行</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>3、交叉连接</p>
+<ul>
+<li><p>语法：</p>
+<ul>
+<li>select 查询列表<br>from 表1 别名<br>cross join 表2 别名;</li>
+</ul>
+</li>
+<li><p>特点：</p>
+<ul>
+<li>类似于笛卡尔乘积</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>4、7种join查询图示</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/image-20201111230359278.png" loading="lazy"></p>
+</li>
+</ul>
+<h3 id="子查询"><a href="#子查询" class="headerlink" title="子查询"></a>子查询</h3><h4 id="一、含义-1"><a href="#一、含义-1" class="headerlink" title="一、含义"></a>一、含义</h4><ul>
+<li>嵌套在其他语句内部的select语句称为子查询或内查询，<br>外面的语句可以是insert、update、delete、select等，一般select作为外面语句较多<br>外面如果为select语句，则此语句称为外查询或主查询</li>
+</ul>
+<h4 id="二、分类-1"><a href="#二、分类-1" class="headerlink" title="二、分类"></a>二、分类</h4><h5 id="1、按出现位置"><a href="#1、按出现位置" class="headerlink" title="1、按出现位置"></a>1、按出现位置</h5><ul>
+<li>select后面：<pre><code>    仅仅支持标量子查询</code></pre>
+from后面：<pre><code>    表子查询</code></pre>
+where或having后面：<pre><code>    标量子查询
+    列子查询
+    行子查询</code></pre>
+exists后面：<pre><code>    标量子查询
+    列子查询
+    行子查询
+    表子查询</code></pre>
+</li>
+</ul>
+<h5 id="2、按结果集的行列"><a href="#2、按结果集的行列" class="headerlink" title="2、按结果集的行列"></a>2、按结果集的行列</h5><ul>
+<li>标量子查询（单行子查询）：结果集为一行一列</li>
+<li>列子查询（多行子查询）：结果集为多行一列</li>
+<li>行子查询：结果集为多行多列</li>
+<li>表子查询：结果集为多行多列</li>
+</ul>
+<h4 id="三、示例-1"><a href="#三、示例-1" class="headerlink" title="三、示例"></a>三、示例</h4><h5 id="where或having后面"><a href="#where或having后面" class="headerlink" title="where或having后面"></a>where或having后面</h5><ul>
+<li><p>1、标量子查询</p>
+<ul>
+<li><p>案例：查询最低工资的员工姓名和工资</p>
+<ul>
+<li><p>①最低工资</p>
+<ul>
+<li>select min(salary) from employees</li>
+</ul>
+</li>
+<li><p>②查询员工的姓名和工资，要求工资=①</p>
+<ul>
+<li>select last_name,salary<br>from employees<br>where salary=(<pre><code>select min(salary) from employees</code></pre>
+);</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>2、列子查询</p>
+<ul>
+<li><p>案例：查询所有是领导的员工姓名</p>
+<ul>
+<li>①查询所有员工的 manager_id<ul>
+<li>select manager_id<br>from employees</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>②查询姓名，employee_id属于①列表的一个</p>
+<ul>
+<li>select last_name<br>from employees<br>where employee_id in(<pre><code>select manager_id
+from employees</code></pre>
+);</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="7、分页查询"><a href="#7、分页查询" class="headerlink" title="7、分页查询"></a>7、分页查询</h3><h4 id="一、应用场景"><a href="#一、应用场景" class="headerlink" title="一、应用场景"></a>一、应用场景</h4><ul>
+<li>当要查询的条目数太多，一页显示不全</li>
+</ul>
+<h5 id="二、语法"><a href="#二、语法" class="headerlink" title="二、语法"></a>二、语法</h5><ul>
+<li><p>select 查询列表<br>from 表<br>[limit [offset, ] size | limit size OFFSET offset ];</p>
+</li>
+<li><p>注意：<br>offset代表的是起始的条目索引，默认从0卡死<br>size代表的是显示的条目数</p>
+</li>
+<li><p>公式：</p>
+<ul>
+<li>假如要显示的页数为page，每一页条目数为size<ul>
+<li>select 查询列表<br>from 表<br>limit (page-1)*size,size;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="9、联合查询"><a href="#9、联合查询" class="headerlink" title="9、联合查询"></a>9、联合查询</h3><h4 id="一、含义-2"><a href="#一、含义-2" class="headerlink" title="一、含义"></a>一、含义</h4><ul>
+<li>union：合并、联合，将多次查询结果合并成一个结果</li>
+</ul>
+<h4 id="二、语法-1"><a href="#二、语法-1" class="headerlink" title="二、语法"></a>二、语法</h4><ul>
+<li>查询语句1<br>union 【all】<br>查询语句2<br>union 【all】<br>…</li>
+</ul>
+<h4 id="三、意义"><a href="#三、意义" class="headerlink" title="三、意义"></a>三、意义</h4><ul>
+<li>1、将一条比较复杂的查询语句拆分成多条语句</li>
+<li>2、适用于查询多个表的时候，查询的列基本是一致</li>
+</ul>
+<h4 id="四、特点"><a href="#四、特点" class="headerlink" title="四、特点"></a>四、特点</h4><ul>
+<li>1、要求多条查询语句的查询列数必须一致</li>
+<li>2、要求多条查询语句的查询的各列类型、顺序最好一致</li>
+<li>3、union 去重，union all包含重复项</li>
+</ul>
+<h3 id="10、总结"><a href="#10、总结" class="headerlink" title="10、总结"></a>10、总结</h3><ul>
+<li>语法：<ul>
+<li>select 查询列表    ⑦<br>from 表1 别名       ①<br>连接类型 join 表2   ②<br>on 连接条件         ③<br>where 筛选          ④<br>group by 分组列表   ⑤<br>having 筛选         ⑥<br>order by排序列表    ⑧<br>limit 起始条目索引，条目数;  ⑨</li>
+</ul>
+</li>
+</ul>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2020/11/09/mysql/%E5%9F%BA%E7%A1%80/2020_11_9-DQL/" title="DQL数据库查询语言">http://soda1.github.io/2020/11/09/mysql/%E5%9F%BA%E7%A1%80/2020_11_9-DQL/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2020/11/09/mysql/%E5%9F%BA%E7%A1%80/2020_11_9-DML/" rel="prev" title="DML数据库操纵语言"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">DML数据库操纵语言</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2020/11/05/spring/spring-boot/2020-11-5-spring-boot%E4%B8%8E%E6%B6%88%E6%81%AF/" rel="next" title="spring boot消息整合"><span class="post-nav-text">spring boot消息整合</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

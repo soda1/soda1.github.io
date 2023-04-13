@@ -1,0 +1,244 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>Hystrix(Hoxton.SR8) | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="在微服务中，服务间的调用关系非常复杂，如果某个服务不可用或存在高延迟，有可能会发生级联失败。比如A服务需要调用B服务，如果B服务不可用或存在高延迟，A对B的请求可能将会开始排队，这会导致A的资源耗尽，从而导致A也不可用 hystrix是由netflix开源的延迟和容错库，用于隔离访问远程系统&#x2F;服务，防止出现级联失败，同时也提供了实时测量数据用于诊断问题 主要通过以下几点实现延迟和容错  线程隔离">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hystrix(Hoxton.SR8)">
+<meta property="og:url" content="http://soda1.github.io/2023/04/02/spring/spring%20cloud/Hystrix/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="在微服务中，服务间的调用关系非常复杂，如果某个服务不可用或存在高延迟，有可能会发生级联失败。比如A服务需要调用B服务，如果B服务不可用或存在高延迟，A对B的请求可能将会开始排队，这会导致A的资源耗尽，从而导致A也不可用 hystrix是由netflix开源的延迟和容错库，用于隔离访问远程系统&#x2F;服务，防止出现级联失败，同时也提供了实时测量数据用于诊断问题 主要通过以下几点实现延迟和容错  线程隔离">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230403131243.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20210318155023.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230403153209.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/soda1/img/main/20230403153929.png">
+<meta property="article:published_time" content="2023-04-02T23:25:46.000Z">
+<meta property="article:modified_time" content="2023-04-13T11:54:18.700Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/soda1/img/main/20230403131243.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">72</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">11</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%95%E5%85%A5"><span class="toc-number">1.</span> <span class="toc-text">引入</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B1%9E%E6%80%A7%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">属性配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%AD%E8%B7%AF%E5%99%A8%E6%9C%BA%E5%88%B6"><span class="toc-number">3.</span> <span class="toc-text">断路器机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#hystrix%E7%8A%B6%E6%80%81%E6%9F%A5%E7%9C%8B"><span class="toc-number">4.</span> <span class="toc-text">hystrix状态查看</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#hystrix-dashboard"><span class="toc-number">5.</span> <span class="toc-text">hystrix dashboard</span></a></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2023/04/02/spring/spring%20cloud/Hystrix/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Hystrix(Hoxton.SR8)</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2023-04-02 23:25:46" itemprop="dateCreated datePublished" datetime="2023-04-02T23:25:46+00:00">2023-04-02</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2023-04-13 11:54:18" itemprop="dateModified" datetime="2023-04-13T11:54:18+00:00">2023-04-13</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">1.2k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">5m</span></span></span><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><p>在微服务中，服务间的调用关系非常复杂，如果某个服务不可用或存在高延迟，有可能会发生级联失败。比如A服务需要调用B服务，如果B服务不可用或存在高延迟，A对B的请求可能将会开始排队，这会导致A的资源耗尽，从而导致A也不可用</p>
+<p>hystrix是由netflix开源的延迟和容错库，用于隔离访问远程系统/服务，防止出现级联失败，同时也提供了实时测量数据用于诊断问题</p>
+<p>主要通过以下几点实现延迟和容错</p>
+<ul>
+<li><p>线程隔离</p>
+<p>hystrix会为每个依赖服务分配一个很小的线程池，如果线程池已满，调用将被立即拒绝，默认不采用排队，从而加速失败判定</p>
+</li>
+<li><p>跳闸机制</p>
+<p>当服务调用错误率超过一定阈值后，hystrix就会自动/手动跳闸，进入断开状态，停止请求服务一段时间</p>
+</li>
+<li><p>回退机制</p>
+<p>当请求失败，超时，被拒绝或断路器打开时，hsytrix会执行回退逻辑</p>
+</li>
+<li><p>自我修复</p>
+<p>断路器打开一段时间后，会自动进入半开状态，允许部分请求通过，如果服务可用就会回到闭合状态，否则又进入断开状态</p>
+</li>
+<li><p>监控</p>
+<p>hystrix提供实时监控功能，可以监控运行指标及配置变化，帮助诊断问题</p>
+</li>
+</ul>
+<h4 id="引入"><a href="#引入" class="headerlink" title="引入"></a>引入</h4><ol>
+<li><p>引入依赖</p>
+<pre><code class="yml">        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+</code></pre>
+</li>
+<li><p>开启hystrix</p>
+<pre><code class="java">@EnableCircuitBreaker
+@SpringBootApplication
+public class HystrixApplication &#123;
+
+    public static void main(String[] args) &#123;
+        SpringApplication.run(HystrixApplication.class);
+    &#125;
+&#125;</code></pre>
+</li>
+</ol>
+<ol start="3">
+<li><p>使用<code>@HystrixConmand</code>注解</p>
+<pre><code class="java">    @HystrixCommand(fallbackMethod = &quot;errorFall&quot;)
+    @GetMapping(&quot;/error&quot;)
+    public String error() &#123;
+        String errInfo = restTemplate.getForObject(&quot;http://localhost:8087/hystrix/error&quot;, String.class);
+        System.out.printf(errInfo);
+        return errInfo;
+    &#125;
+public String errorFall()&#123;
+        return &quot;error fall back&quot;;
+    &#125;</code></pre>
+<p><code>errorFall</code>方法是回退处理逻辑，<strong>它的参数和返回值要和<code>@HystrixCommand</code>标注的方法一样</strong>，当请求服务不可用时就会返回回退逻辑信息</p>
+<p>也可以为一个类指定默认的回退处理逻辑，在类上加上注解<code>@DefaultProperties&quot;</code></p>
+<pre><code class="java">@Controller
+@RequestMapping(&quot;consumer/user&quot;)
+@DefaultProperties(defaultFallback = &quot;fallBackMethod&quot;) // 指定一个类的默认回退逻辑
+public class UserController &#123;
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @GetMapping
+    @ResponseBody
+    @HystrixCommand //标注加入断路器
+    public String queryUserById(@RequestParam(&quot;id&quot;) Long id) &#123;
+        String user = this.restTemplate.getForObject(&quot;http://service-provider/user/&quot; + id, String.class);
+        return user;
+    &#125;
+&#125;</code></pre>
+</li>
+</ol>
+<h4 id="属性配置"><a href="#属性配置" class="headerlink" title="属性配置"></a>属性配置</h4><ul>
+<li><p>全局配置</p>
+<p>使用<code>hystrix.command.default.属性</code>进行全局配置，比如超时配置如下</p>
+<pre><code class="yml">hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 6000 # 设置hystrix的超时时间为6000ms</code></pre>
+</li>
+<li><p>按Command Key配置</p>
+<p>使用<code>hystrix.command.comandKey.属性</code>配置单个熔断器属性</p>
+<pre><code class="yml">hystrix:
+  command:
+    timeoutKey:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 1000 # 设置hystrix的超时时间为6000ms</code></pre>
+<pre><code class="java">@HystrixCommand(fallbackMethod = &quot;errorFall1&quot;, commandKey = &quot;timeoutKey&quot;)
+@GetMapping(&quot;/timeout/&#123;time&#125;&quot;)
+public String timeout(@PathVariable(&quot;time&quot;) Integer time) &#123;
+    String errInfo = restTemplate.getForObject(&quot;http://localhost:8087/hystrix/timeout/&quot; + time, String.class);
+    return errInfo;
+&#125;</code></pre>
+</li>
+</ul>
+<h4 id="断路器机制"><a href="#断路器机制" class="headerlink" title="断路器机制"></a>断路器机制</h4><p><img src="https://raw.githubusercontent.com/soda1/img/main/20230403131243.png" loading="lazy"></p>
+<p>断路器有三个状态</p>
+<ol>
+<li>Closed：关闭状态，所有请求正常访问</li>
+<li>Open：打开状态，所有请求进行降级处理。hystrix会对请求情况计数，当一定时间内失败请求百分比达到阈值，就会触发熔断，断路器处于打开状态。默认在10s内如果请求数大于等于20次时，有50%的失败请求就会触发熔断</li>
+<li>Half Open：半开状态，当断路器处于Open状态时，会进入一段休眠时间（默认5s），随后断路器会自动进入半开状态，部分请求会被通过，如果这些请求都成功了，那么就会闭合断路器，否则会回到断开状态，再次进行休眠</li>
+</ol>
+<h4 id="hystrix状态查看"><a href="#hystrix状态查看" class="headerlink" title="hystrix状态查看"></a>hystrix状态查看</h4><p>Hystrix可以通过<a href="http://localhost:port/actuator/health来查看状态">http://localhost:port/actuator/health来查看状态</a></p>
+<ol>
+<li><p>加actuator依赖</p>
+<pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+</li>
+<li><p>配置组件细节展示</p>
+<pre><code class="yml">management:
+  endpoint:
+    health:
+      show-details: always
+      show-components: always</code></pre>
+</li>
+<li><p>查看状态</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20210318155023.png" alt="image-20210318155023139" loading="lazy"></p>
+</li>
+</ol>
+<center> 熔断状态<center>
+
+<h4 id="hystrix-dashboard"><a href="#hystrix-dashboard" class="headerlink" title="hystrix dashboard"></a>hystrix dashboard</h4><p>它的作用是将监控数据图表化</p>
+<p><strong>使用</strong></p>
+<ol>
+<li><p>加依赖</p>
+<pre><code class="yml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix-dashboard&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+</li>
+<li><p>加注解</p>
+<pre><code class="java">@EnableHystrixDashboard
+@SpringBootApplication
+public class HystrixDashBoardApplication &#123;
+
+    public static void main(String[] args) &#123;
+        SpringApplication.run(HystrixDashBoardApplication.class);
+    &#125;
+
+&#125;</code></pre>
+</li>
+<li><p>配置端口</p>
+<pre><code class="yml">server:
+  port: 8092</code></pre>
+</li>
+</ol>
+<p>启动后在浏览器输入<a target="_blank" rel="noopener" href="http://localhost:8092/hystrix/%E5%B0%B1%E5%8F%AF%E4%BB%A5%E7%9C%8B%E5%88%B0%E7%9B%91%E6%8E%A7%E9%A1%B5%E9%9D%A2%E4%BA%86">http://localhost:8092/hystrix/就可以看到监控页面了</a></p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230403153209.png" loading="lazy"></p>
+<ol start="4">
+<li><p>在要监控的应用加入<code>spring-boot-starter-actuator</code>依赖，然后配置暴露actuator/hystrix.stream路径</p>
+<pre><code class="yml">#配置组件暴露细节
+management:
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  #暴露actuator/hystrix.stream路径
+  endpoints:
+    web:
+      exposure:
+        include: &#39;hystrix.stream&#39;</code></pre>
+</li>
+<li><p>将<code>http://ip:port/actuator/hystrix.stream</code>在页面输入后并起好标题点击Monitor Stream后即可看到如下监控页面</p>
+<p><img src="https://raw.githubusercontent.com/soda1/img/main/20230403153929.png" alt="image-20230403153929901" loading="lazy"></p>
+</li>
+</ol>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2023/04/02/spring/spring%20cloud/Hystrix/" title="Hystrix(Hoxton.SR8)">http://soda1.github.io/2023/04/02/spring/spring%20cloud/Hystrix/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/04/03/spring/spring%20cloud/Zuul/" rel="prev" title="Zuul(Hoxton.SR8)"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">Zuul(Hoxton.SR8)</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/03/31/spring/spring%20cloud/Feign/" rel="next" title="Feign(Hoxton.SR8)"><span class="post-nav-text">Feign(Hoxton.SR8)</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>

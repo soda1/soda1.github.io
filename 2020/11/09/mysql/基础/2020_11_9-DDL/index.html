@@ -1,0 +1,324 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="Eric"><meta name="copyright" content="Eric"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>DDL数据库定义语言 | Eric's blog</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://fastly.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://fastly.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://fastly.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer type="module"></script><script src="https://fastly.jsdelivr.net/npm/vue@2.6.14"></script><link rel="icon" type="image/png" href="/favicon.ico"><link rel="mask-icon" href="/favicon.ico" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="prefetch" href="/js/sakura.js" as="script"><link rel="prefetch" href="/js/load-aplayer.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"soda1.github.io","root":"/","title":"Ericの小屋","version":"1.10.9","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}.","hits":"${hits} results found","hits_time":"${hits} results found in ${time} ms"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"local_search":{"path":"/search.xml"},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><link rel="alternate" href="/atom.xml" title="Eric's blog" type="application/atom+xml"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js" defer></script><script src="/js/load-aplayer.js" defer></script><meta name="description" content="库管理一、创建库 create database 【if not exists】 库名【 character set 字符集名】;  二、修改库 alter database 库名 character set 字符集名;  三、删除库 drop database 【if exists】 库名;  表管理一、创建表 ★--建表常用 create table [if not exists] 表名(">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDL数据库定义语言">
+<meta property="og:url" content="http://soda1.github.io/2020/11/09/mysql/%E5%9F%BA%E7%A1%80/2020_11_9-DDL/index.html">
+<meta property="og:site_name" content="Eric&#39;s blog">
+<meta property="og:description" content="库管理一、创建库 create database 【if not exists】 库名【 character set 字符集名】;  二、修改库 alter database 库名 character set 字符集名;  三、删除库 drop database 【if exists】 库名;  表管理一、创建表 ★--建表常用 create table [if not exists] 表名(">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-11-09T21:52:25.000Z">
+<meta property="article:modified_time" content="2021-03-04T14:41:26.000Z">
+<meta property="article:author" content="Eric">
+<meta name="twitter:card" content="summary"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script><!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="Table of Contents"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="Overview"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Eric"><img width="96" loading="lazy" src="/yun.png" alt="Eric"><span class="site-author-status" title="热爱可抵岁月漫长">😊</span></a><div class="site-author-name"><a href="/about/">Eric</a></div><span class="site-name">Eric's blog</span><sub class="site-subtitle"></sub><div class="site-description">The best way is to get your hands dirty</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="Home"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="Archives"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">72</span></a></div><div class="site-state-item"><a href="/categories/" title="Categories"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">11</span></a></div><div class="site-state-item"><a href="/tags/" title="Tags"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">0</span></a></div><a class="site-state-item hty-icon-button" href="/about" title="About"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BA%93%E7%AE%A1%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">库管理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%88%9B%E5%BB%BA%E5%BA%93"><span class="toc-number">1.1.</span> <span class="toc-text">一、创建库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E4%BF%AE%E6%94%B9%E5%BA%93"><span class="toc-number">1.2.</span> <span class="toc-text">二、修改库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%88%A0%E9%99%A4%E5%BA%93"><span class="toc-number">1.3.</span> <span class="toc-text">三、删除库</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A1%A8%E7%AE%A1%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">表管理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%88%9B%E5%BB%BA%E8%A1%A8-%E2%98%85"><span class="toc-number">2.1.</span> <span class="toc-text">一、创建表 ★</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E4%BF%AE%E6%94%B9%E8%A1%A8"><span class="toc-number">2.2.</span> <span class="toc-text">二、修改表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%88%A0%E9%99%A4%E8%A1%A8"><span class="toc-number">2.3.</span> <span class="toc-text">三、删除表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%A4%8D%E5%88%B6%E8%A1%A8"><span class="toc-number">2.4.</span> <span class="toc-text">四、复制表</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">3.</span> <span class="toc-text">数据类型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%95%B0%E5%80%BC%E5%9E%8B"><span class="toc-number">3.1.</span> <span class="toc-text">一、数值型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AD%97%E7%AC%A6%E5%9E%8B"><span class="toc-number">3.2.</span> <span class="toc-text">二、字符型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%97%A5%E6%9C%9F%E5%9E%8B"><span class="toc-number">3.3.</span> <span class="toc-text">三、日期型</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E7%BA%A6%E6%9D%9F"><span class="toc-number">4.</span> <span class="toc-text">常见约束</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%B8%B8%E8%A7%81%E7%9A%84%E7%BA%A6%E6%9D%9F"><span class="toc-number">4.1.</span> <span class="toc-text">一、常见的约束</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%88%9B%E5%BB%BA%E8%A1%A8%E6%97%B6%E6%B7%BB%E5%8A%A0%E7%BA%A6%E6%9D%9F"><span class="toc-number">4.2.</span> <span class="toc-text">二、创建表时添加约束</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E4%BF%AE%E6%94%B9%E8%A1%A8%E6%97%B6%E6%B7%BB%E5%8A%A0%E6%88%96%E5%88%A0%E9%99%A4%E7%BA%A6%E6%9D%9F"><span class="toc-number">4.3.</span> <span class="toc-text">三、修改表时添加或删除约束</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E8%87%AA%E5%A2%9E%E9%95%BF%E5%88%97"><span class="toc-number">4.4.</span> <span class="toc-text">四、自增长列</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="http://soda1.github.io/2020/11/09/mysql/%E5%9F%BA%E7%A1%80/2020_11_9-DDL/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Eric"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="Eric's blog"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">DDL数据库定义语言</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <span class="post-meta-icon-text">Posted on</span> <time title="Created: 2020-11-09 21:52:25" itemprop="dateCreated datePublished" datetime="2020-11-09T21:52:25+00:00">2020-11-09</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <span class="post-meta-icon-text">Edited on</span> <time title="Modified: 2021-03-04 14:41:26" itemprop="dateModified" datetime="2021-03-04T14:41:26+00:00">2021-03-04</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="Word count in article"><span class="icon iconify" data-icon="ri:file-word-line"></span></span> <span title="Word count in article">1.4k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="Reading time"><span class="icon iconify" data-icon="ri:timer-line"></span></span> <span title="Reading time">5m</span></span></span><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><span class="icon iconify" data-icon="ri:folder-line"></span></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/mysql/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">mysql</span></a></span> > <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/mysql/base/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">base</span></a></span></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h3 id="库管理"><a href="#库管理" class="headerlink" title="库管理"></a>库管理</h3><h4 id="一、创建库"><a href="#一、创建库" class="headerlink" title="一、创建库"></a>一、创建库</h4><ul>
+<li>create database 【if not exists】 库名【 character set 字符集名】;</li>
+</ul>
+<h4 id="二、修改库"><a href="#二、修改库" class="headerlink" title="二、修改库"></a>二、修改库</h4><ul>
+<li>alter database 库名 character set 字符集名;</li>
+</ul>
+<h4 id="三、删除库"><a href="#三、删除库" class="headerlink" title="三、删除库"></a>三、删除库</h4><ul>
+<li>drop database 【if exists】 库名;</li>
+</ul>
+<h3 id="表管理"><a href="#表管理" class="headerlink" title="表管理"></a>表管理</h3><h4 id="一、创建表-★"><a href="#一、创建表-★" class="headerlink" title="一、创建表 ★"></a>一、创建表 ★</h4><pre><code class="sql">--建表常用
+create table [if not exists] 表名(
+    col_name data_type [constraint]
+    |[INDEX | KEY] [index_name] (key_part,...)
+    | CONSTRAINT [foreign_key_name]  FOREIGN KEY (col_name) REFERENCES tab_name (col_name)
+)engine  innodb, character set utf8
+
+ create table  if not exists actor(
+    actor_id smallint(5) not null primary key,
+    first_name varchar(45) not null ,
+    last_name varchar(45) not null ,
+    last_update date not null,
+    user_id INT not NULL,
+    constraint fh foreign key (user_id)  references user(id)
+)engine innodb, character set utf8;</code></pre>
+<h4 id="二、修改表"><a href="#二、修改表" class="headerlink" title="二、修改表"></a>二、修改表</h4><ul>
+<li>1.添加列<ul>
+<li>alter table 表名 add column 列名 类型 【first|after 字段名】;</li>
+</ul>
+</li>
+<li>2.修改列的类型或约束<ul>
+<li>alter table 表名 modify column 列名 新类型 【新约束】;</li>
+</ul>
+</li>
+<li>3.修改列名<ul>
+<li>alter table 表名 change column 旧列名 新列名 类型;</li>
+</ul>
+</li>
+<li>4 .删除列<ul>
+<li>alter table 表名 drop column 列名;</li>
+</ul>
+</li>
+<li>5.修改表名<ul>
+<li>alter table 表名 rename 【to】 新表名;</li>
+</ul>
+</li>
+</ul>
+<h4 id="三、删除表"><a href="#三、删除表" class="headerlink" title="三、删除表"></a>三、删除表</h4><ul>
+<li>drop table【if exists】 表名;</li>
+</ul>
+<h4 id="四、复制表"><a href="#四、复制表" class="headerlink" title="四、复制表"></a>四、复制表</h4><ul>
+<li>1、复制表的结构<ul>
+<li>create table 表名 like 旧表;</li>
+</ul>
+</li>
+<li>2、复制表的结构+数据<ul>
+<li>create table 表名<br>select 查询列表 from 旧表【where 筛选】;</li>
+</ul>
+</li>
+</ul>
+<h3 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h3><h4 id="一、数值型"><a href="#一、数值型" class="headerlink" title="一、数值型"></a>一、数值型</h4><ul>
+<li><p>1、整型</p>
+<ul>
+<li>tinyint、smallint、mediumint、int/integer、bigint<br>1                  2                    3                 4                   8</li>
+<li>特点：<ul>
+<li>①都可以设置无符号和有符号，默认有符号，通过unsigned设置无符号<br>②如果超出了范围，会报out or range异常，插入临界值<br>③长度可以不指定，默认会有一个长度<br>长度代表显示的最大宽度，如果不够则左边用0填充，但需要搭配zerofill，并且默认变为无符号整型</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>2、浮点型</p>
+</li>
+<li><p>定点数：decimal(M,D)</p>
+</li>
+<li><p>浮点数:</p>
+<pre><code>float(M,D)   4
+  double(M,D)  8</code></pre>
+<ul>
+<li>特点：<ul>
+<li>①M代表整数部位+小数部位的个数，D代表小数部位<br>②如果超出范围，则报out or range异常，并且插入临界值<br>③M和D都可以省略，但对于定点数，M默认为10，D默认为0<br>④如果精度要求较高，则优先考虑使用定点数</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="二、字符型"><a href="#二、字符型" class="headerlink" title="二、字符型"></a>二、字符型</h4><ul>
+<li><p>char、varchar、binary、varbinary、enum、set、text、blob</p>
+</li>
+<li><p>char：固定长度的字符，写法为char(M)，最大长度不能超过M，其中M可以省略，默认为1</p>
+</li>
+<li><p>varchar：可变长度的字符，写法为varchar(M)，最大长度不能超过M，其中M不可以省略</p>
+</li>
+</ul>
+<h4 id="三、日期型"><a href="#三、日期型" class="headerlink" title="三、日期型"></a>三、日期型</h4><ul>
+<li>year年<br>date日期<br>time时间<br>datetime 日期+时间          8<br>timestamp 日期+时间         4   比较容易受时区、语法模式、版本的影响，更能反映当前时区的真实时间</li>
+</ul>
+<h3 id="常见约束"><a href="#常见约束" class="headerlink" title="常见约束"></a>常见约束</h3><h4 id="一、常见的约束"><a href="#一、常见的约束" class="headerlink" title="一、常见的约束"></a>一、常见的约束</h4><ul>
+<li>NOT NULL：非空，该字段的值必填</li>
+<li>UNIQUE：唯一，该字段的值不可重复</li>
+<li>DEFAULT：默认，该字段的值不用手动插入有默认值</li>
+<li>CHECK：检查，mysql不支持</li>
+<li>PRIMARY KEY：主键，该字段的值不可重复并且非空  unique+not null</li>
+<li>FOREIGN KEY：外键，该字段的值引用了另外的表的字段</li>
+</ul>
+<p>主键和唯一</p>
+<ul>
+<li>1、区别：<ul>
+<li>①、一个表至多有一个主键，但可以有多个唯一</li>
+<li>②、主键不允许为空，唯一可以为空</li>
+</ul>
+</li>
+<li>2、相同点<ul>
+<li>都具有唯一性</li>
+<li>都支持组合键，但不推荐</li>
+</ul>
+</li>
+</ul>
+<p>外键：</p>
+<ul>
+<li><p>1、用于限制两个表的关系，从表的字段值引用了主表的某字段值</p>
+</li>
+<li><p>2、外键列和主表的被引用列要求类型一致，意义一样，名称无要求</p>
+</li>
+<li><p>3、主表的被引用列要求是一个key（一般就是主键）</p>
+</li>
+<li><p>4、插入数据，先插入主表</p>
+</li>
+<li><p>删除数据，先删除从表</p>
+<ul>
+<li><p>#方式一：级联删除</p>
+<ul>
+<li>ALTER TABLE stuinfo ADD CONSTRAINT fk_stu_major FOREIGN KEY(majorid) REFERENCES major(id) ON DELETE CASCADE;</li>
+</ul>
+</li>
+<li><p>#方式二：级联置空</p>
+<ul>
+<li>ALTER TABLE stuinfo ADD CONSTRAINT fk_stu_major FOREIGN KEY(majorid) REFERENCES major(id) ON DELETE SET NULL;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="二、创建表时添加约束"><a href="#二、创建表时添加约束" class="headerlink" title="二、创建表时添加约束"></a>二、创建表时添加约束</h4><ul>
+<li>create table 表名(<pre><code>字段名 字段类型 not null,#非空
+  字段名 字段类型 primary key,#主键
+  字段名 字段类型 unique,#唯一
+  字段名 字段类型 default 值,#默认
+  constraint 约束名 foreign key(字段名) references 主表（被引用列）</code></pre>
+</li>
+</ul>
+<p>)</p>
+<ul>
+<li><p>注意：</p>
+<ul>
+<li><p>​                        支持类型                可以起约束名<br>列级约束        除了外键                不可以<br>表级约束        除了非空和默认    可以，但对主键无效</p>
+</li>
+<li><p>列级约束可以在一个字段上追加多个，中间用空格隔开，没有顺序要求</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="三、修改表时添加或删除约束"><a href="#三、修改表时添加或删除约束" class="headerlink" title="三、修改表时添加或删除约束"></a>三、修改表时添加或删除约束</h4><ul>
+<li><p>1、非空</p>
+<ul>
+<li>添加非空<ul>
+<li>alter table 表名 modify column 字段名 字段类型 not null;</li>
+</ul>
+</li>
+<li>删除非空<ul>
+<li>alter table 表名 modify column 字段名 字段类型 ;</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>2、默认</p>
+<ul>
+<li>添加默认<ul>
+<li>alter table 表名 modify column 字段名 字段类型 default 值;</li>
+</ul>
+</li>
+<li>删除默认<ul>
+<li>alter table 表名 modify column 字段名 字段类型 ;</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>3、主键</p>
+<ul>
+<li>添加主键<ul>
+<li>alter table 表名 add【 constraint 约束名】 primary key(字段名);</li>
+</ul>
+</li>
+<li>删除主键<ul>
+<li>alter table 表名 drop primary key;</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>4、唯一</p>
+<ul>
+<li>添加唯一<ul>
+<li>alter table 表名 add【 constraint 约束名】 unique(字段名);</li>
+</ul>
+</li>
+<li>删除唯一<ul>
+<li>alter table 表名 drop index 索引名;</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>5、外键</p>
+<ul>
+<li>添加外键<ul>
+<li>alter table 表名 add【 constraint 约束名】 foreign key(字段名) references 主表（被引用列）;</li>
+</ul>
+</li>
+<li>删除外键<ul>
+<li>alter table 表名 drop foreign key 约束名;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="四、自增长列"><a href="#四、自增长列" class="headerlink" title="四、自增长列"></a>四、自增长列</h4><ul>
+<li><p>特点：</p>
+<ul>
+<li>1、不用手动插入值，可以自动提供序列值，默认从1开始，步长为1t<ul>
+<li>auto_increment_increment</li>
+<li>如果要更改起始值：手动插入值</li>
+<li>如果要更改步长：更改系统变量<ul>
+<li>set auto_increment_increment=值;</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>2、一个表至多有一个自增长列</li>
+<li>3、自增长列只能支持数值型</li>
+<li>4、自增长列必须为一个key</li>
+</ul>
+</li>
+<li><p>一、创建表时设置自增长列</p>
+<ul>
+<li>create table 表(<pre><code>字段名 字段类型 约束 auto_increment</code></pre>
+)</li>
+</ul>
+</li>
+<li><p>二、修改表时设置自增长列</p>
+<ul>
+<li>alter table 表 modify column 字段名 字段类型 约束 auto_increment</li>
+</ul>
+</li>
+<li><p>三、删除自增长列</p>
+<ul>
+<li>alter table 表 modify column 字段名 字段类型 约束 </li>
+</ul>
+</li>
+</ul>
+</div></section><ul class="post-copyright"><li class="post-copyright-author"><strong>Post author: </strong>Eric</li><li class="post-copyright-link"><strong>Post link: </strong><a href="http://soda1.github.io/2020/11/09/mysql/%E5%9F%BA%E7%A1%80/2020_11_9-DDL/" title="DDL数据库定义语言">http://soda1.github.io/2020/11/09/mysql/%E5%9F%BA%E7%A1%80/2020_11_9-DDL/</a></li><li class="post-copyright-license"><strong>Copyright Notice: </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> unless otherwise stated.</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2020/11/09/mysql/%E5%9F%BA%E7%A1%80/2020_11_9-TCL/" rel="prev" title="TCL事务控制语言"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">TCL事务控制语言</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2020/11/09/mysql/%E5%9F%BA%E7%A1%80/2020_11_9-DML/" rel="next" title="DML数据库操纵语言"><span class="post-nav-text">DML数据库操纵语言</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"><style>.utterances {
+  max-width: 100%;
+}</style><script src="https://utteranc.es/client.js" repo="soda1/soda1.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> Eric</span></div><div class="powered"><span>Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> v5.2.0</span><span class="footer-separator">|</span><span>Theme - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.9</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="Search"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:search-line"></span></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script src="https://fastly.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js"></script><script src="/js/search/local-search.js" defer type="module"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><span class="icon iconify" data-icon="ri:close-line"></span></span></div><div class="search-input-container"><input class="search-input" id="local-search-input" type="text" placeholder="Searching..." value=""></div><div class="search-result-container"></div></div><div class="aplayer no-destroy" id="aplayer" data-id="308168565" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#0078E7" data-loop="all" data-order="list" data-preload="auto" data-volume="0.7" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></body></html>
